@@ -6,8 +6,9 @@
  */
 
 declare(strict_types=1);
-
 namespace Itsdesk\Connection;
+
+defined( 'ABSPATH' ) || exit;
 
 /**
  * HMAC verification for inbound-v1 events.

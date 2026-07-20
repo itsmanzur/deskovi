@@ -6,8 +6,9 @@
  */
 
 declare(strict_types=1);
-
 namespace Itsdesk\Rest;
+
+defined( 'ABSPATH' ) || exit;
 
 use Itsdesk\Connection\ConnectionManager;
 use Itsdesk\Connection\ConnectionStatus;
@@ -26,6 +27,7 @@ use WP_REST_Server;
 final class AdminController {
 
 	public const REST_NAMESPACE = 'itsdesk/v1';
+
 
 	/**
 	 * Hook rest_api_init.

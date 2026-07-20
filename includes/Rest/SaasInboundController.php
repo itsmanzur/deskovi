@@ -6,11 +6,13 @@
  */
 
 declare(strict_types=1);
-
 namespace Itsdesk\Rest;
+
+defined( 'ABSPATH' ) || exit;
 
 use Itsdesk\Connection\ActivityLogger;
 use Itsdesk\Connection\InboundVerifier;
+use Itsdesk\Orders\OrderActionHandler;
 use Itsdesk\Tickets\TicketService;
 use WP_REST_Request;
 use WP_REST_Response;
@@ -80,6 +82,8 @@ final class SaasInboundController {
 			$result = $svc->apply_saas_message( $payload );
 		} elseif ( 'ticket.status.updated' === $type ) {
 			$result = $svc->apply_saas_status( $payload );
+		} elseif ( in_array( $type, array( 'order.note.add', 'order.invoice.resend' ), true ) ) {
+			$result = ( new OrderActionHandler() )->handle( $payload );
 		} else {
 			return new \WP_Error( 'itsdesk_inbound_type', __( 'Unknown event type.', 'deskovi' ), array( 'status' => 400 ) );
 		}

@@ -6,8 +6,9 @@
  */
 
 declare(strict_types=1);
-
 namespace Itsdesk\Tickets\Transport;
+
+defined( 'ABSPATH' ) || exit;
 
 /**
  * Local fake remote IDs — no network.

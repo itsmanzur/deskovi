@@ -6,8 +6,9 @@
  */
 
 declare(strict_types=1);
-
 namespace Itsdesk\Orders\Transport;
+
+defined( 'ABSPATH' ) || exit;
 
 /**
  * Accepts events locally — no network.

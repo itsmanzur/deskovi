@@ -6,8 +6,9 @@
  */
 
 declare(strict_types=1);
-
 namespace Itsdesk\Diagnostics;
+
+defined( 'ABSPATH' ) || exit;
 
 /**
  * Shared operational markers for beta.

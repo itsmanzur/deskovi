@@ -6,11 +6,13 @@
  */
 
 declare(strict_types=1);
-
 namespace Itsdesk;
+
+defined( 'ABSPATH' ) || exit;
 
 use Itsdesk\Admin\AdminAssets;
 use Itsdesk\Admin\AdminMenu;
+use Itsdesk\Admin\Capabilities;
 use Itsdesk\Compatibility\WooCommerce;
 use Itsdesk\Orders\OutboundOrderSync;
 use Itsdesk\Privacy\PersonalData;
@@ -53,7 +55,7 @@ final class Plugin {
 	 * Wire hooks.
 	 */
 	public function init(): void {
-		load_plugin_textdomain( 'deskovi', false, dirname( ITSDESK_BASENAME ) . '/languages' );
+		( new Capabilities() )->register();
 
 		$woocommerce = new WooCommerce();
 		$woocommerce->register();

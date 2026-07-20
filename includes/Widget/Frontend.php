@@ -6,8 +6,9 @@
  */
 
 declare(strict_types=1);
-
 namespace Itsdesk\Widget;
+
+defined( 'ABSPATH' ) || exit;
 
 /**
  * Enqueues lazy launcher only when enabled and not on cart/checkout.
@@ -126,6 +127,14 @@ final class Frontend {
 					'create'          => __( 'Create ticket', 'deskovi' ),
 					'open'            => __( 'Open', 'deskovi' ),
 					'unread'          => __( 'Unread', 'deskovi' ),
+					'orders'          => __( 'Your orders', 'deskovi' ),
+					'orderDetail'     => __( 'Order details', 'deskovi' ),
+					'tracking'        => __( 'Tracking', 'deskovi' ),
+					'noTracking'      => __( 'No tracking number yet.', 'deskovi' ),
+					'viewOrder'       => __( 'View order / invoice', 'deskovi' ),
+					'requestReturn'   => __( 'Request return', 'deskovi' ),
+					'requestCancel'   => __( 'Request cancel', 'deskovi' ),
+					'emptyOrders'     => __( 'No recent orders.', 'deskovi' ),
 				),
 			)
 		);

@@ -6,8 +6,9 @@
  */
 
 declare(strict_types=1);
-
 namespace Itsdesk\Rest;
+
+defined( 'ABSPATH' ) || exit;
 
 use Itsdesk\Auth\GuestSession;
 use Itsdesk\Orders\OrderContext;
@@ -22,6 +23,7 @@ use WP_REST_Server;
 final class OrderController {
 
 	public const REST_NAMESPACE = 'itsdesk/v1';
+
 
 	/**
 	 * Register routes.

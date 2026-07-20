@@ -6,8 +6,9 @@
  */
 
 declare(strict_types=1);
-
 namespace Itsdesk\Orders;
+
+defined( 'ABSPATH' ) || exit;
 
 use Itsdesk\Connection\ActivityLogger;
 use Itsdesk\Connection\ConnectionStatus;

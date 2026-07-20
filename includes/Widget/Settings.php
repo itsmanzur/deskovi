@@ -6,8 +6,9 @@
  */
 
 declare(strict_types=1);
-
 namespace Itsdesk\Widget;
+
+defined( 'ABSPATH' ) || exit;
 
 /**
  * Widget launcher configuration (assets load only when enabled — M5).

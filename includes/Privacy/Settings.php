@@ -6,8 +6,9 @@
  */
 
 declare(strict_types=1);
-
 namespace Itsdesk\Privacy;
+
+defined( 'ABSPATH' ) || exit;
 
 /**
  * Stores merchant privacy preferences.

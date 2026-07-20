@@ -1,13 +1,12 @@
 <?php
 /**
  * Plugin Name:       Deskovi
- * Plugin URI:        https://deskovi.com
  * Description:       Connect your WooCommerce store to Deskovi for helpdesk tickets, order context, and a customer chat widget.
  * Version:           1.0.0
  * Requires at least: 6.0
  * Requires PHP:      7.4
  * Author:            Deskovi
- * Author URI:        https://deskovi.com
+ * Author URI:        https://profiles.wordpress.org/getwpkit/
  * License:           GPL-2.0-or-later
  * License URI:       https://www.gnu.org/licenses/gpl-2.0.html
  * Text Domain:       deskovi
@@ -27,7 +26,36 @@ define( 'ITSDESK_PATH', plugin_dir_path( __FILE__ ) );
 define( 'ITSDESK_URL', plugin_dir_url( __FILE__ ) );
 define( 'ITSDESK_BASENAME', plugin_basename( __FILE__ ) );
 
+/**
+ * PSR-4 autoload for Itsdesk\ → includes/ (no Composer vendor required).
+ */
+spl_autoload_register(
+	static function ( $class ) {
+		$prefix = 'Itsdesk\\';
+		if ( 0 !== strncmp( $prefix, $class, strlen( $prefix ) ) ) {
+			return;
+		}
+
+		$relative = substr( $class, strlen( $prefix ) );
+		$file     = ITSDESK_PATH . 'includes/' . str_replace( '\\', '/', $relative ) . '.php';
+
+		if ( is_readable( $file ) ) {
+			require_once $file;
+		}
+	}
+);
+
 require_once ITSDESK_PATH . 'includes/Plugin.php';
+
+register_activation_hook(
+	__FILE__,
+	static function () {
+		if ( ! class_exists( \Itsdesk\Admin\Capabilities::class ) ) {
+			require_once ITSDESK_PATH . 'includes/Admin/Capabilities.php';
+		}
+		\Itsdesk\Admin\Capabilities::activate();
+	}
+);
 
 /**
  * Bootstrap Deskovi.

@@ -6,8 +6,9 @@
  */
 
 declare(strict_types=1);
-
 namespace Itsdesk\Connection\Transport;
+
+defined( 'ABSPATH' ) || exit;
 
 /**
  * Factory for connection transports.

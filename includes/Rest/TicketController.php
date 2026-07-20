@@ -6,8 +6,9 @@
  */
 
 declare(strict_types=1);
-
 namespace Itsdesk\Rest;
+
+defined( 'ABSPATH' ) || exit;
 
 use Itsdesk\Auth\GuestSession;
 use Itsdesk\Tickets\Categories;
@@ -23,6 +24,7 @@ use WP_REST_Server;
 final class TicketController {
 
 	public const REST_NAMESPACE = 'itsdesk/v1';
+
 
 	/**
 	 * Register routes.
@@ -88,6 +90,16 @@ final class TicketController {
 			array(
 				'methods'             => WP_REST_Server::CREATABLE,
 				'callback'            => array( $this, 'admin_status' ),
+				'permission_callback' => array( $this, 'can_manage' ),
+			)
+		);
+
+		register_rest_route(
+			self::REST_NAMESPACE,
+			'/tickets/(?P<id>[a-zA-Z0-9_-]+)/retry-sync',
+			array(
+				'methods'             => WP_REST_Server::CREATABLE,
+				'callback'            => array( $this, 'admin_retry_sync' ),
 				'permission_callback' => array( $this, 'can_manage' ),
 			)
 		);
@@ -252,6 +264,20 @@ final class TicketController {
 		$body   = $request->get_json_params() ?: array();
 		$status = isset( $body['status'] ) ? (string) $body['status'] : '';
 		$result = ( new TicketService() )->update_status( (string) $request['id'], $status );
+		if ( is_wp_error( $result ) ) {
+			return $result;
+		}
+		return new WP_REST_Response( $result, 200 );
+	}
+
+	/**
+	 * Re-queue outbound ticket create sync.
+	 *
+	 * @param WP_REST_Request $request Request.
+	 * @return WP_REST_Response|WP_Error
+	 */
+	public function admin_retry_sync( WP_REST_Request $request ) {
+		$result = ( new TicketService() )->retry_sync( (string) $request['id'] );
 		if ( is_wp_error( $result ) ) {
 			return $result;
 		}

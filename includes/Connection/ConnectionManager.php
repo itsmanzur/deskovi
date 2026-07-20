@@ -6,8 +6,9 @@
  */
 
 declare(strict_types=1);
-
 namespace Itsdesk\Connection;
+
+defined( 'ABSPATH' ) || exit;
 
 use Itsdesk\Connection\Transport\TransportFactory;
 use Itsdesk\Connection\Transport\TransportInterface;

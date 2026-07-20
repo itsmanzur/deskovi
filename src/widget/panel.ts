@@ -1,6 +1,7 @@
 import {
 	createTicket,
 	fetchCategories,
+	fetchOrder,
 	fetchOrders,
 	fetchTicket,
 	fetchTickets,
@@ -9,16 +10,17 @@ import {
 	isAuthed,
 	replyTicket,
 } from './api';
-import type { Category, OrderSummary, Ticket, WidgetConfig } from './types';
+import type { Category, OrderDetail, OrderSummary, Ticket, WidgetConfig } from './types';
 import { panelStyles } from './panel-styles';
 
-type View = 'list' | 'create' | 'thread' | 'welcome' | 'guest';
+type View = 'list' | 'create' | 'thread' | 'welcome' | 'guest' | 'orders' | 'order';
 
 type PanelState = {
 	view: View;
 	tickets: Ticket[];
 	categories: Category[];
 	orders: OrderSummary[];
+	orderDetail: OrderDetail | null;
 	selected: Ticket | null;
 	busy: boolean;
 	error: string;
@@ -94,6 +96,7 @@ export function mountPanel(
 		tickets: [],
 		categories: [],
 		orders: [],
+		orderDetail: null,
 		selected: null,
 		busy: false,
 		error: '',
@@ -156,6 +159,45 @@ export function mountPanel(
 			state.view = 'create';
 			state.subject = '';
 			state.body = '';
+		} );
+
+	const openOrders = () =>
+		withBusy( async () => {
+			const res = await fetchOrders();
+			state.orders = res.orders || [];
+			state.view = 'orders';
+			state.orderDetail = null;
+		} );
+
+	const openOrder = ( id: number ) =>
+		withBusy( async () => {
+			state.orderDetail = await fetchOrder( id );
+			state.view = 'order';
+		} );
+
+	const requestFromOrder = ( kind: 'refund' | 'cancel' ) =>
+		withBusy( async () => {
+			const order = state.orderDetail;
+			if ( ! order ) {
+				return;
+			}
+			const [ cats, orders ] = await Promise.all( [
+				fetchCategories(),
+				fetchOrders(),
+			] );
+			state.categories = cats.categories || [];
+			state.orders = orders.orders || [];
+			state.category = kind;
+			state.orderId = String( order.id );
+			state.subject =
+				kind === 'cancel'
+					? `Cancel request for order #${ order.number }`
+					: `Return request for order #${ order.number }`;
+			state.body =
+				kind === 'cancel'
+					? `I would like to cancel order #${ order.number }.`
+					: `I would like to return items from order #${ order.number }.`;
+			state.view = 'create';
 		} );
 
 	const openThread = ( id: string ) =>
@@ -331,9 +373,93 @@ export function mountPanel(
 				${ state.busy ? `<p class="dk-muted">${ esc( t( cfg, 'loading' ) ) }</p>` : rows }
 			</div>
 			<div class="dk-foot">
+				<button type="button" class="dk-btn dk-btn-secondary" data-act="orders" ${
+					state.busy ? 'disabled' : ''
+				}>${ esc( t( cfg, 'orders' ) ) }</button>
 				<button type="button" class="dk-btn dk-btn-primary" data-act="create" ${
 					state.busy ? 'disabled' : ''
 				}>${ esc( t( cfg, 'newTicket' ) ) }</button>
+			</div>
+		`;
+	}
+
+	function renderOrders(): string {
+		const rows =
+			state.orders.length === 0
+				? `<p class="dk-muted">${ esc( t( cfg, 'emptyOrders' ) ) }</p>`
+				: state.orders
+						.map(
+							( o ) => `
+					<button type="button" class="dk-ticket" data-act="open-order" data-id="${ o.id }">
+						<strong>#${ esc( o.number ) }</strong>
+						<span>${ esc( o.status ) } · ${ esc( o.currency ) } ${ esc( o.total ) }</span>
+					</button>`
+						)
+						.join( '' );
+
+		return `
+			${ renderHead( t( cfg, 'orders' ), true ) }
+			<div class="dk-body">
+				${ state.error ? `<p class="dk-error">${ esc( state.error ) }</p>` : '' }
+				${ state.busy ? `<p class="dk-muted">${ esc( t( cfg, 'loading' ) ) }</p>` : rows }
+			</div>
+		`;
+	}
+
+	function renderOrderDetail(): string {
+		const order = state.orderDetail;
+		if ( ! order ) {
+			return renderOrders();
+		}
+		const tracking =
+			order.tracking && order.tracking.length
+				? order.tracking
+						.map(
+							( tr ) =>
+								`<p class="dk-muted"><strong>${ esc( t( cfg, 'tracking' ) ) }</strong>: ${
+									tr.provider ? esc( tr.provider ) + ' · ' : ''
+								}${ esc( tr.number ) }</p>`
+						)
+						.join( '' )
+				: `<p class="dk-muted">${ esc( t( cfg, 'noTracking' ) ) }</p>`;
+		const items = ( order.items || [] )
+			.map(
+				( item ) =>
+					`<li>${ esc( String( item.quantity || 1 ) ) }× ${ esc( item.name ) }</li>`
+			)
+			.join( '' );
+
+		return `
+			${ renderHead( t( cfg, 'orderDetail' ), true ) }
+			<div class="dk-body">
+				${ state.error ? `<p class="dk-error">${ esc( state.error ) }</p>` : '' }
+				<p><strong>#${ esc( order.number ) }</strong> · ${ esc(
+					order.status_label || order.status
+				) }</p>
+				<p class="dk-muted">${ esc( order.currency ) } ${ esc( order.total ) }${
+					order.payment_method_title
+						? ` · ${ esc( order.payment_method_title ) }`
+						: ''
+				}</p>
+				${ tracking }
+				${ items ? `<ul>${ items }</ul>` : '' }
+				${
+					order.view_order_url
+						? `<p><a class="dk-btn dk-btn-secondary" href="${ esc(
+								order.view_order_url
+						  ) }" target="_blank" rel="noopener">${ esc(
+								t( cfg, 'viewOrder' )
+						  ) }</a></p>`
+						: ''
+				}
+			</div>
+			<div class="dk-foot">
+				<button type="button" class="dk-btn dk-btn-secondary" data-act="request-return" ${
+					state.busy ? 'disabled' : ''
+				}>${ esc( t( cfg, 'requestReturn' ) ) }</button>
+				<button type="button" class="dk-btn dk-btn-primary" data-act="request-cancel" ${
+					state.busy ? 'disabled' : ''
+				}>${ esc( t( cfg, 'requestCancel' ) ) }</button>
 			</div>
 		`;
 	}
@@ -446,6 +572,10 @@ export function mountPanel(
 			panel.innerHTML = renderCreate();
 		} else if ( state.view === 'thread' ) {
 			panel.innerHTML = renderThread();
+		} else if ( state.view === 'orders' ) {
+			panel.innerHTML = renderOrders();
+		} else if ( state.view === 'order' ) {
+			panel.innerHTML = renderOrderDetail();
 		} else {
 			panel.innerHTML = renderList();
 		}
@@ -477,6 +607,16 @@ export function mountPanel(
 				render();
 				return;
 			}
+			if ( state.view === 'order' ) {
+				state.view = 'orders';
+				state.orderDetail = null;
+				render();
+				return;
+			}
+			if ( state.view === 'orders' ) {
+				void loadList();
+				return;
+			}
 			if ( state.view === 'thread' || state.view === 'create' ) {
 				void loadList();
 			}
@@ -498,6 +638,25 @@ export function mountPanel(
 		}
 		if ( act === 'create' ) {
 			void openCreate();
+			return;
+		}
+		if ( act === 'orders' ) {
+			void openOrders();
+			return;
+		}
+		if ( act === 'open-order' ) {
+			const id = parseInt( actEl.getAttribute( 'data-id' ) || '', 10 );
+			if ( id ) {
+				void openOrder( id );
+			}
+			return;
+		}
+		if ( act === 'request-return' ) {
+			void requestFromOrder( 'refund' );
+			return;
+		}
+		if ( act === 'request-cancel' ) {
+			void requestFromOrder( 'cancel' );
 			return;
 		}
 		if ( act === 'open' ) {

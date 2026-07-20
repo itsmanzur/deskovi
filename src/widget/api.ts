@@ -1,4 +1,4 @@
-import type { Category, OrderSummary, Ticket, WidgetConfig } from './types';
+import type { Category, OrderDetail, OrderSummary, Ticket, WidgetConfig } from './types';
 
 function cfg(): WidgetConfig {
 	const c = window.itsdeskWidget;
@@ -94,6 +94,10 @@ export function fetchOrders(): Promise< {
 	window_days?: number;
 } > {
 	return request( 'itsdesk/v1/customer/orders' );
+}
+
+export function fetchOrder( id: number ): Promise< OrderDetail > {
+	return request( `itsdesk/v1/customer/orders/${ id }` );
 }
 
 export function guestStart(

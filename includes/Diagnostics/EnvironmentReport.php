@@ -6,8 +6,9 @@
  */
 
 declare(strict_types=1);
-
 namespace Itsdesk\Diagnostics;
+
+defined( 'ABSPATH' ) || exit;
 
 use Itsdesk\Privacy\Settings as PrivacySettings;
 use Itsdesk\Widget\Frontend as WidgetFrontend;

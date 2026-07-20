@@ -165,6 +165,14 @@ export function updateTicketStatus( id: string, status: string ): Promise< Ticke
 	} );
 }
 
+export function retryTicketSync( id: string ): Promise< Ticket > {
+	return apiFetch( {
+		path: `${ base }/tickets/${ id }/retry-sync`,
+		method: 'POST',
+		data: {},
+	} );
+}
+
 export function fetchTicketOrder( ticketId: string ): Promise< TicketOrderResponse > {
 	return apiFetch( { path: `${ base }/tickets/${ ticketId }/order` } );
 }

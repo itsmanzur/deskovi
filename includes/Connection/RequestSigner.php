@@ -6,8 +6,9 @@
  */
 
 declare(strict_types=1);
-
 namespace Itsdesk\Connection;
+
+defined( 'ABSPATH' ) || exit;
 
 /**
  * Builds canonical payload + signature for site-authenticated calls.

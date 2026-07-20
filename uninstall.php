@@ -11,7 +11,7 @@ if ( ! defined( 'WP_UNINSTALL_PLUGIN' ) ) {
 	exit;
 }
 
-$options = array(
+$itsdesk_options = array(
 	'itsdesk_version',
 	'itsdesk_connection',
 	'itsdesk_site_identity',
@@ -21,13 +21,14 @@ $options = array(
 	'itsdesk_activity_log',
 	'itsdesk_diagnostic_errors',
 	'itsdesk_tickets',
+	'itsdesk_delivery_secret',
 );
 
-foreach ( $options as $option ) {
-	delete_option( $option );
+foreach ( $itsdesk_options as $itsdesk_option ) {
+	delete_option( $itsdesk_option );
 }
 
-$role = get_role( 'administrator' );
-if ( $role ) {
-	$role->remove_cap( 'manage_itsdesk' );
+$itsdesk_role = get_role( 'administrator' );
+if ( $itsdesk_role ) {
+	$itsdesk_role->remove_cap( 'manage_itsdesk' );
 }

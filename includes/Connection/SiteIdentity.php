@@ -6,8 +6,9 @@
  */
 
 declare(strict_types=1);
-
 namespace Itsdesk\Connection;
+
+defined( 'ABSPATH' ) || exit;
 
 /**
  * Generates and stores site key material. Private key never exposed via REST.

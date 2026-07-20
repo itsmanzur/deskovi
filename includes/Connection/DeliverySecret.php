@@ -6,8 +6,9 @@
  */
 
 declare(strict_types=1);
-
 namespace Itsdesk\Connection;
+
+defined( 'ABSPATH' ) || exit;
 
 /**
  * Stores HMAC delivery secret from connect exchange. Never exposed via REST.

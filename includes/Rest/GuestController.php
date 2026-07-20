@@ -6,8 +6,9 @@
  */
 
 declare(strict_types=1);
-
 namespace Itsdesk\Rest;
+
+defined( 'ABSPATH' ) || exit;
 
 use Itsdesk\Auth\GuestSession;
 use WP_REST_Request;
@@ -20,6 +21,7 @@ use WP_REST_Server;
 final class GuestController {
 
 	public const REST_NAMESPACE = 'itsdesk/v1';
+
 
 	/**
 	 * Register routes.

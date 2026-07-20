@@ -27,6 +27,9 @@ webpack.config.js
 *.map
 *.docx
 *.md
+SupportApp_Desk_Roadmap.html
+SupportApp_Desk_*.html
+*Roadmap*.html
 .distignore
 .DS_Store
 Thumbs.db

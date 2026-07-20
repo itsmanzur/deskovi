@@ -6,8 +6,9 @@
  */
 
 declare(strict_types=1);
-
 namespace Itsdesk\Queue;
+
+defined( 'ABSPATH' ) || exit;
 
 /**
  * Summarizes pending/failed itsdesk jobs.

@@ -6,8 +6,9 @@
  */
 
 declare(strict_types=1);
-
 namespace Itsdesk\Tickets\Transport;
+
+defined( 'ABSPATH' ) || exit;
 
 use Itsdesk\Connection\ConnectionStatus;
 use Itsdesk\Connection\SignedHttpClient;
@@ -57,6 +58,9 @@ final class HttpTicketTransport implements TicketTransportInterface {
 			'status'           => (string) ( $ticket['status'] ?? 'open' ),
 			'category'         => $ticket['category'] ?? null,
 			'order_id'         => isset( $ticket['order_id'] ) ? (int) $ticket['order_id'] : null,
+			'order_context'    => ( isset( $ticket['order_snapshot'] ) && is_array( $ticket['order_snapshot'] ) )
+				? $ticket['order_snapshot']
+				: null,
 			'customer_user_id' => isset( $ticket['customer_user_id'] ) ? (int) $ticket['customer_user_id'] : null,
 			'customer_email'   => $ticket['customer_email'] ?? null,
 			'customer_name'    => $ticket['customer_name'] ?? null,

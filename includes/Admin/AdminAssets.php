@@ -6,8 +6,9 @@
  */
 
 declare(strict_types=1);
-
 namespace Itsdesk\Admin;
+
+defined( 'ABSPATH' ) || exit;
 
 /**
  * Enqueues the React admin bundle only on the Deskovi page.

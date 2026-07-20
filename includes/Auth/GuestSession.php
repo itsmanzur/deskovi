@@ -6,8 +6,9 @@
  */
 
 declare(strict_types=1);
-
 namespace Itsdesk\Auth;
+
+defined( 'ABSPATH' ) || exit;
 
 use Itsdesk\Connection\ActivityLogger;
 
@@ -269,7 +270,10 @@ final class GuestSession {
 	}
 
 	private function rate_limit_key( string $email ): string {
-		$ip = isset( $_SERVER['REMOTE_ADDR'] ) ? (string) $_SERVER['REMOTE_ADDR'] : '';
+		$ip = '';
+		if ( isset( $_SERVER['REMOTE_ADDR'] ) ) {
+			$ip = sanitize_text_field( wp_unslash( (string) $_SERVER['REMOTE_ADDR'] ) );
+		}
 		return 'itsdesk_guest_rl_' . md5( $ip . '|' . strtolower( $email ) );
 	}
 

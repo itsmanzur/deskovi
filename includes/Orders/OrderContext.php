@@ -6,8 +6,9 @@
  */
 
 declare(strict_types=1);
-
 namespace Itsdesk\Orders;
+
+defined( 'ABSPATH' ) || exit;
 
 use Itsdesk\Privacy\Settings as PrivacySettings;
 
@@ -104,7 +105,7 @@ final class OrderContext {
 	}
 
 	/**
-	 * Compact snapshot without timeline (ticket create / outbound).
+	 * Compact snapshot for ticket outbound — includes short timeline for agents.
 	 *
 	 * @return array<string, mixed>|\WP_Error
 	 */
@@ -119,7 +120,10 @@ final class OrderContext {
 			return $owned;
 		}
 
-		return $this->build_snapshot( $order, false );
+		$snapshot = $this->build_snapshot( $order, false );
+		$snapshot['timeline'] = $this->timeline->for_order( $order, 12 );
+
+		return $snapshot;
 	}
 
 	/**
@@ -205,9 +209,10 @@ final class OrderContext {
 			}
 			$product = $item->get_product();
 			$items[] = array(
-				'name'     => $item->get_name(),
-				'quantity' => (int) $item->get_quantity(),
-				'sku'      => $product ? (string) $product->get_sku() : '',
+				'name'       => $item->get_name(),
+				'quantity'   => (int) $item->get_quantity(),
+				'sku'        => $product ? (string) $product->get_sku() : '',
+				'line_total' => (string) $item->get_total(),
 			);
 		}
 
@@ -221,18 +226,28 @@ final class OrderContext {
 		}
 
 		$snapshot = array(
-			'id'                    => $order->get_id(),
-			'number'                => $order->get_order_number(),
-			'status'                => $order->get_status(),
-			'date_created'          => $created ? $created->date( 'c' ) : '',
-			'currency'              => $order->get_currency(),
-			'total'                 => $order->get_total(),
-			'payment_method_title'  => $order->get_payment_method_title(),
-			'shipping_method'       => $shipping_method,
-			'items'                 => $items,
-			'billing'               => null,
-			'shipping'              => null,
-			'phone'                 => null,
+			'id'                   => $order->get_id(),
+			'number'               => $order->get_order_number(),
+			'status'               => $order->get_status(),
+			'status_label'         => wc_get_order_status_name( $order->get_status() ),
+			'date_created'         => $created ? $created->date( 'c' ) : '',
+			'date_paid'            => $order->get_date_paid() ? $order->get_date_paid()->date( 'c' ) : '',
+			'date_completed'       => $order->get_date_completed() ? $order->get_date_completed()->date( 'c' ) : '',
+			'currency'             => $order->get_currency(),
+			'total'                => $order->get_total(),
+			'subtotal'             => $order->get_subtotal(),
+			'shipping_total'       => $order->get_shipping_total(),
+			'discount_total'       => $order->get_discount_total(),
+			'refunded_total'       => $order->get_total_refunded(),
+			'payment_method_title' => $order->get_payment_method_title(),
+			'shipping_method'      => $shipping_method,
+			'customer_note'        => $order->get_customer_note(),
+			'tracking'             => $this->extract_tracking( $order ),
+			'view_order_url'       => $order->get_view_order_url(),
+			'items'                => $items,
+			'billing'              => null,
+			'shipping'             => null,
+			'phone'                => null,
 		);
 
 		if ( $allow_address ) {
@@ -270,5 +285,41 @@ final class OrderContext {
 		}
 
 		return $snapshot;
+	}
+
+	/**
+	 * Best-effort tracking numbers from common WooCommerce meta / plugins.
+	 *
+	 * @return array<int, array{number: string, provider: string}>
+	 */
+	private function extract_tracking( \WC_Order $order ): array {
+		$out = array();
+
+		$legacy = $order->get_meta( '_tracking_number', true );
+		if ( is_string( $legacy ) && '' !== $legacy ) {
+			$out[] = array(
+				'number'   => $legacy,
+				'provider' => (string) $order->get_meta( '_tracking_provider', true ),
+			);
+		}
+
+		$items = $order->get_meta( '_wc_shipment_tracking_items', true );
+		if ( is_array( $items ) ) {
+			foreach ( $items as $row ) {
+				if ( ! is_array( $row ) ) {
+					continue;
+				}
+				$num = isset( $row['tracking_number'] ) ? (string) $row['tracking_number'] : '';
+				if ( '' === $num ) {
+					continue;
+				}
+				$out[] = array(
+					'number'   => $num,
+					'provider' => isset( $row['tracking_provider'] ) ? (string) $row['tracking_provider'] : (string) ( $row['custom_tracking_provider'] ?? '' ),
+				);
+			}
+		}
+
+		return $out;
 	}
 }

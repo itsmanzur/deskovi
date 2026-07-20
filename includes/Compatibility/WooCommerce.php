@@ -6,8 +6,9 @@
  */
 
 declare(strict_types=1);
-
 namespace Itsdesk\Compatibility;
+
+defined( 'ABSPATH' ) || exit;
 
 /**
  * Ensures WooCommerce is present and declares HPOS compatibility.

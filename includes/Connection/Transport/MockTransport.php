@@ -6,8 +6,9 @@
  */
 
 declare(strict_types=1);
-
 namespace Itsdesk\Connection\Transport;
+
+defined( 'ABSPATH' ) || exit;
 
 /**
  * Deterministic mock responses — no network.

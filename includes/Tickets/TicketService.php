@@ -6,8 +6,9 @@
  */
 
 declare(strict_types=1);
-
 namespace Itsdesk\Tickets;
+
+defined( 'ABSPATH' ) || exit;
 
 use Itsdesk\Auth\GuestSession;
 use Itsdesk\Connection\ActivityLogger;
@@ -520,6 +521,35 @@ final class TicketService {
 	}
 
 	/**
+	 * Re-queue outbound create sync (failed / pending tickets).
+	 *
+	 * @return array<string, mixed>|\WP_Error
+	 */
+	public function retry_sync( string $ticket_id ) {
+		$ticket = $this->repo->find( $ticket_id );
+		if ( null === $ticket ) {
+			return new \WP_Error(
+				'itsdesk_ticket_not_found',
+				__( 'Ticket not found.', 'deskovi' ),
+				array( 'status' => 404 )
+			);
+		}
+
+		$ticket['sync_status'] = 'pending';
+		$ticket['updated_at']  = gmdate( 'c' );
+		$this->repo->save( $ticket );
+		$this->sync->enqueue_create( $ticket_id );
+
+		$this->logger->log(
+			'Ticket',
+			__( 'Outbound sync retry queued', 'deskovi' ),
+			'OK'
+		);
+
+		return $ticket;
+	}
+
+	/**
 	 * Link or unlink an order on a ticket (admin).
 	 *
 	 * @return array<string, mixed>|\WP_Error
@@ -541,6 +571,7 @@ final class TicketService {
 			$ticket['order_snapshot'] = null;
 			$ticket['updated_at']     = gmdate( 'c' );
 			$this->repo->save( $ticket );
+			$this->sync->enqueue_create( $ticket_id );
 			$this->logger->log( 'Ticket', __( 'Order unlinked from ticket', 'deskovi' ), 'OK' );
 			return $ticket;
 		}
@@ -559,6 +590,7 @@ final class TicketService {
 		$ticket['order_snapshot'] = $snap;
 		$ticket['updated_at']     = gmdate( 'c' );
 		$this->repo->save( $ticket );
+		$this->sync->enqueue_create( $ticket_id );
 
 		$this->logger->log(
 			'Ticket',

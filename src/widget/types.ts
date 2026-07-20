@@ -47,6 +47,15 @@ export type OrderSummary = {
 	date_created: string;
 };
 
+export type OrderDetail = OrderSummary & {
+	status_label?: string;
+	payment_method_title?: string;
+	shipping_method?: string;
+	view_order_url?: string;
+	tracking?: Array< { number: string; provider?: string } >;
+	items?: Array< { name: string; quantity: number; sku?: string } >;
+};
+
 export type Category = { id: string; label: string };
 
 declare global {

@@ -6,8 +6,9 @@
  */
 
 declare(strict_types=1);
-
 namespace Itsdesk\Tickets;
+
+defined( 'ABSPATH' ) || exit;
 
 /**
  * Allowlisted categories for ticket forms.
@@ -24,6 +25,7 @@ final class Categories {
 			'order'    => __( 'Order question', 'deskovi' ),
 			'shipping' => __( 'Shipping / tracking', 'deskovi' ),
 			'refund'   => __( 'Refund / return', 'deskovi' ),
+			'cancel'   => __( 'Cancel request', 'deskovi' ),
 			'product'  => __( 'Product question', 'deskovi' ),
 			'other'    => __( 'Other', 'deskovi' ),
 		);

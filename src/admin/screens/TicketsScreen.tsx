@@ -9,6 +9,7 @@ import {
 	fetchTickets,
 	linkTicketOrder,
 	replyTicket,
+	retryTicketSync,
 	updateTicketStatus,
 } from '../api';
 import { SkeletonPanel } from '../components/Skeleton';
@@ -455,8 +456,45 @@ export function TicketsScreen( { onToast }: Props ) {
 									? ` · ${ selected.remote_id }`
 									: '' }
 								{ selected.sync_status === 'synced' &&
-									' · ' + __( 'mock outbound OK', 'deskovi' ) }
+									' · ' + __( 'outbound OK', 'deskovi' ) }
 							</p>
+							{ ( selected.sync_status === 'failed' ||
+								selected.sync_status === 'pending' ) && (
+								<button
+									type="button"
+									className="itsdesk-btn itsdesk-btn--secondary"
+									disabled={ busy }
+									style={ { marginBottom: 8 } }
+									onClick={ () => {
+										setBusy( true );
+										retryTicketSync( selected.id )
+											.then( ( t ) => {
+												setSelected( t );
+												setTickets( ( prev ) =>
+													prev.map( ( row ) =>
+														row.id === t.id ? t : row
+													)
+												);
+												onToast(
+													__(
+														'Sync retry queued.',
+														'deskovi'
+													)
+												);
+												setBusy( false );
+											} )
+											.catch( ( err: unknown ) => {
+												onToast(
+													apiErrorMessage( err ),
+													'danger'
+												);
+												setBusy( false );
+											} );
+									} }
+								>
+									{ __( 'Retry sync', 'deskovi' ) }
+								</button>
+							) }
 							{ selected.saas_url && (
 								<p>
 									<a

@@ -6,8 +6,9 @@
  */
 
 declare(strict_types=1);
-
 namespace Itsdesk\Tickets;
+
+defined( 'ABSPATH' ) || exit;
 
 /**
  * Option-backed ticket store for M3 mock/bridge cache.

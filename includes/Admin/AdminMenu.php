@@ -6,8 +6,9 @@
  */
 
 declare(strict_types=1);
-
 namespace Itsdesk\Admin;
+
+defined( 'ABSPATH' ) || exit;
 
 /**
  * Registers the Deskovi top-level admin page.

@@ -6,8 +6,9 @@
  */
 
 declare(strict_types=1);
-
 namespace Itsdesk\Connection\Transport;
+
+defined( 'ABSPATH' ) || exit;
 
 use Itsdesk\Connection\SaasConfig;
 use Itsdesk\Connection\SignedHttpClient;
@@ -42,13 +43,13 @@ final class HttpTransport implements TransportInterface {
 			'authorize_url'   => $base . '/',
 			'mock_workspaces' => array(
 				array(
-					'id'   => 'ws_local_dev',
-					'name' => 'Local Dev',
+					'id'   => 'from_code',
+					'name' => __( 'Workspace from your connect code', 'deskovi' ),
 				),
 			),
 			'expires_in'      => 600,
 			'site_url'        => $site_url,
-			'hint'            => 'Generate a connect code in your Deskovi workspace, then paste it here.',
+			'hint'            => __( 'In Deskovi open Connect, generate a code, then paste it here.', 'deskovi' ),
 		);
 	}
 
