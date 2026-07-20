@@ -1,0 +1,13 @@
+/node_modules/
+/vendor/
+/assets/admin/*.map
+npm-debug.log*
+.DS_Store
+
+*.zip
+.wordpress-org/
+.zip-staging-deskovi/
+
+
+*.docx
+

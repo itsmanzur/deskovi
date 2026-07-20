@@ -1,0 +1,17 @@
+{
+  "name": "deskovi/itsdesk",
+  "description": "Deskovi WordPress connector (itsdesk)",
+  "type": "wordpress-plugin",
+  "license": "GPL-2.0-or-later",
+  "require": {
+    "php": ">=8.1"
+  },
+  "autoload": {
+    "psr-4": {
+      "Itsdesk\\": "includes/"
+    }
+  },
+  "config": {
+    "sort-packages": true
+  }
+}

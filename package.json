@@ -1,0 +1,24 @@
+{
+  "name": "deskovi",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Deskovi WordPress plugin",
+  "scripts": {
+    "build": "wp-scripts build",
+    "start": "wp-scripts start",
+    "lint": "wp-scripts lint-js src/admin",
+    "zip": "node scripts/build-zip.js"
+  },
+  "devDependencies": {
+    "@types/react": "^18.3.12",
+    "@types/react-dom": "^18.3.1",
+    "@types/wordpress__element": "^2.14.1",
+    "@wordpress/scripts": "^30.7.0",
+    "typescript": "^5.7.2"
+  },
+  "dependencies": {
+    "@wordpress/api-fetch": "^7.14.0",
+    "@wordpress/element": "^6.14.0",
+    "@wordpress/i18n": "^5.14.0"
+  }
+}
