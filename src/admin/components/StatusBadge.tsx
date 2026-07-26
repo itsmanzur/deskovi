@@ -16,25 +16,3 @@ export function StatusBadge( { tone = 'neutral', pulse = false, children }: Prop
 		</span>
 	);
 }
-
-export function connectionBadge( status: string ) {
-	if ( status === 'connected' ) {
-		return (
-			<StatusBadge tone="ok" pulse>
-				{ __( 'Connected', 'deskovi' ) }
-			</StatusBadge>
-		);
-	}
-	if ( status === 'error' ) {
-		return (
-			<StatusBadge tone="danger">
-				{ __( 'Needs attention', 'deskovi' ) }
-			</StatusBadge>
-		);
-	}
-	return (
-		<StatusBadge tone="warn">
-			{ __( 'Not connected', 'deskovi' ) }
-		</StatusBadge>
-	);
-}

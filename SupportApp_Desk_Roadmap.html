@@ -1,0 +1,538 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SupportApp Desk — Product Roadmap & Market Brief</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Sans+Bengali:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink-navy:#101820;
+    --ink-navy-2:#182534;
+    --grid-line:#2c3d4f;
+    --paper:#F6F3EC;
+    --paper-dim:#EDE9DE;
+    --ink:#181A1F;
+    --ink-soft:#4B4F58;
+    --purple:#7F54B3;
+    --purple-deep:#5C3A8A;
+    --green:#2F6B4F;
+    --green-bg:#E5EFE7;
+    --amber:#A8721F;
+    --amber-bg:#F5EAD6;
+    --line:#D8D2C2;
+    --radius:2px;
+  }
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{
+    margin:0;
+    background:var(--paper);
+    color:var(--ink);
+    font-family:'IBM Plex Sans','IBM Plex Sans Bengali',sans-serif;
+    font-size:16px;
+    line-height:1.65;
+  }
+  .bn{ font-family:'IBM Plex Sans Bengali','IBM Plex Sans',sans-serif; }
+  h1,h2,h3{
+    font-family:'Space Grotesk',sans-serif;
+    letter-spacing:-0.01em;
+    margin:0 0 0.4em 0;
+    color:var(--ink);
+  }
+  .mono{ font-family:'IBM Plex Mono',monospace; }
+  a{ color:var(--purple-deep); }
+
+  /* ---------- HERO / BLUEPRINT ---------- */
+  .hero{
+    background:
+      linear-gradient(var(--grid-line) 1px, transparent 1px) 0 0/40px 40px,
+      linear-gradient(90deg, var(--grid-line) 1px, transparent 1px) 0 0/40px 40px,
+      radial-gradient(ellipse at 20% -10%, #24344a 0%, var(--ink-navy) 55%);
+    background-color:var(--ink-navy);
+    color:#EDEFF2;
+    padding:64px 6vw 56px;
+    position:relative;
+    overflow:hidden;
+    border-bottom:3px solid var(--purple);
+  }
+  .hero::after{
+    content:"";
+    position:absolute; inset:0;
+    background:linear-gradient(180deg, transparent 60%, var(--ink-navy) 100%);
+  }
+  .hero-eyebrow{
+    font-family:'IBM Plex Mono',monospace;
+    font-size:12.5px;
+    letter-spacing:0.14em;
+    text-transform:uppercase;
+    color:#B6A6DA;
+    margin-bottom:18px;
+    position:relative; z-index:2;
+  }
+  .hero h1{
+    color:#fff;
+    font-size:clamp(32px,4.4vw,52px);
+    max-width:16ch;
+    position:relative; z-index:2;
+  }
+  .hero p.sub{
+    max-width:640px;
+    color:#C9CDD6;
+    font-size:17px;
+    position:relative; z-index:2;
+    margin-top:14px;
+  }
+  .meta-row{
+    display:flex; flex-wrap:wrap; gap:28px;
+    margin-top:36px;
+    position:relative; z-index:2;
+  }
+  .meta-row div{ font-family:'IBM Plex Mono',monospace; font-size:12.5px; color:#9AA3B2; }
+  .meta-row strong{ display:block; color:#EDEFF2; font-size:14px; font-weight:500; margin-top:3px; }
+
+  /* schematic diagram */
+  .schematic{
+    margin-top:44px;
+    position:relative; z-index:2;
+    display:grid;
+    grid-template-columns:1fr auto 1fr;
+    gap:0;
+    align-items:center;
+    max-width:900px;
+  }
+  .schem-box{
+    border:1.5px dashed #5A6B80;
+    border-radius:3px;
+    padding:18px 20px;
+    background:rgba(255,255,255,0.03);
+  }
+  .schem-box h4{
+    font-family:'IBM Plex Mono',monospace;
+    font-size:11.5px; letter-spacing:0.08em; text-transform:uppercase;
+    color:#B6A6DA; margin:0 0 8px 0;
+  }
+  .schem-box ul{ margin:0; padding-left:16px; font-size:13.5px; color:#C9CDD6;}
+  .schem-box li{ margin-bottom:4px; }
+  .schem-arrow{
+    text-align:center;
+    font-family:'IBM Plex Mono',monospace;
+    font-size:11px;
+    color:#8A93A6;
+    padding:0 14px;
+  }
+  .schem-arrow .line{
+    height:1px; background:repeating-linear-gradient(90deg,#8A93A6 0 6px, transparent 6px 10px);
+    margin:6px 0;
+  }
+
+  /* ---------- LAYOUT ---------- */
+  .wrap{ max-width:980px; margin:0 auto; padding:0 6vw; }
+  section{ padding:56px 0; border-bottom:1px solid var(--line); }
+  section:last-of-type{ border-bottom:none; }
+  .section-num{
+    font-family:'IBM Plex Mono',monospace;
+    font-size:12.5px; color:var(--purple-deep);
+    letter-spacing:0.1em; text-transform:uppercase;
+    margin-bottom:10px;
+  }
+  .section-title{ font-size:clamp(24px,3vw,32px); }
+  .lede{ color:var(--ink-soft); max-width:70ch; margin-top:10px; font-size:16px;}
+
+  /* pills / tags */
+  .tag{
+    display:inline-block; font-family:'IBM Plex Mono',monospace; font-size:11.5px;
+    padding:3px 9px; border-radius:20px; letter-spacing:0.03em;
+  }
+  .tag.free{ background:var(--green-bg); color:var(--green); }
+  .tag.pro{ background:var(--amber-bg); color:var(--amber); }
+  .tag.purple{ background:#EFE7F7; color:var(--purple-deep); }
+
+  /* cards grid */
+  .grid{ display:grid; gap:18px; margin-top:28px; }
+  .grid.cols-2{ grid-template-columns:1fr 1fr; }
+  .grid.cols-3{ grid-template-columns:repeat(3,1fr); }
+  @media (max-width:760px){ .grid.cols-2,.grid.cols-3{ grid-template-columns:1fr; } .schematic{grid-template-columns:1fr;} .schem-arrow{transform:rotate(90deg); padding:14px 0;} }
+
+  .card{
+    background:#fff;
+    border:1px solid var(--line);
+    border-radius:var(--radius);
+    padding:20px 22px;
+  }
+  .card h4{ font-family:'Space Grotesk',sans-serif; font-size:16.5px; margin-bottom:6px;}
+  .card p{ margin:0; color:var(--ink-soft); font-size:14.5px; }
+
+  /* module list */
+  .module{
+    display:grid; grid-template-columns:64px 1fr; gap:18px;
+    padding:20px 0; border-top:1px solid var(--line);
+  }
+  .module:first-of-type{ border-top:none; }
+  .module .num{ font-family:'IBM Plex Mono',monospace; font-size:26px; color:#CDBEE8; font-weight:600; }
+  .module h4{ margin:0 0 4px 0; font-family:'Space Grotesk',sans-serif; font-size:17.5px; }
+  .module .goal{ color:var(--purple-deep); font-size:14px; margin-bottom:6px; font-weight:500;}
+  .module .scope{ color:var(--ink-soft); font-size:14px; }
+
+  /* timeline */
+  .timeline{ position:relative; margin-top:32px; padding-left:26px; border-left:2px solid var(--line); }
+  .tl-item{ position:relative; padding-bottom:30px; }
+  .tl-item:last-child{ padding-bottom:0; }
+  .tl-item::before{
+    content:""; position:absolute; left:-32px; top:4px;
+    width:12px; height:12px; border-radius:50%;
+    background:var(--paper); border:2.5px solid var(--purple);
+  }
+  .tl-item.done::before{ background:var(--green); border-color:var(--green); }
+  .tl-code{ font-family:'IBM Plex Mono',monospace; font-size:12px; color:var(--purple-deep); letter-spacing:0.05em; }
+  .tl-item h4{ margin:2px 0 6px 0; font-family:'Space Grotesk',sans-serif; font-size:18px; }
+  .tl-item .deliv{ font-size:14.5px; color:var(--ink); margin-bottom:6px; }
+  .tl-item .exit{ font-size:13.5px; color:var(--ink-soft); border-left:2px solid var(--line); padding-left:10px; }
+  .tl-item .exit b{ color:var(--ink); font-weight:600; }
+
+  /* tables */
+  table{ width:100%; border-collapse:collapse; margin-top:18px; font-size:14.5px; }
+  th,td{ text-align:left; padding:10px 12px; border-bottom:1px solid var(--line); vertical-align:top; }
+  th{ font-family:'IBM Plex Mono',monospace; font-size:12px; text-transform:uppercase; letter-spacing:0.05em; color:var(--ink-soft); font-weight:500; }
+  tr:last-child td{ border-bottom:none; }
+  td.hl{ color:var(--purple-deep); font-weight:500; }
+
+  /* stat strip */
+  .stats{ display:grid; grid-template-columns:repeat(4,1fr); gap:16px; margin-top:28px; }
+  @media (max-width:760px){ .stats{ grid-template-columns:1fr 1fr; } }
+  .stat{ border-left:2px solid var(--purple); padding-left:14px; }
+  .stat .num{ font-family:'Space Grotesk',sans-serif; font-size:26px; font-weight:600; }
+  .stat .lab{ font-size:12.5px; color:var(--ink-soft); margin-top:2px; }
+
+  /* competitor cards */
+  .comp-card{ border:1px solid var(--line); border-radius:var(--radius); padding:18px 20px; background:#fff; }
+  .comp-card .name{ font-family:'Space Grotesk',sans-serif; font-weight:600; font-size:16px; }
+  .comp-card .pricing{ font-family:'IBM Plex Mono',monospace; font-size:12.5px; color:var(--purple-deep); margin:4px 0 10px; }
+  .comp-card ul{ margin:0; padding-left:18px; font-size:14px; color:var(--ink-soft); }
+  .comp-card li{ margin-bottom:4px; }
+
+  .callout{
+    background:var(--ink-navy); color:#EDEFF2; padding:26px 28px; border-radius:3px; margin-top:26px;
+    border-left:4px solid var(--purple);
+  }
+  .callout h4{ font-family:'IBM Plex Mono',monospace; font-size:12px; text-transform:uppercase; letter-spacing:0.1em; color:#B6A6DA; margin:0 0 10px 0;}
+  .callout p{ margin:0; color:#DADEE5; font-size:15px; }
+
+  footer{ padding:40px 6vw 60px; text-align:center; color:var(--ink-soft); font-size:13px; font-family:'IBM Plex Mono',monospace; }
+
+  ul.plain{ padding-left:20px; margin:10px 0; }
+  ul.plain li{ margin-bottom:6px; font-size:15px; }
+</style>
+</head>
+<body>
+
+<div class="hero">
+  <div class="hero-eyebrow">Product Architecture &amp; Development Roadmap — v1.1 (Market Brief) · Living Deskovi source: deskovi-saas/docs/PRODUCT.md</div>
+  <h1>SupportApp Desk → Deskovi</h1>
+  <p class="sub bn">WooCommerce স্টোর আর Deskovi SaaS-এর মধ্যে একটি লাইটওয়েট, সিকিউর কানেক্টর — একটি সম্পূর্ণ হেল্পডেস্ক WordPress-এর ভেতরে নয়। (এই HTML মার্কেট ব্রিফ; চলমান প্রোডাক্ট সোর্স: <span class="mono">deskovi-saas/docs/PRODUCT.md</span>)</p>
+  <div class="meta-row">
+    <div>Prepared by <strong>Manzurul Islam</strong></div>
+    <div>Date <strong>19–20 July 2026</strong></div>
+    <div>Architecture <strong>WP Connector + SaaS</strong></div>
+    <div>Primary users <strong>WooCommerce stores, agencies</strong></div>
+  </div>
+
+  <div class="schematic">
+    <div class="schem-box">
+      <h4>WordPress / WooCommerce</h4>
+      <ul>
+        <li>Customer identity + order ownership</li>
+        <li>Support widget &amp; launcher</li>
+        <li>Order context snapshot</li>
+        <li>Signed outbound events</li>
+      </ul>
+    </div>
+    <div class="schem-arrow">
+      <div>signed · idempotent</div>
+      <div class="line"></div>
+      <div>outbound-first</div>
+    </div>
+    <div class="schem-box">
+      <h4>SupportApp SaaS</h4>
+      <ul>
+        <li>Conversations, agents, inbox</li>
+        <li>Realtime chat + mobile</li>
+        <li>Automation, AI, analytics</li>
+        <li>Multi-store workspace</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<div class="wrap">
+
+  <!-- 0. WHAT IS IT -->
+  <section id="what">
+    <div class="section-num">00 · Plain-Language Summary</div>
+    <h2 class="section-title bn">এই প্রোডাক্টটা আসলে কী</h2>
+    <p class="lede bn">
+      SupportApp Desk WordPress-এর ভেতরে আরেকটা পূর্ণাঙ্গ হেল্পডেস্ক তৈরি করবে না। এটা একটা হালকা প্লাগইন, যার কাজ শুধু WooCommerce স্টোরের কাস্টমার আইডেন্টিটি আর অর্ডার তথ্যকে SupportApp নামের ক্লাউড অ্যাপের সঙ্গে নিরাপদে সংযুক্ত করা। আসল হেল্পডেস্ক ইন্টেলিজেন্স — কথোপকথন, এজেন্ট, রিয়েলটাইম ইনবক্স, অটোমেশন, AI, অ্যানালিটিক্স, মোবাইল অ্যাপ — সবকিছু থাকবে SupportApp-এর দিকে।
+    </p>
+    <div class="grid cols-2">
+      <div class="card">
+        <h4 class="bn">কাস্টমার যা পাবে</h4>
+        <p class="bn">টিকেট খুলে নিজের অর্ডার সিলেক্ট করা, অর্ডার স্ট্যাটাস ও শিপমেন্ট দেখা, ইনভয়েস ডাউনলোড, রিটার্ন/রিফান্ড/ওয়ারেন্টি রিকোয়েস্ট, লাইভ চ্যাট, আগের কথোপকথন দেখা, নলেজ-বেস সার্চ।</p>
+      </div>
+      <div class="card">
+        <h4 class="bn">এজেন্ট যা পাবে</h4>
+        <p class="bn">কাস্টমার প্রোফাইল, রিসেন্ট অর্ডার, টিকেটের সঙ্গে লিংক করা অর্ডার ও টাইমলাইন, রিপ্লাই/ইন্টারনাল নোট, পরবর্তী ধাপে পারমিশন-ভিত্তিক অর্ডার অ্যাকশন।</p>
+      </div>
+    </div>
+    <div class="callout">
+      <h4>Why this matters</h4>
+      <p class="bn">এক প্লাগইনে সব রাখলে ডেটাবেস ভারী হয়, চেকআউট স্লো হওয়ার ঝুঁকি বাড়ে আর সিকিউরিটি সারফেস বড় হয়ে যায়। WordPress-কে হালকা রেখে ইন্টেলিজেন্স SaaS-এ সরিয়ে দিলে স্টোরের পারফরম্যান্স নিরাপদ থাকে, আর SupportApp সাইড দ্রুত ফিচার যোগ করতে পারে।</p>
+    </div>
+  </section>
+
+  <!-- 1. MARKET -->
+  <section id="market">
+    <div class="section-num">01 · Market Research</div>
+    <h2 class="section-title">Market Size &amp; Opportunity</h2>
+    <p class="lede bn">গ্লোবাল হেল্পডেস্ক সফটওয়্যার মার্কেট একটা বড়, পরিপক্ব এবং এখনো বাড়তে থাকা মার্কেট — কিন্তু আমাদের আসল সুযোগটা লুকিয়ে আছে WooCommerce ইকোসিস্টেমের ভেতরে, যেটা অনেক নির্দিষ্ট ও সাইজেবল।</p>
+
+    <div class="stats">
+      <div class="stat"><div class="num">~$5–14B</div><div class="lab bn">গ্লোবাল হেল্পডেস্ক সফটওয়্যার মার্কেট (analyst reports অনুযায়ী পরিসীমা ভিন্ন), ~9–13% CAGR-এ বাড়ছে</div></div>
+      <div class="stat"><div class="num">4.1–4.5M</div><div class="lab bn">লাইভ, সক্রিয়ভাবে বিক্রি করছে এমন WooCommerce স্টোর (StoreLeads, 2026)</div></div>
+      <div class="stat"><div class="num">7M+</div><div class="lab bn">WordPress.org-এ WooCommerce প্লাগইনের অ্যাক্টিভ ইনস্টল</div></div>
+      <div class="stat"><div class="num">~30–35%</div><div class="lab bn">স্টোর-সংখ্যা অনুযায়ী গ্লোবাল ইকমার্স মার্কেটে WooCommerce-এর শেয়ার</div></div>
+    </div>
+    <p class="lede" style="margin-top:18px;">Analyst estimates for the broader "help desk software" category range widely (roughly $5B to $14B+ depending on scope and methodology), growing at a 9–13% CAGR across most reports. That figure is not directly ours — <span class="bn">আসল টার্গেট হলো WooCommerce-নির্দিষ্ট নিশ, যেখানে ৪০ লক্ষের বেশি লাইভ স্টোর আর ৭০ লক্ষের বেশি প্লাগইন ইনস্টল আছে।</span> Even a small conversion of that base into paid seats is a meaningful SaaS business.</p>
+  </section>
+
+  <!-- 2. COMPETITORS -->
+  <section id="competitors">
+    <div class="section-num">02 · Competitive Landscape</div>
+    <h2 class="section-title">Who We're Up Against</h2>
+    <p class="lede bn">প্রতিযোগীদের দুই স্তরে ভাগ করা যায়: (ক) WordPress-নেটিভ হেল্পডেস্ক প্লাগইন, যারা সরাসরি প্রতিদ্বন্দ্বী; এবং (খ) বড় জেনেরিক SaaS হেল্পডেস্ক যাদের WooCommerce অ্যাড-অন আছে।</p>
+
+    <h3 style="margin-top:30px; font-size:18px;">Tier 1 — WordPress-native helpdesk plugins <span class="tag purple">Direct competitors</span></h3>
+    <div class="grid cols-3" style="margin-top:16px;">
+      <div class="comp-card">
+        <div class="name">ThriveDesk</div>
+        <div class="pricing">From ~$25/mo · flat-rate up to ~$129/mo unlimited team</div>
+        <ul>
+          <li>Widely cited as the current market leader for WooCommerce</li>
+          <li>Native order context (ID, shipping, payment, history) inside the ticket</li>
+          <li>Flat pricing instead of per-agent — a stated differentiator</li>
+        </ul>
+      </div>
+      <div class="comp-card">
+        <div class="name">Fluent Support</div>
+        <div class="pricing">Free tier (up to 3 agents) · paid annual site licenses</div>
+        <ul>
+          <li>By WP Manage Ninja (also makes Fluent Forms/CRM) — strong WP ecosystem trust</li>
+          <li>10,000+ active installs</li>
+          <li>Already ships OpenAI-powered summaries and reply suggestions</li>
+        </ul>
+      </div>
+      <div class="comp-card">
+        <div class="name">Awesome Support / SupportCandy / KB Support</div>
+        <div class="pricing">Freemium, higher-tier pricing on add-ons</div>
+        <ul>
+          <li>Established, 10,000+ users each on some products</li>
+          <li>Ticketing + knowledge base focus, less commerce-context depth</li>
+        </ul>
+      </div>
+    </div>
+
+    <h3 style="margin-top:34px; font-size:18px;">Tier 2 — Generic SaaS helpdesks with a WooCommerce plugin <span class="tag purple">Indirect competitors</span></h3>
+    <div class="grid cols-3" style="margin-top:16px;">
+      <div class="comp-card">
+        <div class="name">Zendesk</div>
+        <div class="pricing">$19–99/mo per agent + ~$129/yr WooCommerce plugin</div>
+        <ul><li>Enterprise-grade, multi-channel, but bolted-on WooCommerce integration</li></ul>
+      </div>
+      <div class="comp-card">
+        <div class="name">Freshdesk</div>
+        <div class="pricing">Per-agent SaaS pricing</div>
+        <ul><li>Cloud-based, wide channel coverage, generic ecommerce context</li></ul>
+      </div>
+      <div class="comp-card">
+        <div class="name">Help Scout</div>
+        <div class="pricing">Per-user SaaS pricing</div>
+        <ul><li>Clean shared inbox, weaker native WooCommerce order depth</li></ul>
+      </div>
+    </div>
+
+    <div class="callout">
+      <h4 class="bn">আমরা কি কুলাতে পারবো?</h4>
+      <p class="bn">হ্যাঁ, তবে সহজ হবে না — এই স্পেসে ThriveDesk আর Fluent Support ইতিমধ্যে প্রতিষ্ঠিত, ভালো রিভিউ ও কমিউনিটি ট্রাস্ট নিয়ে বসে আছে। "আরেকটা হেল্পডেস্ক প্লাগইন" হিসেবে ঢুকলে হারাবো। আমাদের সুযোগ তৈরি হয় নির্দিষ্ট কিছু জায়গায় — যেখানে আমাদের আর্কিটেকচার (WordPress লাইটওয়েট + SaaS ইন্টেলিজেন্স, ফুল টিকেট হিস্টোরি WP-তে না রাখা) প্রতিযোগীদের চেয়ে বাস্তবিকভাবে আলাদা।</p>
+    </div>
+
+    <h3 style="margin-top:34px; font-size:18px;">What we need to do to compete</h3>
+    <table>
+      <tr><th>Area</th><th>Requirement</th><th class="bn">কেন দরকার</th></tr>
+      <tr><td class="hl">Order context parity</td><td>Order status, shipping, history, refund state visible inside the ticket from day one (Module 2).</td><td class="bn">এটাই এখন পুরো ক্যাটাগরির প্রধান বিক্রির পয়েন্ট — ThriveDesk এটাকেই হেডলাইন হিসেবে ব্যবহার করে।</td></tr>
+      <tr><td class="hl">Predictable pricing</td><td>Flat or workspace-level pricing, not raw per-agent, at least at lower tiers.</td><td class="bn">Per-agent প্রাইসিং growing team-দের জন্য disincentive; ThriveDesk এটাকে নিজের USP বানিয়েছে।</td></tr>
+      <tr><td class="hl">Setup speed</td><td>One-click connect flow, under 5 minutes to first ticket.</td><td class="bn">প্রতিযোগীরা "৫ মিনিটে সেটআপ"-কে মার্কেটিং পয়েন্ট হিসেবে ব্যবহার করে।</td></tr>
+      <tr><td class="hl">AI table stakes</td><td>Ticket summarization and reply suggestions by at least the M10 milestone.</td><td class="bn">Fluent Support ইতিমধ্যে OpenAI-চালিত ফিচার শিপ করেছে — এটা এখন প্রত্যাশিত বেসলাইন, differentiator নয়।</td></tr>
+      <tr><td class="hl">Agency / multi-store angle</td><td>Workspace supporting several connected stores under one account, agency-friendly roles.</td><td class="bn">অনেক এজেন্সি (যেমন আমাদের নিজেদের মতো) অনেকগুলো ক্লায়েন্ট স্টোর চালায় — এটা একটা কম-কনটেস্টেড কোণ যেখানে বড় প্রতিযোগীরা কম ফোকাস করে।</td></tr>
+      <tr><td class="hl">Security &amp; performance story</td><td>Publish the "zero blocking checkout request" and signed-request architecture as a trust signal, not just an internal principle.</td><td class="bn">এটাই আমাদের সবচেয়ে বাস্তব টেকনিক্যাল differentiator — বেশিরভাগ competitor listing-এ security architecture কখনো marketing point হিসেবে আসে না।</td></tr>
+      <tr><td class="hl">Distribution</td><td>WordPress.org listing, reviews, and presence in "best WooCommerce helpdesk" roundup articles.</td><td class="bn">এই ক্যাটাগরিতে discovery মূলত হয় এই ধরনের listicle আর WP.org search-এর মাধ্যমে।</td></tr>
+    </table>
+  </section>
+
+  <!-- 3. FREE VS PRO -->
+  <section id="pricing">
+    <div class="section-num">03 · Free vs Pro</div>
+    <h2 class="section-title">What's Free, What's Paid</h2>
+    <p class="lede bn">সোর্স ডকুমেন্টে নির্দিষ্ট কোন ফিচার ফ্রি আর কোনটা পেইড তা বলা নেই — শুধু বলা আছে "এক কোডবেস, ফিচার গেটিং হবে SaaS অ্যাকাউন্ট/প্ল্যান থেকে।" নিচের ভাগটা মডিউল লিস্ট (§7) ও "Included in 1.0 vs Deferred" (§8) টেবিলের ভিত্তিতে একটা সুপারিশ — এটা চূড়ান্ত করার আগে অ্যাপ্রুভ করা দরকার।</p>
+
+    <div class="grid cols-2" style="margin-top:24px;">
+      <div class="card" style="border-top:4px solid var(--green);">
+        <span class="tag free">FREE — WordPress plugin</span>
+        <h4 style="margin-top:12px;">Distribution &amp; core connector</h4>
+        <ul class="plain">
+          <li>Site connect / disconnect, one-time authorization, key rotation</li>
+          <li>Customer identity &amp; order-ownership resolution (logged-in + guest)</li>
+          <li>Basic order context: status, recent orders, shipment tracking</li>
+          <li>Support widget, launcher, ticket form, order selector</li>
+          <li>Ticket creation + email-based replies (Module 3 core)</li>
+          <li>Self-service basics: invoice download, tracking, cancellation request</li>
+          <li>Connection health &amp; limited diagnostics</li>
+        </ul>
+      </div>
+      <div class="card" style="border-top:4px solid var(--amber);">
+        <span class="tag pro">PAID — SupportApp workspace plan</span>
+        <h4 style="margin-top:12px;">Everything that scales with the team</h4>
+        <ul class="plain">
+          <li>Realtime chat, live-chat availability, mobile inbox &amp; push notifications</li>
+          <li>Multiple agents, roles, assignment, SLA and automation rules</li>
+          <li>AI assistance: summaries, reply suggestions, sentiment, classification, translation</li>
+          <li>Analytics and reporting dashboards</li>
+          <li>Multiple connected stores per workspace (agency plan)</li>
+          <li>Extended attachment storage &amp; retention controls</li>
+          <li>Remote order actions once enabled: notes, resend email, status change, refund approval (Module 7, later phase)</li>
+          <li>Priority support</li>
+        </ul>
+      </div>
+    </div>
+    <div class="callout">
+      <h4 class="bn">নীতি</h4>
+      <p class="bn">প্লাগইনের কাজ কাস্টমার অ্যাকুইজিশন — তাই "core loop" (কানেক্ট → অর্ডার কনটেক্সট → টিকেট খোলা) ফ্রিতে ফ্রিকশনহীন হওয়া দরকার। মনিটাইজেশন হবে টিম সাইজ, অটোমেশন, AI আর মাল্টি-স্টোর ম্যানেজমেন্টে — যেগুলো এজেন্সি ও বড় স্টোরের কাছে আসল ভ্যালু তৈরি করে।</p>
+    </div>
+  </section>
+
+  <!-- 4. PRINCIPLES -->
+  <section id="principles">
+    <div class="section-num">04 · Non-Negotiable Principles</div>
+    <h2 class="section-title">Five Rules That Never Bend</h2>
+    <div class="grid cols-2" style="margin-top:10px;">
+      <div class="card"><h4>Zero blocking requests</h4><p>No blocking SupportApp network call during checkout, cart, or normal storefront page loads.</p></div>
+      <div class="card"><h4>Data minimization</h4><p>Only what support needs syncs — never a full WooCommerce database copy.</p></div>
+      <div class="card"><h4>Least privilege</h4><p>Every user, site token, and remote action has its own scoped capability.</p></div>
+      <div class="card"><h4>Auditable by default</h4><p>Every sensitive operation is authenticated, replay-protected, idempotent, and logged.</p></div>
+      <div class="card"><h4>Read-mostly in v1.0</h4><p>No automatic refunds or destructive order actions until a later, controlled phase.</p></div>
+    </div>
+  </section>
+
+  <!-- 5. MODULES -->
+  <section id="modules">
+    <div class="section-num">05 · Product Modules</div>
+    <h2 class="section-title">Eight Modules</h2>
+    <div style="margin-top:10px;">
+      <div class="module"><div class="num">01</div><div><h4>Connection Manager</h4><div class="goal">Securely connect a store with a SupportApp workspace.</div><div class="scope">Connect/disconnect, workspace selection, key rotation, connection health, environment detection, test connection.</div></div></div>
+      <div class="module"><div class="num">02</div><div><h4>WooCommerce Customer Context</h4><div class="goal">Give agents commerce context without re-asking the customer.</div><div class="scope">Profile, recent orders, purchases, order total/status, shipping, refund history, previous tickets. No raw payment data.</div></div></div>
+      <div class="module"><div class="num">03</div><div><h4>Ticket &amp; Conversation Bridge</h4><div class="goal">Move conversations reliably between WordPress and SupportApp agents.</div><div class="scope">Ticket creation, categories, order selection, replies, status, attachments, notifications, guest verification, deep link.</div></div></div>
+      <div class="module"><div class="num">04</div><div><h4>Support Widget</h4><div class="goal">Embedded, fast, theme-safe support experience.</div><div class="scope">Floating launcher, ticket form, live-chat availability, order selector, conversation history, unread count, theming.</div></div></div>
+      <div class="module"><div class="num">05</div><div><h4>Diagnostics</h4><div class="goal">Reduce back-and-forth with customer-approved environment data.</div><div class="scope">WP/WooCommerce/PHP/plugin/theme versions, REST status, connection test. No automatic full log upload.</div></div></div>
+      <div class="module"><div class="num">06</div><div><h4>Post-Purchase Self-Service</h4><div class="goal">Let customers solve common order issues without an agent.</div><div class="scope">Tracking, invoice, return/refund/warranty request, address correction, cancellation, damaged-item workflow.</div></div></div>
+      <div class="module"><div class="num">07</div><div><h4>Remote Order Actions</h4><div class="goal">Controlled operations from SupportApp, after the read-only foundation is stable.</div><div class="scope">Add note, resend email, status actions, tracking reference, return approval, refund/cancellation with fine-grained permissions.</div></div></div>
+      <div class="module"><div class="num">08</div><div><h4>AI Assistance</h4><div class="goal">Improve agent speed without autonomous destructive decisions.</div><div class="scope">Summary, reply suggestion, sentiment, classification, KB retrieval, translation, tone adjustment. Human approval by default.</div></div></div>
+    </div>
+  </section>
+
+  <!-- 6. ROADMAP -->
+  <section id="roadmap">
+    <div class="section-num">06 · Release Roadmap</div>
+    <h2 class="section-title">Milestones M0 → M10</h2>
+    <div class="timeline">
+      <div class="tl-item"><div class="tl-code">M0</div><h4>Product Specification</h4><div class="deliv">Final scope, roles, data/privacy map, API contract, threat model, performance budget, error rules.</div><div class="exit"><b>Exit:</b> team can explain what data moves, who can act, and what happens on failure.</div></div>
+      <div class="tl-item"><div class="tl-code">M1</div><h4>Plugin Foundation</h4><div class="deliv">Modular plugin shell, dependency checks, admin UI, logging, localization, HPOS declaration.</div><div class="exit"><b>Exit:</b> no fatal activation; no unrelated frontend assets; clear WooCommerce dependency notice.</div></div>
+      <div class="tl-item"><div class="tl-code">M2</div><h4>Secure Connection</h4><div class="deliv">Authentication, workspace selection, one-time code, key pair, signatures, revocation, health test.</div><div class="exit"><b>Exit:</b> expired/replayed requests rejected; disconnected site blocked; no reusable master secret leak.</div></div>
+      <div class="tl-item"><div class="tl-code">M3</div><h4>Ticket Bridge</h4><div class="deliv">Ticket form, categories, replies, status, attachment, notification, guest verification.</div><div class="exit"><b>Exit:</b> ownership isolation; duplicate prevention; offline API retry; no storefront slowdown.</div></div>
+      <div class="tl-item"><div class="tl-code">M4</div><h4>Order Context</h4><div class="deliv">Customer order list, order linking, snapshots, timeline, status-event sync, HPOS support.</div><div class="exit"><b>Exit:</b> no full table scan; HPOS on/off passes; customers see only their own orders.</div></div>
+      <div class="tl-item"><div class="tl-code">M5</div><h4>Customer Widget</h4><div class="deliv">Lazy launcher, conversation UI, realtime, responsive design, themes, placement controls.</div><div class="exit"><b>Exit:</b> no asset when disabled; cached-page data isolation; mobile/theme compatibility pass.</div></div>
+      <div class="tl-item"><div class="tl-code">M6</div><h4>Private Beta</h4><div class="deliv">GS Plugins, ThemeXclub, CoderPixel and selected stores.</div><div class="exit"><b>Exit:</b> connection, firewall, large-store, queue, guest-checkout and support-workflow issues validated.</div></div>
+      <div class="tl-item"><div class="tl-code">M7</div><h4>Version 1.0</h4><div class="deliv">Stable connection, ticket bridge, order context, attachment, diagnostics, privacy, realtime.</div><div class="exit"><b>Exit:</b> security/performance gates pass; no automatic refund or destructive action.</div></div>
+      <div class="tl-item"><div class="tl-code">M8</div><h4>Post-Purchase Workflows</h4><div class="deliv">Tracking, return/refund request, warranty, invoice, self-service forms.</div><div class="exit"><b>Exit:</b> workflow data integrity and customer notifications validated.</div></div>
+      <div class="tl-item"><div class="tl-code">M9</div><h4>Controlled Order Actions</h4><div class="deliv">Signed inbound commands, permission matrix, notes, email resend, selected status and refund approval.</div><div class="exit"><b>Exit:</b> every action allowlisted, confirmed, idempotent, and audited.</div></div>
+      <div class="tl-item"><div class="tl-code">M10</div><h4>AI &amp; Automation</h4><div class="deliv">Summaries, suggested replies, classification, sentiment, knowledge, rules.</div><div class="exit"><b>Exit:</b> human approval default; data/privacy controls and cost monitoring established.</div></div>
+    </div>
+
+    <table style="margin-top:34px;">
+      <tr><th>Included in 1.0</th><th>Deferred beyond 1.0</th></tr>
+      <tr><td>Secure connection and site identity</td><td>Automatic refunds and cancellations</td></tr>
+      <tr><td>Customer authentication and guest verification</td><td>Full return-management suite</td></tr>
+      <tr><td>Ticket submission and two-way replies</td><td>Autonomous AI replies</td></tr>
+      <tr><td>WooCommerce order context and linking</td><td>Marketplace integrations</td></tr>
+      <tr><td>Attachments, diagnostics and privacy controls</td><td>Subscription-specific complex workflows</td></tr>
+      <tr><td>HPOS support, realtime and connection logs</td><td>Multisite central management and full analytics</td></tr>
+    </table>
+  </section>
+
+  <!-- 7. TECH STACK -->
+  <section id="stack">
+    <div class="section-num">07 · Technology Stack</div>
+    <h2 class="section-title">What It's Built With</h2>
+    <table>
+      <tr><th>Layer</th><th>Choice</th></tr>
+      <tr><td>Plugin core</td><td class="hl">PHP 8.3+</td></tr>
+      <tr><td>Admin UI</td><td class="hl">TypeScript + React</td></tr>
+      <tr><td>Customer widget</td><td class="hl">TypeScript Web Component (Shadow DOM)</td></tr>
+      <tr><td>WooCommerce data access</td><td class="hl">WooCommerce CRUD APIs, HPOS-compatible</td></tr>
+      <tr><td>Background jobs (WP side)</td><td class="hl">WooCommerce Action Scheduler</td></tr>
+      <tr><td>Backend API</td><td class="hl">Laravel on PHP 8.3+</td></tr>
+      <tr><td>Web dashboard</td><td class="hl">Vue + TypeScript</td></tr>
+      <tr><td>Cache</td><td class="hl">Redis</td></tr>
+      <tr><td>Queues</td><td class="hl">Redis Queue + Laravel Horizon</td></tr>
+      <tr><td>Realtime</td><td class="hl">Laravel Reverb / WebSocket</td></tr>
+      <tr><td>Files</td><td class="hl">S3-compatible object storage, short-lived signed URLs</td></tr>
+    </table>
+  </section>
+
+  <!-- 8. TESTING & GATES -->
+  <section id="gates">
+    <div class="section-num">08 · Testing &amp; Stop-Ship Gates</div>
+    <h2 class="section-title">Nothing Ships If...</h2>
+    <ul class="plain">
+      <li>A known critical/high vulnerability remains unresolved</li>
+      <li>Any cross-tenant, cross-site, or ownership isolation test fails</li>
+      <li>Replay protection, signature validation, or token revocation fails</li>
+      <li>HPOS compatibility fails, or checkout performance regresses</li>
+      <li>Plugin activation throws a fatal error</li>
+      <li>Secrets appear in browser output or logs</li>
+      <li>Duplicate refund or order action is possible</li>
+      <li>A SupportApp outage can permanently lose a customer message</li>
+    </ul>
+  </section>
+
+  <!-- 9. WHY WINS -->
+  <section id="why">
+    <div class="section-num">09 · Why This Architecture Wins</div>
+    <h2 class="section-title">The Bet We're Making</h2>
+    <ul class="plain">
+      <li>Storefront and checkout performance stay protected</li>
+      <li>Plugin conflicts and database growth stay low</li>
+      <li>Security surface and remote permissions stay small</li>
+      <li>SaaS recurring revenue and multi-store agency plans become possible</li>
+      <li>Mobile app and realtime inbox naturally share the same backend</li>
+      <li>Future EDD, Freemius and other commerce integrations can follow the same connector model</li>
+    </ul>
+  </section>
+
+</div>
+
+<footer>
+  SupportApp Desk — Product Architecture &amp; Development Roadmap · Prepared by Manzurul Islam · 19–20 July 2026<br>
+  Market and competitor figures compiled from public sources current as of July 2026 — verify against latest official documentation before each milestone.
+</footer>
+
+</body>
+</html>

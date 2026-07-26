@@ -1,7 +1,7 @@
 <?php
 /**
  * Plugin Name:       Deskovi
- * Description:       Connect your WooCommerce store to Deskovi for helpdesk tickets, order context, and a customer chat widget.
+ * Description:       A local WooCommerce helpdesk: support tickets, order context for agents, and an optional customer chat widget.
  * Version:           1.0.0
  * Requires at least: 6.0
  * Requires PHP:      7.4
@@ -54,6 +54,11 @@ register_activation_hook(
 			require_once ITSDESK_PATH . 'includes/Admin/Capabilities.php';
 		}
 		\Itsdesk\Admin\Capabilities::activate();
+
+		if ( ! class_exists( \Itsdesk\Tickets\Schema::class ) ) {
+			require_once ITSDESK_PATH . 'includes/Tickets/Schema.php';
+		}
+		\Itsdesk\Tickets\Schema::install();
 	}
 );
 

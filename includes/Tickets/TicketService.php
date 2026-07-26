@@ -10,8 +10,9 @@ namespace Itsdesk\Tickets;
 
 defined( 'ABSPATH' ) || exit;
 
+use Itsdesk\Admin\Capabilities;
 use Itsdesk\Auth\GuestSession;
-use Itsdesk\Connection\ActivityLogger;
+use Itsdesk\Diagnostics\ActivityLogger;
 use Itsdesk\Orders\OrderContext;
 
 /**
@@ -20,15 +21,13 @@ use Itsdesk\Orders\OrderContext;
 final class TicketService {
 
 	private TicketRepository $repo;
-	private OutboundSync $sync;
 	private ActivityLogger $logger;
 
 	/**
 	 * Constructor.
 	 */
-	public function __construct( ?TicketRepository $repo = null, ?OutboundSync $sync = null ) {
+	public function __construct( ?TicketRepository $repo = null ) {
 		$this->repo   = $repo ?? new TicketRepository();
-		$this->sync   = $sync ?? new OutboundSync();
 		$this->logger = new ActivityLogger();
 	}
 
@@ -45,7 +44,7 @@ final class TicketService {
 				return strcmp( (string) ( $b['updated_at'] ?? '' ), (string) ( $a['updated_at'] ?? '' ) );
 			}
 		);
-		return $tickets;
+		return array_map( array( $this, 'add_agent_name' ), $tickets );
 	}
 
 	/**
@@ -249,7 +248,6 @@ final class TicketService {
 
 		$ticket = array(
 			'id'                     => $ticket_id,
-			'remote_id'              => null,
 			'status'                 => 'open',
 			'category'               => $category,
 			'subject'                => $subject,
@@ -259,8 +257,6 @@ final class TicketService {
 			'customer_user_id'       => $user_id,
 			'customer_email'         => $email,
 			'customer_name'          => $name,
-			'saas_url'               => null,
-			'sync_status'            => 'pending',
 			'idempotency_key'        => $idempotency,
 			'customer_last_read_at'  => $now,
 			'agent_last_reply_at'    => null,
@@ -287,8 +283,6 @@ final class TicketService {
 			),
 			'OK'
 		);
-
-		$this->sync->enqueue_create( $ticket_id );
 
 		return $ticket;
 	}
@@ -345,7 +339,6 @@ final class TicketService {
 
 		$this->repo->save( $ticket );
 		$this->logger->log( 'Ticket', __( 'Reply added to ticket', 'deskovi' ), 'OK' );
-		$this->sync->enqueue_message( $ticket_id, $msg_id );
 
 		return $this->decorate_ticket( $ticket );
 	}
@@ -353,10 +346,9 @@ final class TicketService {
 	/**
 	 * Update status (admin).
 	 *
-	 * @param string $source local|saas — saas skips outbound re-sync.
 	 * @return array<string, mixed>|\WP_Error
 	 */
-	public function update_status( string $ticket_id, string $status, string $source = 'local' ) {
+	public function update_status( string $ticket_id, string $status ) {
 		$allowed = array( 'open', 'pending', 'resolved', 'closed' );
 		$status  = sanitize_key( $status );
 		if ( ! in_array( $status, $allowed, true ) ) {
@@ -380,10 +372,6 @@ final class TicketService {
 		$ticket['updated_at'] = gmdate( 'c' );
 		$this->repo->save( $ticket );
 
-		if ( 'saas' !== $source ) {
-			$this->sync->enqueue_status( $ticket_id );
-		}
-
 		$this->logger->log(
 			'Ticket',
 			sprintf(
@@ -398,134 +386,11 @@ final class TicketService {
 	}
 
 	/**
-	 * Apply SaaS agent message to local bridge ticket.
-	 *
-	 * @param array<string, mixed> $payload Inbound event payload.
-	 * @return array<string, mixed>|\WP_Error
-	 */
-	public function apply_saas_message( array $payload ) {
-		$ticket_meta = isset( $payload['ticket'] ) && is_array( $payload['ticket'] ) ? $payload['ticket'] : array();
-		$message     = isset( $payload['message'] ) && is_array( $payload['message'] ) ? $payload['message'] : array();
-
-		$ticket = $this->find_for_saas( $ticket_meta );
-		if ( is_wp_error( $ticket ) ) {
-			return $ticket;
-		}
-
-		$remote_msg = (string) ( $message['remote_id'] ?? '' );
-		if ( '' !== $remote_msg ) {
-			foreach ( $ticket['messages'] ?? array() as $existing ) {
-				if ( ! is_array( $existing ) ) {
-					continue;
-				}
-				if ( ( $existing['remote_id'] ?? '' ) === $remote_msg || ( $existing['id'] ?? '' ) === $remote_msg ) {
-					return $this->decorate_ticket( $ticket );
-				}
-			}
-		}
-
-		$internal = ! empty( $message['internal'] );
-		$now      = (string) ( $message['created_at'] ?? gmdate( 'c' ) );
-		$msg_id   = '' !== $remote_msg ? $remote_msg : ( 'msg_' . wp_generate_uuid4() );
-
-		$entry = array(
-			'id'         => $msg_id,
-			'remote_id'  => $remote_msg !== '' ? $remote_msg : null,
-			'author'     => (string) ( $message['author'] ?? 'agent' ),
-			'body'       => sanitize_textarea_field( (string) ( $message['body'] ?? '' ) ),
-			'internal'   => $internal,
-			'created_at' => $now,
-			'attachments'=> array(),
-		);
-
-		if ( ! empty( $message['attachments'] ) && is_array( $message['attachments'] ) ) {
-			foreach ( $message['attachments'] as $att ) {
-				if ( ! is_array( $att ) ) {
-					continue;
-				}
-				$entry['attachments'][] = array(
-					'id'       => (string) ( $att['id'] ?? '' ),
-					'filename' => sanitize_file_name( (string) ( $att['filename'] ?? 'file' ) ),
-					'mime'     => sanitize_text_field( (string) ( $att['mime'] ?? '' ) ),
-					'size'     => (int) ( $att['size'] ?? 0 ),
-					'url'      => esc_url_raw( (string) ( $att['url'] ?? '' ) ),
-				);
-			}
-		}
-
-		if ( '' === $entry['body'] && empty( $entry['attachments'] ) ) {
-			return new \WP_Error( 'itsdesk_inbound_empty', __( 'Empty inbound message.', 'deskovi' ), array( 'status' => 400 ) );
-		}
-
-		$ticket['messages'][] = $entry;
-		$ticket['updated_at'] = gmdate( 'c' );
-		if ( ! empty( $ticket_meta['remote_id'] ) ) {
-			$ticket['remote_id'] = (string) $ticket_meta['remote_id'];
-		}
-		if ( ! $internal && 'agent' === $entry['author'] ) {
-			$ticket['agent_last_reply_at'] = $now;
-			if ( 'open' === ( $ticket['status'] ?? '' ) ) {
-				$ticket['status'] = 'pending';
-			}
-		}
-
-		$this->repo->save( $ticket );
-		return $this->decorate_ticket( $ticket );
-	}
-
-	/**
-	 * Apply SaaS status without outbound loop.
-	 *
-	 * @param array<string, mixed> $payload Inbound event.
-	 * @return array<string, mixed>|\WP_Error
-	 */
-	public function apply_saas_status( array $payload ) {
-		$ticket_meta = isset( $payload['ticket'] ) && is_array( $payload['ticket'] ) ? $payload['ticket'] : array();
-		$ticket      = $this->find_for_saas( $ticket_meta );
-		if ( is_wp_error( $ticket ) ) {
-			return $ticket;
-		}
-
-		$status = (string) ( $ticket_meta['status'] ?? '' );
-		return $this->update_status( (string) $ticket['id'], $status, 'saas' );
-	}
-
-	/**
-	 * @param array<string, mixed> $ticket_meta Ticket refs from SaaS.
-	 * @return array<string, mixed>|\WP_Error
-	 */
-	private function find_for_saas( array $ticket_meta ) {
-		$local  = (string) ( $ticket_meta['local_ticket_id'] ?? '' );
-		$remote = (string) ( $ticket_meta['remote_id'] ?? '' );
-
-		if ( '' !== $local ) {
-			$ticket = $this->repo->find( $local );
-			if ( null !== $ticket ) {
-				return $ticket;
-			}
-		}
-
-		if ( '' !== $remote ) {
-			foreach ( $this->repo->all() as $ticket ) {
-				if ( (string) ( $ticket['remote_id'] ?? '' ) === $remote ) {
-					return $ticket;
-				}
-			}
-		}
-
-		return new \WP_Error(
-			'itsdesk_ticket_not_found',
-			__( 'Ticket not found for inbound event.', 'deskovi' ),
-			array( 'status' => 404 )
-		);
-	}
-
-	/**
-	 * Re-queue outbound create sync (failed / pending tickets).
+	 * Assign (or unassign) a ticket to a support agent (admin).
 	 *
 	 * @return array<string, mixed>|\WP_Error
 	 */
-	public function retry_sync( string $ticket_id ) {
+	public function assign( string $ticket_id, ?int $agent_id ) {
 		$ticket = $this->repo->find( $ticket_id );
 		if ( null === $ticket ) {
 			return new \WP_Error(
@@ -535,14 +400,34 @@ final class TicketService {
 			);
 		}
 
-		$ticket['sync_status'] = 'pending';
-		$ticket['updated_at']  = gmdate( 'c' );
+		if ( null === $agent_id || $agent_id <= 0 ) {
+			$ticket['assigned_agent_id'] = null;
+			$ticket['updated_at']        = gmdate( 'c' );
+			$this->repo->save( $ticket );
+			$this->logger->log( 'Ticket', __( 'Ticket unassigned', 'deskovi' ), 'OK' );
+			return $ticket;
+		}
+
+		$agent = get_userdata( $agent_id );
+		if ( ! $agent || ! $agent->has_cap( Capabilities::CAP ) ) {
+			return new \WP_Error(
+				'itsdesk_assign_invalid_agent',
+				__( 'That user is not a support agent.', 'deskovi' ),
+				array( 'status' => 400 )
+			);
+		}
+
+		$ticket['assigned_agent_id'] = $agent_id;
+		$ticket['updated_at']        = gmdate( 'c' );
 		$this->repo->save( $ticket );
-		$this->sync->enqueue_create( $ticket_id );
 
 		$this->logger->log(
 			'Ticket',
-			__( 'Outbound sync retry queued', 'deskovi' ),
+			sprintf(
+				/* translators: %s: agent display name */
+				__( 'Ticket assigned to %s', 'deskovi' ),
+				$agent->display_name
+			),
 			'OK'
 		);
 
@@ -571,7 +456,6 @@ final class TicketService {
 			$ticket['order_snapshot'] = null;
 			$ticket['updated_at']     = gmdate( 'c' );
 			$this->repo->save( $ticket );
-			$this->sync->enqueue_create( $ticket_id );
 			$this->logger->log( 'Ticket', __( 'Order unlinked from ticket', 'deskovi' ), 'OK' );
 			return $ticket;
 		}
@@ -590,7 +474,6 @@ final class TicketService {
 		$ticket['order_snapshot'] = $snap;
 		$ticket['updated_at']     = gmdate( 'c' );
 		$this->repo->save( $ticket );
-		$this->sync->enqueue_create( $ticket_id );
 
 		$this->logger->log(
 			'Ticket',
@@ -669,6 +552,23 @@ final class TicketService {
 		$read  = (string) ( $ticket['customer_last_read_at'] ?? '' );
 		$agent = (string) ( $ticket['agent_last_reply_at'] ?? '' );
 		$ticket['unread'] = ( '' !== $agent && ( '' === $read || strcmp( $agent, $read ) > 0 ) );
+		return $this->add_agent_name( $ticket );
+	}
+
+	/**
+	 * Add the assigned agent's display name for convenience in API responses.
+	 *
+	 * @param array<string, mixed> $ticket Ticket.
+	 * @return array<string, mixed>
+	 */
+	private function add_agent_name( array $ticket ): array {
+		$agent_id = ! empty( $ticket['assigned_agent_id'] ) ? (int) $ticket['assigned_agent_id'] : 0;
+		if ( $agent_id <= 0 ) {
+			$ticket['assigned_agent_name'] = null;
+			return $ticket;
+		}
+		$agent                          = get_userdata( $agent_id );
+		$ticket['assigned_agent_name']  = $agent ? $agent->display_name : null;
 		return $ticket;
 	}
 }

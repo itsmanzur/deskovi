@@ -146,19 +146,7 @@ export function PrivacyScreen( { initial, onSaved, onError }: Props ) {
 					<strong>{ __( 'WordPress privacy tools', 'deskovi' ) }</strong>
 					<p>
 						{ __(
-							'Deskovi registers a privacy-policy suggestion and local ticket export/erase under Tools → Export/Erase Personal Data. Remote SaaS deletion stays disabled until the cloud connection can fulfill it.',
-							'deskovi'
-						) }
-					</p>
-				</div>
-			</div>
-
-			<div className="itsdesk-health itsdesk-health--warn">
-				<div>
-					<strong>{ __( 'Remote SaaS deletion', 'deskovi' ) }</strong>
-					<p>
-						{ __(
-							'Requesting deletion from Deskovi cloud requires a live SaaS connection (later). Local bridge tickets can already be erased via WordPress privacy tools.',
+							'Deskovi registers a privacy-policy suggestion and ticket export/erase under Tools → Export/Erase Personal Data.',
 							'deskovi'
 						) }
 					</p>

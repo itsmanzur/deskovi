@@ -28,7 +28,6 @@ final class EnvironmentReport {
 
 		$theme   = wp_get_theme();
 		$privacy = ( new PrivacySettings() )->get();
-		$as_ok   = function_exists( 'as_enqueue_async_action' );
 
 		return array(
 			'wordpress'   => (string) $wp_version,
@@ -53,19 +52,9 @@ final class EnvironmentReport {
 					'status' => 'ok',
 				),
 				array(
-					'name'   => 'Checkout blocking remote calls',
-					'value'  => 'Guarded — live transports refuse cart/checkout; widget skips checkout',
-					'status' => 'pass',
-				),
-				array(
 					'name'   => 'Widget on checkout',
 					'value'  => 'Skipped by Frontend::should_load',
 					'status' => class_exists( WidgetFrontend::class ) ? 'pass' : 'fail',
-				),
-				array(
-					'name'   => 'Action Scheduler',
-					'value'  => $as_ok ? 'Available' : 'Missing (mock may run inline)',
-					'status' => $as_ok ? 'pass' : 'info',
 				),
 				array(
 					'name'   => 'Diagnostics consent',
@@ -96,16 +85,11 @@ final class EnvironmentReport {
 	}
 
 	/**
-	 * Limited sanitized diagnostic lines (no full logs).
+	 * No sanitized diagnostic errors are tracked locally (no outbound sync layer).
 	 *
 	 * @return array<int, array<string, string>>
 	 */
 	private function recent_errors(): array {
-		$stored = get_option( Ops::ERRORS_OPTION, array() );
-		if ( ! is_array( $stored ) ) {
-			return array();
-		}
-
-		return array_slice( $stored, 0, 10 );
+		return array();
 	}
 }

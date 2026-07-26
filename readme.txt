@@ -8,23 +8,22 @@ Stable tag: 1.0.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
-Connect your WooCommerce store to Deskovi for helpdesk tickets, order context, and a customer chat widget.
+A lightweight WooCommerce helpdesk: tickets, order context for agents, and an optional customer chat widget — all stored locally on your site.
 
 == Description ==
 
-Deskovi is a WooCommerce connector that links your store to the Deskovi helpdesk cloud so you can manage customer support from one place.
+Deskovi adds a self-contained support ticket system to your WooCommerce store. Customers can open tickets (logged in or as a verified guest), agents reply from a dashboard inside wp-admin, and every ticket can be linked to the relevant order automatically.
 
 **Features**
 
-* One-click style connection with a short-lived connect code from your Deskovi workspace
-* Ticket bridge between WordPress and Deskovi (create, reply, status updates)
+* Ticket system with replies, status (open/pending/resolved/closed), and file attachments
 * WooCommerce order context for agents (HPOS-compatible)
 * Optional customer chat widget on the storefront
 * Guest email OTP verification for visitors who are not logged in
 * Privacy export and erase hooks for WordPress Tools → Export / Erase Personal Data
-* Diagnostics screen for connection health
+* Admin diagnostics and activity log
 
-By default the plugin runs in a **local mock** connection mode so you can explore the admin UI without contacting any remote service. Connecting to Deskovi cloud is optional and merchant-initiated.
+All data — tickets, messages, and attachments — is stored in your own WordPress database. Deskovi does not require an external account or send data to any third-party service.
 
 **Requires** [WooCommerce](https://wordpress.org/plugins/woocommerce/).
 
@@ -33,14 +32,13 @@ By default the plugin runs in a **local mock** connection mode so you can explor
 1. Install and activate [WooCommerce](https://wordpress.org/plugins/woocommerce/) if it is not already active.
 2. Upload the `deskovi` folder to `/wp-content/plugins/`, or install the zip via Plugins → Add New → Upload Plugin.
 3. Activate **Deskovi** through the Plugins menu.
-4. Open **Deskovi** in the WordPress admin.
-5. (Optional) In your Deskovi workspace, generate a connect code and paste it on the Connection screen to link this store to Deskovi cloud.
+4. Open **Deskovi** in the WordPress admin to configure the widget and privacy settings.
 
 == Frequently Asked Questions ==
 
 = Does this plugin require an account? =
 
-You can activate the plugin and use mock/local tooling without a Deskovi account. Connecting to Deskovi cloud requires a Deskovi workspace and is optional.
+No. Deskovi runs entirely on your own site and does not require signing up for any external service.
 
 = Does it work without WooCommerce? =
 
@@ -48,7 +46,7 @@ No. WooCommerce must be installed and active. Deskovi will not load its features
 
 = Where is customer data stored? =
 
-Ticket and connection data used by the connector are stored in your WordPress database. When you connect to Deskovi cloud, selected ticket and order context is also sent to Deskovi (see External services).
+All ticket, message, and attachment data is stored in your own WordPress database (custom tables). Nothing is sent off-site.
 
 = How do I remove the chat widget? =
 
@@ -58,35 +56,28 @@ Disable the widget from the Deskovi admin settings. When the widget is off, stor
 
 Deskovi hooks into WordPress personal data export and erase tools so ticket-related personal data can be included when a user requests export or erasure.
 
-== External services ==
+= Are file attachments secure? =
 
-This plugin can connect your store to the **Deskovi** cloud service at `https://app.deskovi.com`.
+Yes. Uploaded files are stored outside direct web access and are only ever served through an authenticated request that checks the requester actually owns the related ticket.
 
-**When connected (merchant-initiated):**
+== Source Code ==
 
-* Your site URL, a public connection identifier, and signed ticket / order context may be sent to Deskovi so agents can support customers.
-* Deskovi may deliver agent replies and status updates back to your site over HTTPS using a delivery secret established at connect time.
-* The connection is started only when you enter a connect code from your Deskovi workspace. Mock mode does not call Deskovi.
+This plugin's admin dashboard and customer widget are built from TypeScript/React source using @wordpress/scripts (webpack). The compiled, minified files shipped in assets/admin and assets/widget are generated from this source.
 
-**When not connected:**
-
-* The plugin does not contact `https://app.deskovi.com`.
-
-Service homepage: [https://deskovi.com](https://deskovi.com)
-Terms and privacy for the cloud product are published on the Deskovi website. For WordPress site privacy, use **Settings → Privacy** and the export/erase tools under **Tools**.
+Full source, build tooling, and build instructions (npm install && npm run build) are publicly available at:
+https://github.com/itsmanzur/deskovi
 
 == Screenshots ==
 
-1. Connection screen — link your store with a Deskovi connect code
-2. Tickets — bridge tickets and conversation history
-3. Customer widget — optional storefront chat for shoppers
+1. Tickets — manage tickets and conversation history from wp-admin
+2. Customer widget — optional storefront chat for shoppers
 
 == Changelog ==
 
 = 1.0.0 =
-* Initial public release of the Deskovi WooCommerce connector
-* Connection flow (mock by default; optional Deskovi cloud connect)
-* Ticket bridge with order context (HPOS-aware)
+* Initial public release
+* Local ticket system with order context (HPOS-aware)
+* File attachments
 * Optional customer chat widget and guest OTP
 * Privacy export / erase integration
 * Admin diagnostics

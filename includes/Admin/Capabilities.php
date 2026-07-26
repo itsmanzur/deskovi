@@ -18,6 +18,8 @@ final class Capabilities {
 
 	public const CAP = 'manage_itsdesk';
 
+	public const AGENT_ROLE = 'itsdesk_agent';
+
 	/**
 	 * Register hooks.
 	 */
@@ -30,6 +32,7 @@ final class Capabilities {
 	 */
 	public static function activate(): void {
 		self::grant();
+		self::register_agent_role();
 	}
 
 	/**
@@ -37,6 +40,7 @@ final class Capabilities {
 	 */
 	public function ensure_caps(): void {
 		self::grant();
+		self::register_agent_role();
 	}
 
 	/**
@@ -48,6 +52,28 @@ final class Capabilities {
 			if ( $role && ! $role->has_cap( self::CAP ) ) {
 				$role->add_cap( self::CAP );
 			}
+		}
+	}
+
+	/**
+	 * Register the support-agent role: ticket management only, no store/site admin.
+	 */
+	private static function register_agent_role(): void {
+		$role = get_role( self::AGENT_ROLE );
+		if ( ! $role ) {
+			add_role(
+				self::AGENT_ROLE,
+				__( 'Support Agent', 'deskovi' ),
+				array(
+					'read'    => true,
+					self::CAP => true,
+				)
+			);
+			return;
+		}
+
+		if ( ! $role->has_cap( self::CAP ) ) {
+			$role->add_cap( self::CAP );
 		}
 	}
 }

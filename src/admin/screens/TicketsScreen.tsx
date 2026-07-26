@@ -1,19 +1,22 @@
-import { useCallback, useEffect, useState } from '@wordpress/element';
+import { useCallback, useEffect, useMemo, useState } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 import {
 	apiErrorMessage,
+	assignTicket,
 	createTicket,
+	fetchAgents,
 	fetchTicket,
 	fetchTicketCategories,
 	fetchTicketOrder,
 	fetchTickets,
 	linkTicketOrder,
 	replyTicket,
-	retryTicketSync,
 	updateTicketStatus,
 } from '../api';
 import { SkeletonPanel } from '../components/Skeleton';
-import type { OrderSnapshot, Ticket, TicketCategory } from '../types';
+import type { Agent, OrderSnapshot, Ticket, TicketCategory } from '../types';
+
+type AssigneeFilter = 'all' | 'unassigned' | 'mine';
 
 type Props = {
 	onToast: ( message: string, tone?: 'ok' | 'danger' ) => void;
@@ -30,16 +33,6 @@ function statusTone( status: string ): string {
 		return 'ok';
 	}
 	return 'neutral';
-}
-
-function syncTone( sync: string ): string {
-	if ( sync === 'synced' ) {
-		return 'ok';
-	}
-	if ( sync === 'failed' ) {
-		return 'danger';
-	}
-	return 'warn';
 }
 
 function formatWhen( value: string ): string {
@@ -66,11 +59,15 @@ function labelStatus( value: string ): string {
 export function TicketsScreen( { onToast }: Props ) {
 	const [ tickets, setTickets ] = useState< Ticket[] >( [] );
 	const [ categories, setCategories ] = useState< TicketCategory[] >( [] );
+	const [ agents, setAgents ] = useState< Agent[] >( [] );
+	const [ assigneeFilter, setAssigneeFilter ] = useState< AssigneeFilter >( 'all' );
 	const [ selectedId, setSelectedId ] = useState< string | null >( null );
 	const [ selected, setSelected ] = useState< Ticket | null >( null );
 	const [ loading, setLoading ] = useState( true );
 	const [ busy, setBusy ] = useState( false );
 	const [ showCreate, setShowCreate ] = useState( false );
+
+	const currentUserId = window.itsdeskAdmin?.currentUserId ?? 0;
 
 	const [ subject, setSubject ] = useState( '' );
 	const [ body, setBody ] = useState( '' );
@@ -85,10 +82,11 @@ export function TicketsScreen( { onToast }: Props ) {
 
 	const loadList = useCallback( () => {
 		setLoading( true );
-		Promise.all( [ fetchTickets(), fetchTicketCategories() ] )
-			.then( ( [ ticketRes, catRes ] ) => {
+		Promise.all( [ fetchTickets(), fetchTicketCategories(), fetchAgents() ] )
+			.then( ( [ ticketRes, catRes, agentRes ] ) => {
 				setTickets( ticketRes.tickets || [] );
 				setCategories( catRes.categories || [] );
+				setAgents( agentRes.agents || [] );
 				if ( catRes.categories?.[ 0 ] && ! category ) {
 					setCategory( catRes.categories[ 0 ].id );
 				}
@@ -99,6 +97,16 @@ export function TicketsScreen( { onToast }: Props ) {
 				setLoading( false );
 			} );
 	}, [ category, onToast ] );
+
+	const visibleTickets = useMemo( () => {
+		if ( assigneeFilter === 'unassigned' ) {
+			return tickets.filter( ( t ) => ! t.assigned_agent_id );
+		}
+		if ( assigneeFilter === 'mine' ) {
+			return tickets.filter( ( t ) => t.assigned_agent_id === currentUserId );
+		}
+		return tickets;
+	}, [ tickets, assigneeFilter, currentUserId ] );
 
 	useEffect( () => {
 		loadList();
@@ -226,6 +234,24 @@ export function TicketsScreen( { onToast }: Props ) {
 			} );
 	};
 
+	const onAssign = ( agentId: number | null ) => {
+		if ( ! selected ) {
+			return;
+		}
+		setBusy( true );
+		assignTicket( selected.id, agentId )
+			.then( ( ticket ) => {
+				setSelected( ticket );
+				setBusy( false );
+				onToast( __( 'Assignment updated.', 'deskovi' ) );
+				loadList();
+			} )
+			.catch( ( err: unknown ) => {
+				onToast( apiErrorMessage( err ), 'danger' );
+				setBusy( false );
+			} );
+	};
+
 	const onStatus = ( status: string ) => {
 		if ( ! selected ) {
 			return;
@@ -255,7 +281,7 @@ export function TicketsScreen( { onToast }: Props ) {
 					<h2>{ __( 'Tickets', 'deskovi' ) }</h2>
 					<p className="itsdesk-admin__muted">
 						{ __(
-							'Ticket bridge cache — conversations sync outbound to Deskovi SaaS (mock). Customer REST is available for logged-in shoppers.',
+							'Tickets are created, replied to, and stored locally in your WordPress database.',
 							'deskovi'
 						) }
 					</p>
@@ -282,14 +308,38 @@ export function TicketsScreen( { onToast }: Props ) {
 				</button>
 			</div>
 
+			<div className="itsdesk-admin__actions">
+				{ (
+					[
+						[ 'all', __( 'All', 'deskovi' ) ],
+						[ 'unassigned', __( 'Unassigned', 'deskovi' ) ],
+						[ 'mine', __( 'Assigned to me', 'deskovi' ) ],
+					] as Array< [ AssigneeFilter, string ] >
+				).map( ( [ value, label ] ) => (
+					<button
+						key={ value }
+						type="button"
+						className={
+							'itsdesk-btn' +
+							( assigneeFilter === value
+								? ' itsdesk-btn--primary'
+								: ' itsdesk-btn--secondary' )
+						}
+						onClick={ () => setAssigneeFilter( value ) }
+					>
+						{ label }
+					</button>
+				) ) }
+			</div>
+
 			<div className="itsdesk-tickets">
 				<aside className="itsdesk-tickets__list">
-					{ tickets.length === 0 ? (
+					{ visibleTickets.length === 0 ? (
 						<p className="itsdesk-admin__muted">
 							{ __( 'No tickets yet. Create one to test the bridge.', 'deskovi' ) }
 						</p>
 					) : (
-						tickets.map( ( t ) => (
+						visibleTickets.map( ( t ) => (
 							<button
 								key={ t.id }
 								type="button"
@@ -313,14 +363,9 @@ export function TicketsScreen( { onToast }: Props ) {
 								</div>
 								<div className="itsdesk-ticket-row__meta">
 									<span>{ t.customer_name || t.customer_email || '—' }</span>
-									<span
-										className={
-											'itsdesk-badge itsdesk-badge--' +
-											syncTone( t.sync_status )
-										}
-									>
-										<span className="itsdesk-badge__dot" />
-										{ labelStatus( t.sync_status ) }
+									<span className="itsdesk-badge itsdesk-badge--neutral">
+										{ t.assigned_agent_name ||
+											__( 'Unassigned', 'deskovi' ) }
 									</span>
 								</div>
 							</button>
@@ -449,63 +494,6 @@ export function TicketsScreen( { onToast }: Props ) {
 								{ ' · ' }
 								{ labelStatus( selected.category ) }
 							</p>
-							<p className="itsdesk-admin__muted">
-								{ __( 'Bridge sync', 'deskovi' ) }:{ ' ' }
-								{ labelStatus( selected.sync_status ) }
-								{ selected.remote_id
-									? ` · ${ selected.remote_id }`
-									: '' }
-								{ selected.sync_status === 'synced' &&
-									' · ' + __( 'outbound OK', 'deskovi' ) }
-							</p>
-							{ ( selected.sync_status === 'failed' ||
-								selected.sync_status === 'pending' ) && (
-								<button
-									type="button"
-									className="itsdesk-btn itsdesk-btn--secondary"
-									disabled={ busy }
-									style={ { marginBottom: 8 } }
-									onClick={ () => {
-										setBusy( true );
-										retryTicketSync( selected.id )
-											.then( ( t ) => {
-												setSelected( t );
-												setTickets( ( prev ) =>
-													prev.map( ( row ) =>
-														row.id === t.id ? t : row
-													)
-												);
-												onToast(
-													__(
-														'Sync retry queued.',
-														'deskovi'
-													)
-												);
-												setBusy( false );
-											} )
-											.catch( ( err: unknown ) => {
-												onToast(
-													apiErrorMessage( err ),
-													'danger'
-												);
-												setBusy( false );
-											} );
-									} }
-								>
-									{ __( 'Retry sync', 'deskovi' ) }
-								</button>
-							) }
-							{ selected.saas_url && (
-								<p>
-									<a
-										href={ selected.saas_url }
-										target="_blank"
-										rel="noopener noreferrer"
-									>
-										{ __( 'Open mock SaaS deep link', 'deskovi' ) }
-									</a>
-								</p>
-							) }
 
 							<div className="itsdesk-card" style={ { marginTop: 14 } }>
 								<div className="itsdesk-card__head">
@@ -671,6 +659,31 @@ export function TicketsScreen( { onToast }: Props ) {
 										</div>
 									</>
 								) }
+							</div>
+
+							<div className="itsdesk-field" style={ { marginTop: 14 } }>
+								<label htmlFor="itsdesk-tkt-assignee">
+									{ __( 'Assigned to', 'deskovi' ) }
+								</label>
+								<select
+									id="itsdesk-tkt-assignee"
+									className="itsdesk-select"
+									value={ selected.assigned_agent_id ?? '' }
+									disabled={ busy }
+									onChange={ ( e ) => {
+										const value = ( e.target as HTMLSelectElement ).value;
+										onAssign( value ? parseInt( value, 10 ) : null );
+									} }
+								>
+									<option value="">
+										{ __( 'Unassigned', 'deskovi' ) }
+									</option>
+									{ agents.map( ( a ) => (
+										<option key={ a.id } value={ a.id }>
+											{ a.name }
+										</option>
+									) ) }
+								</select>
 							</div>
 
 							<div className="itsdesk-admin__actions">

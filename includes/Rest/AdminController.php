@@ -10,11 +10,9 @@ namespace Itsdesk\Rest;
 
 defined( 'ABSPATH' ) || exit;
 
-use Itsdesk\Connection\ConnectionManager;
-use Itsdesk\Connection\ConnectionStatus;
+use Itsdesk\Diagnostics\ActivityLogger;
 use Itsdesk\Diagnostics\EnvironmentReport;
 use Itsdesk\Privacy\Settings as PrivacySettings;
-use Itsdesk\Queue\Status as QueueStatus;
 use Itsdesk\Widget\Settings as WidgetSettings;
 use WP_Error;
 use WP_REST_Request;
@@ -46,66 +44,6 @@ final class AdminController {
 			array(
 				'methods'             => WP_REST_Server::READABLE,
 				'callback'            => array( $this, 'get_overview' ),
-				'permission_callback' => array( $this, 'can_manage' ),
-			)
-		);
-
-		register_rest_route(
-			self::REST_NAMESPACE,
-			'/connection',
-			array(
-				'methods'             => WP_REST_Server::READABLE,
-				'callback'            => array( $this, 'get_connection' ),
-				'permission_callback' => array( $this, 'can_manage' ),
-			)
-		);
-
-		register_rest_route(
-			self::REST_NAMESPACE,
-			'/connection/start',
-			array(
-				'methods'             => WP_REST_Server::CREATABLE,
-				'callback'            => array( $this, 'start_connection' ),
-				'permission_callback' => array( $this, 'can_manage' ),
-			)
-		);
-
-		register_rest_route(
-			self::REST_NAMESPACE,
-			'/connection/complete',
-			array(
-				'methods'             => WP_REST_Server::CREATABLE,
-				'callback'            => array( $this, 'complete_connection' ),
-				'permission_callback' => array( $this, 'can_manage' ),
-			)
-		);
-
-		register_rest_route(
-			self::REST_NAMESPACE,
-			'/connection/test',
-			array(
-				'methods'             => WP_REST_Server::CREATABLE,
-				'callback'            => array( $this, 'test_connection' ),
-				'permission_callback' => array( $this, 'can_manage' ),
-			)
-		);
-
-		register_rest_route(
-			self::REST_NAMESPACE,
-			'/connection/rotate',
-			array(
-				'methods'             => WP_REST_Server::CREATABLE,
-				'callback'            => array( $this, 'rotate_connection' ),
-				'permission_callback' => array( $this, 'can_manage' ),
-			)
-		);
-
-		register_rest_route(
-			self::REST_NAMESPACE,
-			'/connection/disconnect',
-			array(
-				'methods'             => WP_REST_Server::CREATABLE,
-				'callback'            => array( $this, 'disconnect_connection' ),
 				'permission_callback' => array( $this, 'can_manage' ),
 			)
 		);
@@ -176,100 +114,16 @@ final class AdminController {
 	 * GET /overview
 	 */
 	public function get_overview(): WP_REST_Response {
-		$overview = ( new ConnectionStatus() )->overview();
-		$widget   = ( new WidgetSettings() )->get();
-		$privacy  = ( new PrivacySettings() )->get();
-		$manager  = new ConnectionManager();
+		$widget  = ( new WidgetSettings() )->get();
+		$privacy = ( new PrivacySettings() )->get();
 
 		return new WP_REST_Response(
 			array(
-				'connection'     => $manager->get_public_state(),
-				'queue_failures' => $overview['queue_failures'],
-				'queue_pending'  => $overview['queue_pending'],
-				'hpos_enabled'   => $overview['hpos_enabled'],
-				'widget'         => $widget,
-				'privacy'        => $privacy,
+				'widget'  => $widget,
+				'privacy' => $privacy,
 			),
 			200
 		);
-	}
-
-	/**
-	 * GET /connection
-	 */
-	public function get_connection(): WP_REST_Response {
-		return new WP_REST_Response( ( new ConnectionManager() )->get_public_state(), 200 );
-	}
-
-	/**
-	 * POST /connection/start
-	 *
-	 * @return WP_REST_Response|WP_Error
-	 */
-	public function start_connection() {
-		$result = ( new ConnectionManager() )->start();
-		if ( is_wp_error( $result ) ) {
-			return $result;
-		}
-
-		return new WP_REST_Response( $result, 200 );
-	}
-
-	/**
-	 * POST /connection/complete
-	 *
-	 * @param WP_REST_Request $request Request.
-	 * @return WP_REST_Response|WP_Error
-	 */
-	public function complete_connection( WP_REST_Request $request ) {
-		$result = ( new ConnectionManager() )->complete( $request->get_json_params() ?: array() );
-		if ( is_wp_error( $result ) ) {
-			return $result;
-		}
-
-		return new WP_REST_Response( $result, 200 );
-	}
-
-	/**
-	 * POST /connection/test
-	 *
-	 * @return WP_REST_Response|WP_Error
-	 */
-	public function test_connection() {
-		$result = ( new ConnectionManager() )->test();
-		if ( is_wp_error( $result ) ) {
-			return $result;
-		}
-
-		return new WP_REST_Response( $result, 200 );
-	}
-
-	/**
-	 * POST /connection/rotate
-	 *
-	 * @return WP_REST_Response|WP_Error
-	 */
-	public function rotate_connection() {
-		$result = ( new ConnectionManager() )->rotate();
-		if ( is_wp_error( $result ) ) {
-			return $result;
-		}
-
-		return new WP_REST_Response( $result, 200 );
-	}
-
-	/**
-	 * POST /connection/disconnect
-	 *
-	 * @return WP_REST_Response|WP_Error
-	 */
-	public function disconnect_connection() {
-		$result = ( new ConnectionManager() )->disconnect();
-		if ( is_wp_error( $result ) ) {
-			return $result;
-		}
-
-		return new WP_REST_Response( $result, 200 );
 	}
 
 	/**
@@ -327,12 +181,9 @@ final class AdminController {
 	 * GET /activity
 	 */
 	public function get_activity(): WP_REST_Response {
-		$queue = new QueueStatus();
-
 		return new WP_REST_Response(
 			array(
-				'summary'  => $queue->summary(),
-				'activity' => $queue->activity(),
+				'activity' => ( new ActivityLogger() )->recent(),
 			),
 			200
 		);

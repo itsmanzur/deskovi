@@ -10,7 +10,7 @@ namespace Itsdesk\Auth;
 
 defined( 'ABSPATH' ) || exit;
 
-use Itsdesk\Connection\ActivityLogger;
+use Itsdesk\Diagnostics\ActivityLogger;
 
 /**
  * Short-lived verified guest cookie for ticket bridge.

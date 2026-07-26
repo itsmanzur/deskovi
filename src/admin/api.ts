@@ -1,8 +1,7 @@
 import apiFetch from '@wordpress/api-fetch';
 import type {
 	ActivityData,
-	ConnectionStartResponse,
-	ConnectionState,
+	Agent,
 	DiagnosticsData,
 	OrderSnapshot,
 	OverviewData,
@@ -35,57 +34,6 @@ function apiErrorMessage( err: unknown ): string {
 
 export function fetchOverview(): Promise< OverviewData > {
 	return apiFetch( { path: `${ base }/overview` } );
-}
-
-export function fetchConnection(): Promise< ConnectionState > {
-	return apiFetch( { path: `${ base }/connection` } );
-}
-
-export function startConnection(): Promise< ConnectionStartResponse > {
-	return apiFetch( {
-		path: `${ base }/connection/start`,
-		method: 'POST',
-		data: {},
-	} );
-}
-
-export function completeConnection( data: {
-	state: string;
-	workspace_id: string;
-	code?: string;
-} ): Promise< ConnectionState > {
-	return apiFetch( {
-		path: `${ base }/connection/complete`,
-		method: 'POST',
-		data,
-	} );
-}
-
-export function testConnection(): Promise< {
-	result: { ok?: boolean; health?: string; latency_ms?: number };
-	connection: ConnectionState;
-} > {
-	return apiFetch( {
-		path: `${ base }/connection/test`,
-		method: 'POST',
-		data: {},
-	} );
-}
-
-export function rotateConnection(): Promise< ConnectionState > {
-	return apiFetch( {
-		path: `${ base }/connection/rotate`,
-		method: 'POST',
-		data: {},
-	} );
-}
-
-export function disconnectConnection(): Promise< ConnectionState > {
-	return apiFetch( {
-		path: `${ base }/connection/disconnect`,
-		method: 'POST',
-		data: {},
-	} );
 }
 
 export function fetchWidget(): Promise< WidgetSettings > {
@@ -165,11 +113,35 @@ export function updateTicketStatus( id: string, status: string ): Promise< Ticke
 	} );
 }
 
-export function retryTicketSync( id: string ): Promise< Ticket > {
+export function fetchAgents(): Promise< { agents: Agent[] } > {
+	return apiFetch( { path: `${ base }/agents` } );
+}
+
+export function assignTicket(
+	id: string,
+	agentId: number | null
+): Promise< Ticket > {
 	return apiFetch( {
-		path: `${ base }/tickets/${ id }/retry-sync`,
+		path: `${ base }/tickets/${ id }/assign`,
 		method: 'POST',
-		data: {},
+		data: { agent_id: agentId },
+	} );
+}
+
+export function uploadTicketAttachment(
+	id: string,
+	file: File,
+	messageId?: string
+): Promise< { id: string; ticket_id: string; message_id: string | null; filename: string; mime_type: string; size_bytes: number; created_at: string } > {
+	const formData = new FormData();
+	formData.append( 'file', file );
+	if ( messageId ) {
+		formData.append( 'message_id', messageId );
+	}
+	return apiFetch( {
+		path: `${ base }/tickets/${ id }/attachments`,
+		method: 'POST',
+		body: formData,
 	} );
 }
 
@@ -190,14 +162,6 @@ export function linkTicketOrder(
 
 export function fetchOrder( orderId: number ): Promise< OrderSnapshot > {
 	return apiFetch( { path: `${ base }/orders/${ orderId }` } );
-}
-
-export function saasUrl(): string {
-	return config?.saasUrl || 'https://app.deskovi.com';
-}
-
-export function connectionMode(): string {
-	return config?.connectionMode || 'mock';
 }
 
 export { apiErrorMessage };

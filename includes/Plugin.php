@@ -14,14 +14,12 @@ use Itsdesk\Admin\AdminAssets;
 use Itsdesk\Admin\AdminMenu;
 use Itsdesk\Admin\Capabilities;
 use Itsdesk\Compatibility\WooCommerce;
-use Itsdesk\Orders\OutboundOrderSync;
 use Itsdesk\Privacy\PersonalData;
 use Itsdesk\Rest\AdminController;
 use Itsdesk\Rest\GuestController;
 use Itsdesk\Rest\OrderController;
-use Itsdesk\Rest\SaasInboundController;
 use Itsdesk\Rest\TicketController;
-use Itsdesk\Tickets\OutboundSync;
+use Itsdesk\Tickets\Schema as TicketSchema;
 use Itsdesk\Widget\Frontend as WidgetFrontend;
 
 /**
@@ -55,6 +53,8 @@ final class Plugin {
 	 * Wire hooks.
 	 */
 	public function init(): void {
+		TicketSchema::maybe_install();
+
 		( new Capabilities() )->register();
 
 		$woocommerce = new WooCommerce();
@@ -70,9 +70,6 @@ final class Plugin {
 		( new TicketController() )->register();
 		( new OrderController() )->register();
 		( new GuestController() )->register();
-		( new SaasInboundController() )->register();
-		( new OutboundSync() )->register();
-		( new OutboundOrderSync() )->register();
 		( new WidgetFrontend() )->register();
 		( new PersonalData() )->register();
 	}

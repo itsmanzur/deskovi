@@ -1,11 +1,10 @@
 import { useCallback, useEffect, useState } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
-import { connectionMode, fetchOverview, saasUrl } from './api';
+import { fetchOverview } from './api';
 import { SkeletonPanel } from './components/Skeleton';
 import { Toast } from './components/Toast';
 import {
 	IconActivity,
-	IconLink,
 	IconMark,
 	IconOverview,
 	IconPulse,
@@ -14,15 +13,12 @@ import {
 	IconWidget,
 } from './components/Icons';
 import { ActivityScreen } from './screens/ActivityScreen';
-import { ConnectionScreen } from './screens/ConnectionScreen';
 import { DiagnosticsScreen } from './screens/DiagnosticsScreen';
 import { OverviewScreen } from './screens/OverviewScreen';
 import { PrivacyScreen } from './screens/PrivacyScreen';
 import { TicketsScreen } from './screens/TicketsScreen';
 import { WidgetScreen } from './screens/WidgetScreen';
 import type { OverviewData, Screen } from './types';
-import { connectionBadge } from './components/StatusBadge';
-import { IconExternal } from './components/Icons';
 
 const NAV: Array< {
 	id: Screen;
@@ -33,11 +29,6 @@ const NAV: Array< {
 		id: 'overview',
 		label: __( 'Overview', 'deskovi' ),
 		icon: <IconOverview size={ 17 } />,
-	},
-	{
-		id: 'connection',
-		label: __( 'Connection', 'deskovi' ),
-		icon: <IconLink size={ 17 } />,
 	},
 	{
 		id: 'tickets',
@@ -106,17 +97,6 @@ export function App() {
 		body = <div className="itsdesk-admin__error">{ error }</div>;
 	} else if ( overview ) {
 		switch ( screen ) {
-			case 'connection':
-				body = (
-					<ConnectionScreen
-						connection={ overview.connection }
-						onConnectionChange={ ( connection ) =>
-							setOverview( { ...overview, connection } )
-						}
-						onToast={ showToast }
-					/>
-				);
-				break;
 			case 'tickets':
 				body = <TicketsScreen onToast={ showToast } />;
 				break;
@@ -161,8 +141,6 @@ export function App() {
 		}
 	}
 
-	const status = overview?.connection.status || 'disconnected';
-
 	return (
 		<div className="itsdesk-admin">
 			<header className="itsdesk-admin__chrome">
@@ -174,35 +152,11 @@ export function App() {
 						<h1>{ __( 'Deskovi', 'deskovi' ) }</h1>
 						<p className="itsdesk-admin__sub">
 							{ __(
-								'Order-aware support connector for WooCommerce. Conversations stay in Deskovi SaaS — your store stays fast.',
+								'Support tickets and order-aware customer service for WooCommerce.',
 								'deskovi'
 							) }
 						</p>
 					</div>
-				</div>
-				<div className="itsdesk-admin__chrome-actions">
-					{ connectionBadge( status ) }
-					{ status !== 'connected' && status !== 'error' && (
-						connectionMode() === 'mock' ? (
-							<button
-								type="button"
-								className="itsdesk-btn itsdesk-btn--primary"
-								onClick={ () => setScreen( 'connection' ) }
-							>
-								{ __( 'Connect', 'deskovi' ) }
-							</button>
-						) : (
-							<a
-								className="itsdesk-btn itsdesk-btn--primary"
-								href={ saasUrl() }
-								target="_blank"
-								rel="noopener noreferrer"
-							>
-								{ __( 'Connect', 'deskovi' ) }
-								<IconExternal size={ 13 } />
-							</a>
-						)
-					) }
 				</div>
 			</header>
 

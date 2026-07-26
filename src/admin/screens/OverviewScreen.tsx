@@ -1,16 +1,10 @@
 import { __ } from '@wordpress/i18n';
-import { saasUrl } from '../api';
-import { connectionBadge } from '../components/StatusBadge';
 import { MetricCard } from '../components/MetricCard';
 import {
 	IconCart,
 	IconCheck,
-	IconExternal,
-	IconLink,
 	IconPulse,
-	IconQueue,
 	IconShield,
-	IconSync,
 	IconWidget,
 } from '../components/Icons';
 import type { OverviewData, Screen } from '../types';
@@ -22,190 +16,148 @@ type Props = {
 };
 
 export function OverviewScreen( { data, onNavigate, onRefresh }: Props ) {
-	const { connection, queue_failures, queue_pending, hpos_enabled, widget, privacy } =
-		data;
-	const connected =
-		connection.status === 'connected' || connection.status === 'error';
-	const workspace =
-		connection.workspace_name || __( 'Not linked yet', 'deskovi' );
-	const lastSync = connection.last_sync_at || __( 'Never', 'deskovi' );
+	const { widget, privacy } = data;
 
 	return (
 		<div className="itsdesk-admin__panel-inner">
-			{ ! connected && (
-				<section className="itsdesk-hero">
-					<div style={ { position: 'relative', zIndex: 1 } }>
-						<div className="itsdesk-hero__eyebrow">
-							{ __( 'Setup · 2 minutes', 'deskovi' ) }
-						</div>
-						<h2>
-							{ __(
-								'Connect WooCommerce to Deskovi — without slowing checkout',
-								'deskovi'
-							) }
-						</h2>
-						<p>
-							{ __(
-								'Unlike full helpdesks inside WordPress, Deskovi stays a lightweight connector. Agents get order context in SaaS; your storefront stays fast and private.',
-								'deskovi'
-							) }
-						</p>
-						<div className="itsdesk-hero__actions">
-							<button
-								type="button"
-								className="itsdesk-btn itsdesk-btn--primary"
-								onClick={ () => onNavigate( 'connection' ) }
-							>
-								{ __( 'Connect to Deskovi', 'deskovi' ) }
-							</button>
-							<button
-								type="button"
-								className="itsdesk-btn itsdesk-btn--secondary"
-								onClick={ () => onNavigate( 'privacy' ) }
-							>
-								{ __( 'Review privacy defaults', 'deskovi' ) }
-							</button>
+			<section className="itsdesk-hero">
+				<div style={ { position: 'relative', zIndex: 1 } }>
+					<div className="itsdesk-hero__eyebrow">
+						{ __( 'Setup · 2 minutes', 'deskovi' ) }
+					</div>
+					<h2>
+						{ __(
+							'A support desk that lives inside your store',
+							'deskovi'
+						) }
+					</h2>
+					<p>
+						{ __(
+							'Tickets, replies, and attachments are all stored in your own WordPress database — nothing leaves your site.',
+							'deskovi'
+						) }
+					</p>
+					<div className="itsdesk-hero__actions">
+						<button
+							type="button"
+							className="itsdesk-btn itsdesk-btn--primary"
+							onClick={ () => onNavigate( 'tickets' ) }
+						>
+							{ __( 'View tickets', 'deskovi' ) }
+						</button>
+						<button
+							type="button"
+							className="itsdesk-btn itsdesk-btn--secondary"
+							onClick={ () => onNavigate( 'widget' ) }
+						>
+							{ __( 'Set up the widget', 'deskovi' ) }
+						</button>
+					</div>
+				</div>
+				<div
+					className="itsdesk-checklist"
+					style={ { position: 'relative', zIndex: 1 } }
+				>
+					<div className="itsdesk-checklist__title">
+						{ __( 'Launch checklist', 'deskovi' ) }
+					</div>
+					<div className="itsdesk-checklist__item is-done">
+						<span className="itsdesk-checklist__mark">
+							<IconCheck size={ 12 } />
+						</span>
+						<div>
+							<strong>{ __( 'Plugin installed', 'deskovi' ) }</strong>
+							<span>
+								{ __(
+									'HPOS-ready ticket system is active on this store.',
+									'deskovi'
+								) }
+							</span>
 						</div>
 					</div>
 					<div
-						className="itsdesk-checklist"
-						style={ { position: 'relative', zIndex: 1 } }
+						className={
+							'itsdesk-checklist__item' +
+							( widget.enabled ? ' is-done' : '' )
+						}
 					>
-						<div className="itsdesk-checklist__title">
-							{ __( 'Launch checklist', 'deskovi' ) }
-						</div>
-						<div className="itsdesk-checklist__item is-done">
-							<span className="itsdesk-checklist__mark">
-								<IconCheck size={ 12 } />
+						<span className="itsdesk-checklist__mark">
+							{ widget.enabled ? <IconCheck size={ 12 } /> : '2' }
+						</span>
+						<div>
+							<strong>{ __( 'Enable support widget', 'deskovi' ) }</strong>
+							<span>
+								{ __(
+									'Lazy launcher only — zero assets when disabled.',
+									'deskovi'
+								) }
 							</span>
-							<div>
-								<strong>{ __( 'Plugin installed', 'deskovi' ) }</strong>
-								<span>
-									{ __(
-										'HPOS-ready connector is active on this store.',
-										'deskovi'
-									) }
-								</span>
-							</div>
-						</div>
-						<div
-							className={
-								'itsdesk-checklist__item' + ( connected ? ' is-done' : '' )
-							}
-						>
-							<span className="itsdesk-checklist__mark">
-								{ connected ? <IconCheck size={ 12 } /> : '2' }
-							</span>
-							<div>
-								<strong>
-									{ __( 'Secure workspace connection', 'deskovi' ) }
-								</strong>
-								<span>
-									{ __(
-										'One-time code + site keys. No permanent API key in settings.',
-										'deskovi'
-									) }
-								</span>
-							</div>
-						</div>
-						<div
-							className={
-								'itsdesk-checklist__item' +
-								( widget.enabled ? ' is-done' : '' )
-							}
-						>
-							<span className="itsdesk-checklist__mark">
-								{ widget.enabled ? <IconCheck size={ 12 } /> : '3' }
-							</span>
-							<div>
-								<strong>{ __( 'Enable support widget', 'deskovi' ) }</strong>
-								<span>
-									{ __(
-										'Lazy launcher only — zero assets when disabled.',
-										'deskovi'
-									) }
-								</span>
-							</div>
 						</div>
 					</div>
-				</section>
-			) }
+					<div className="itsdesk-checklist__item is-done">
+						<span className="itsdesk-checklist__mark">
+							<IconCheck size={ 12 } />
+						</span>
+						<div>
+							<strong>{ __( 'Privacy defaults reviewed', 'deskovi' ) }</strong>
+							<span>
+								{ __(
+									'Export/erase tools are wired to WordPress privacy tools.',
+									'deskovi'
+								) }
+							</span>
+						</div>
+					</div>
+				</div>
+			</section>
 
 			<div className="itsdesk-admin__row">
-				<h2>
-					{ connected
-						? __( 'Store health', 'deskovi' )
-						: __( 'Overview', 'deskovi' ) }
-				</h2>
-				<div className="itsdesk-admin__spacer" />
-				{ connectionBadge( connection.status ) }
+				<h2>{ __( 'Store health', 'deskovi' ) }</h2>
 			</div>
 
 			<div className="itsdesk-metrics">
 				<MetricCard
-					label={ __( 'Workspace', 'deskovi' ) }
-					value={ workspace }
-					hint={
-						connected
-							? __( 'Linked workspace', 'deskovi' )
-							: __( 'Connect to choose a workspace', 'deskovi' )
+					label={ __( 'Widget', 'deskovi' ) }
+					value={
+						widget.enabled ? __( 'Enabled', 'deskovi' ) : __( 'Disabled', 'deskovi' )
 					}
-					icon={ <IconLink /> }
-					tone={ connected ? 'ok' : 'warn' }
-					onClick={ () => onNavigate( 'connection' ) }
+					hint={ `${ widget.placement } · ${ widget.theme }` }
+					icon={ <IconWidget /> }
+					tone={ widget.enabled ? 'ok' : 'default' }
+					onClick={ () => onNavigate( 'widget' ) }
 				/>
 				<MetricCard
-					label={ __( 'Last sync', 'deskovi' ) }
-					value={ lastSync }
-					hint={ __( 'Outbound event delivery', 'deskovi' ) }
-					icon={ <IconSync /> }
-					onClick={ () => onNavigate( 'activity' ) }
-				/>
-				<MetricCard
-					label={ __( 'Queue', 'deskovi' ) }
-					value={ `${ queue_failures }` }
-					hint={ `${ queue_pending } ${ __( 'pending', 'deskovi' ) } · ${ __(
-						'failures',
-						'deskovi'
-					) }` }
-					icon={ <IconQueue /> }
-					tone={ queue_failures > 0 ? 'warn' : 'default' }
-					onClick={ () => onNavigate( 'activity' ) }
+					label={ __( 'Privacy', 'deskovi' ) }
+					value={
+						privacy.historical_import === 'off'
+							? __( 'Minimal', 'deskovi' )
+							: `${ privacy.historical_import }d`
+					}
+					hint={ `${ __( 'Retention', 'deskovi' ) }: ${ privacy.retention_days }d` }
+					icon={ <IconShield /> }
+					onClick={ () => onNavigate( 'privacy' ) }
 				/>
 				<MetricCard
 					label={ __( 'Order storage', 'deskovi' ) }
-					value={
-						hpos_enabled
-							? __( 'HPOS on', 'deskovi' )
-							: __( 'HPOS off', 'deskovi' )
-					}
+					value={ __( 'HPOS compatible', 'deskovi' ) }
 					hint={ __( 'WooCommerce CRUD compatible', 'deskovi' ) }
 					icon={ <IconCart /> }
-					tone={ hpos_enabled ? 'ok' : 'default' }
+					tone="ok"
 					onClick={ () => onNavigate( 'diagnostics' ) }
 				/>
 			</div>
 
-			<div className={ `itsdesk-health${ connected ? '' : ' itsdesk-health--warn' }` }>
+			<div className="itsdesk-health">
 				<span className="itsdesk-health__icon">
-					{ connected ? <IconPulse /> : <IconShield /> }
+					<IconPulse />
 				</span>
 				<div>
-					<strong>
-						{ connected
-							? __( 'Connector healthy', 'deskovi' )
-							: __( 'Waiting for secure connection', 'deskovi' ) }
-					</strong>
+					<strong>{ __( 'Running locally', 'deskovi' ) }</strong>
 					<p>
-						{ connected
-							? __(
-									'Outbound events use Action Scheduler. No blocking remote calls on checkout, cart, or normal page loads.',
-									'deskovi'
-							  )
-							: __(
-									'Connect your store to unlock order-aware support. Until then, nothing leaves WordPress and checkout stays untouched.',
-									'deskovi'
-							  ) }
+						{ __(
+							'No external service or account is required. All ticket data stays in your WordPress database.',
+							'deskovi'
+						) }
 					</p>
 				</div>
 			</div>
@@ -214,11 +166,9 @@ export function OverviewScreen( { data, onNavigate, onRefresh }: Props ) {
 				<button
 					type="button"
 					className="itsdesk-btn itsdesk-btn--primary"
-					onClick={ () => onNavigate( 'connection' ) }
+					onClick={ () => onNavigate( 'tickets' ) }
 				>
-					{ connected
-						? __( 'Manage connection', 'deskovi' )
-						: __( 'Connect to Deskovi', 'deskovi' ) }
+					{ __( 'View tickets', 'deskovi' ) }
 				</button>
 				<button
 					type="button"
@@ -227,15 +177,6 @@ export function OverviewScreen( { data, onNavigate, onRefresh }: Props ) {
 				>
 					{ __( 'Run diagnostics', 'deskovi' ) }
 				</button>
-				<a
-					className="itsdesk-btn itsdesk-btn--secondary"
-					href={ saasUrl() }
-					target="_blank"
-					rel="noopener noreferrer"
-				>
-					{ __( 'Open SaaS inbox', 'deskovi' ) }
-					<IconExternal />
-				</a>
 				<button
 					type="button"
 					className="itsdesk-btn itsdesk-btn--ghost"
@@ -245,96 +186,15 @@ export function OverviewScreen( { data, onNavigate, onRefresh }: Props ) {
 				</button>
 			</div>
 
-			<h3 className="itsdesk-admin__section">
-				{ __( 'Quick status', 'deskovi' ) }
-			</h3>
-			<table className="itsdesk-table">
-				<thead>
-					<tr>
-						<th>{ __( 'Area', 'deskovi' ) }</th>
-						<th>{ __( 'State', 'deskovi' ) }</th>
-						<th>{ __( 'Detail', 'deskovi' ) }</th>
-					</tr>
-				</thead>
-				<tbody>
-					<tr>
-						<td className="itsdesk-table__area">
-							{ __( 'Connection', 'deskovi' ) }
-						</td>
-						<td>{ connectionBadge( connection.status ) }</td>
-						<td>{ connection.health || '—' }</td>
-					</tr>
-					<tr>
-						<td className="itsdesk-table__area">
-							{ __( 'Widget', 'deskovi' ) }
-						</td>
-						<td>
-							{ widget.enabled ? (
-								<span className="itsdesk-badge itsdesk-badge--ok">
-									<span className="itsdesk-badge__dot" />
-									{ __( 'Enabled', 'deskovi' ) }
-								</span>
-							) : (
-								<span className="itsdesk-badge itsdesk-badge--neutral">
-									<span className="itsdesk-badge__dot" />
-									{ __( 'Disabled', 'deskovi' ) }
-								</span>
-							) }
-						</td>
-						<td>
-							{ widget.placement } · { widget.theme }
-						</td>
-					</tr>
-					<tr>
-						<td className="itsdesk-table__area">
-							{ __( 'Privacy', 'deskovi' ) }
-						</td>
-						<td>
-							<span className="itsdesk-badge itsdesk-badge--info">
-								<span className="itsdesk-badge__dot" />
-								{ privacy.historical_import === 'off'
-									? __( 'Minimal', 'deskovi' )
-									: `${ privacy.historical_import }d` }
-							</span>
-						</td>
-						<td>
-							{ __( 'Retention', 'deskovi' ) }: { privacy.retention_days }d
-						</td>
-					</tr>
-					<tr>
-						<td className="itsdesk-table__area">
-							{ __( 'Queue', 'deskovi' ) }
-						</td>
-						<td>
-							<span
-								className={
-									'itsdesk-badge itsdesk-badge--' +
-									( queue_failures > 0 ? 'warn' : 'ok' )
-								}
-							>
-								<span className="itsdesk-badge__dot" />
-								{ queue_pending === 0 && queue_failures === 0
-									? __( 'Idle', 'deskovi' )
-									: __( 'Active', 'deskovi' ) }
-							</span>
-						</td>
-						<td>
-							{ queue_pending } { __( 'pending', 'deskovi' ) } ·{ ' ' }
-							{ queue_failures } { __( 'failed', 'deskovi' ) }
-						</td>
-					</tr>
-				</tbody>
-			</table>
-
 			<div className="itsdesk-features">
 				<div className="itsdesk-feature">
 					<div className="itsdesk-feature__icon">
 						<IconShield size={ 16 } />
 					</div>
-					<strong>{ __( 'Secure by design', 'deskovi' ) }</strong>
+					<strong>{ __( 'Private by default', 'deskovi' ) }</strong>
 					<p>
 						{ __(
-							'Signed, replay-protected traffic. Least privilege. No master API key sitting in options.',
+							'No master API key, no external account, no data leaving your site.',
 							'deskovi'
 						) }
 					</p>
@@ -346,7 +206,7 @@ export function OverviewScreen( { data, onNavigate, onRefresh }: Props ) {
 					<strong>{ __( 'Order-aware support', 'deskovi' ) }</strong>
 					<p>
 						{ __(
-							'Agents see relevant WooCommerce context — not a full store database copy.',
+							'Agents see relevant WooCommerce context right next to each ticket.',
 							'deskovi'
 						) }
 					</p>
@@ -358,7 +218,7 @@ export function OverviewScreen( { data, onNavigate, onRefresh }: Props ) {
 					<strong>{ __( 'Checkout stays fast', 'deskovi' ) }</strong>
 					<p>
 						{ __(
-							'Zero blocking Deskovi network requests on checkout, cart, or normal page loads.',
+							'No blocking network requests on checkout, cart, or normal page loads.',
 							'deskovi'
 						) }
 					</p>

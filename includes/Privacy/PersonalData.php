@@ -35,7 +35,7 @@ final class PersonalData {
 		}
 
 		$content = '<p>' . esc_html__(
-			'Deskovi is a WooCommerce support connector. When you contact support, this store may keep a temporary ticket bridge cache (subject, messages, linked order ID, email) so conversations can sync to Deskovi SaaS. Payment card data is never collected by Deskovi. Billing address and phone are shared only if the store owner enables those privacy toggles. Guests may verify with order number + billing email (one-time code). You can request export or erasure of local bridge data via WordPress tools; remote Deskovi SaaS deletion is handled separately when connected.',
+			'Deskovi is a WooCommerce support ticket plugin. When you contact support, this store stores your ticket (subject, messages, attachments, linked order ID, email) in its own database. Payment card data is never collected by Deskovi. Billing address and phone are shared with support agents only if the store owner enables those privacy toggles. Guests may verify with order number + billing email (one-time code). You can request export or erasure of this data via WordPress tools.',
 			'deskovi'
 		) . '</p>';
 

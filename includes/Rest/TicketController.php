@@ -10,7 +10,9 @@ namespace Itsdesk\Rest;
 
 defined( 'ABSPATH' ) || exit;
 
+use Itsdesk\Admin\Capabilities;
 use Itsdesk\Auth\GuestSession;
+use Itsdesk\Tickets\AttachmentService;
 use Itsdesk\Tickets\Categories;
 use Itsdesk\Tickets\TicketService;
 use WP_Error;
@@ -96,10 +98,20 @@ final class TicketController {
 
 		register_rest_route(
 			self::REST_NAMESPACE,
-			'/tickets/(?P<id>[a-zA-Z0-9_-]+)/retry-sync',
+			'/tickets/(?P<id>[a-zA-Z0-9_-]+)/assign',
 			array(
 				'methods'             => WP_REST_Server::CREATABLE,
-				'callback'            => array( $this, 'admin_retry_sync' ),
+				'callback'            => array( $this, 'admin_assign' ),
+				'permission_callback' => array( $this, 'can_manage' ),
+			)
+		);
+
+		register_rest_route(
+			self::REST_NAMESPACE,
+			'/agents',
+			array(
+				'methods'             => WP_REST_Server::READABLE,
+				'callback'            => array( $this, 'admin_list_agents' ),
 				'permission_callback' => array( $this, 'can_manage' ),
 			)
 		);
@@ -150,13 +162,43 @@ final class TicketController {
 				'permission_callback' => array( $this, 'can_customer' ),
 			)
 		);
+
+		register_rest_route(
+			self::REST_NAMESPACE,
+			'/tickets/(?P<id>[a-zA-Z0-9_-]+)/attachments',
+			array(
+				'methods'             => WP_REST_Server::CREATABLE,
+				'callback'            => array( $this, 'admin_upload_attachment' ),
+				'permission_callback' => array( $this, 'can_manage' ),
+			)
+		);
+
+		register_rest_route(
+			self::REST_NAMESPACE,
+			'/customer/tickets/(?P<id>[a-zA-Z0-9_-]+)/attachments',
+			array(
+				'methods'             => WP_REST_Server::CREATABLE,
+				'callback'            => array( $this, 'customer_upload_attachment' ),
+				'permission_callback' => array( $this, 'can_customer' ),
+			)
+		);
+
+		register_rest_route(
+			self::REST_NAMESPACE,
+			'/attachments/(?P<id>[a-zA-Z0-9_-]+)',
+			array(
+				'methods'             => WP_REST_Server::READABLE,
+				'callback'            => array( $this, 'download_attachment' ),
+				'permission_callback' => '__return_true',
+			)
+		);
 	}
 
 	/**
 	 * Admin capability.
 	 */
 	public function can_manage(): bool {
-		return current_user_can( 'manage_itsdesk' );
+		return current_user_can( Capabilities::CAP );
 	}
 
 	/**
@@ -271,17 +313,43 @@ final class TicketController {
 	}
 
 	/**
-	 * Re-queue outbound ticket create sync.
+	 * Admin assign (or unassign) a ticket to a support agent.
 	 *
 	 * @param WP_REST_Request $request Request.
 	 * @return WP_REST_Response|WP_Error
 	 */
-	public function admin_retry_sync( WP_REST_Request $request ) {
-		$result = ( new TicketService() )->retry_sync( (string) $request['id'] );
+	public function admin_assign( WP_REST_Request $request ) {
+		$body     = $request->get_json_params() ?: array();
+		$agent_id = array_key_exists( 'agent_id', $body ) && null !== $body['agent_id']
+			? (int) $body['agent_id']
+			: null;
+		$result   = ( new TicketService() )->assign( (string) $request['id'], $agent_id );
 		if ( is_wp_error( $result ) ) {
 			return $result;
 		}
 		return new WP_REST_Response( $result, 200 );
+	}
+
+	/**
+	 * List WP users who can manage tickets, for populating an assignee dropdown.
+	 */
+	public function admin_list_agents(): WP_REST_Response {
+		$users  = get_users(
+			array(
+				'capability' => Capabilities::CAP,
+				'orderby'    => 'display_name',
+				'order'      => 'ASC',
+			)
+		);
+		$agents = array();
+		foreach ( $users as $user ) {
+			$agents[] = array(
+				'id'         => $user->ID,
+				'name'       => $user->display_name,
+				'avatar_url' => get_avatar_url( $user->ID ),
+			);
+		}
+		return new WP_REST_Response( array( 'agents' => $agents ), 200 );
 	}
 
 	/**
@@ -385,5 +453,109 @@ final class TicketController {
 			return $result;
 		}
 		return new WP_REST_Response( $result, 200 );
+	}
+
+	/**
+	 * Admin upload attachment.
+	 *
+	 * @param WP_REST_Request $request Request.
+	 * @return WP_REST_Response|WP_Error
+	 */
+	public function admin_upload_attachment( WP_REST_Request $request ) {
+		return $this->handle_attachment_upload( $request, null, true, null );
+	}
+
+	/**
+	 * Customer/guest upload attachment.
+	 *
+	 * @param WP_REST_Request $request Request.
+	 * @return WP_REST_Response|WP_Error
+	 */
+	public function customer_upload_attachment( WP_REST_Request $request ) {
+		$user_id = is_user_logged_in() ? get_current_user_id() : null;
+		$guest   = is_user_logged_in() ? null : $this->guest_context();
+		return $this->handle_attachment_upload( $request, $user_id, false, $guest );
+	}
+
+	/**
+	 * Shared upload handler: verifies ticket ownership, validates the file,
+	 * then stores it via AttachmentService.
+	 *
+	 * @param WP_REST_Request                           $request  Request.
+	 * @param int|null                                  $user_id  WP user id, if logged in.
+	 * @param bool                                       $is_admin Whether this is an agent/admin request.
+	 * @param array{email: string, order_id: int}|null   $guest    Guest session, if any.
+	 * @return WP_REST_Response|WP_Error
+	 */
+	private function handle_attachment_upload( WP_REST_Request $request, ?int $user_id, bool $is_admin, ?array $guest ) {
+		$ticket_id = (string) $request['id'];
+		$ticket    = ( new TicketService() )->get( $ticket_id, $user_id, $is_admin, $guest );
+		if ( is_wp_error( $ticket ) ) {
+			return $ticket;
+		}
+
+		$message_id = (string) ( $request->get_param( 'message_id' ) ?? '' );
+		if ( '' !== $message_id ) {
+			$found = false;
+			foreach ( $ticket['messages'] ?? array() as $message ) {
+				if ( is_array( $message ) && ( $message['id'] ?? '' ) === $message_id ) {
+					$found = true;
+					break;
+				}
+			}
+			if ( ! $found ) {
+				return new WP_Error( 'itsdesk_attachment_bad_message', __( 'That message does not belong to this ticket.', 'deskovi' ), array( 'status' => 400 ) );
+			}
+		} else {
+			$message_id = null;
+		}
+
+		$files = $request->get_file_params();
+		if ( empty( $files['file'] ) || ! is_array( $files['file'] ) ) {
+			return new WP_Error( 'itsdesk_attachment_missing', __( 'No file was provided.', 'deskovi' ), array( 'status' => 400 ) );
+		}
+
+		$uploaded_by = $is_admin ? 'agent' : 'customer';
+		$result      = ( new AttachmentService() )->store( $files['file'], $ticket_id, $message_id, $uploaded_by );
+		if ( is_wp_error( $result ) ) {
+			return $result;
+		}
+
+		return new WP_REST_Response( $result, 201 );
+	}
+
+	/**
+	 * Stream an attachment to an authorized requester only.
+	 *
+	 * @param WP_REST_Request $request Request.
+	 * @return WP_REST_Response|WP_Error
+	 */
+	public function download_attachment( WP_REST_Request $request ) {
+		$attachment_service = new AttachmentService();
+		$attachment         = $attachment_service->find( (string) $request['id'] );
+		if ( null === $attachment ) {
+			return new WP_Error( 'itsdesk_attachment_not_found', __( 'Attachment not found.', 'deskovi' ), array( 'status' => 404 ) );
+		}
+
+		$is_admin = current_user_can( Capabilities::CAP );
+		$user_id  = is_user_logged_in() ? get_current_user_id() : null;
+		$guest    = is_user_logged_in() ? null : $this->guest_context();
+
+		$ticket = ( new TicketService() )->get( (string) $attachment['ticket_id'], $user_id, $is_admin, $guest );
+		if ( is_wp_error( $ticket ) ) {
+			return new WP_Error( 'itsdesk_attachment_forbidden', __( 'You cannot access this file.', 'deskovi' ), array( 'status' => 403 ) );
+		}
+
+		$path = $attachment_service->absolute_path( $attachment );
+		if ( '' === $path || ! file_exists( $path ) ) {
+			return new WP_Error( 'itsdesk_attachment_missing_file', __( 'File no longer exists.', 'deskovi' ), array( 'status' => 404 ) );
+		}
+
+		nocache_headers();
+		header( 'Content-Type: ' . (string) $attachment['mime_type'] );
+		header( 'Content-Disposition: attachment; filename="' . sanitize_file_name( (string) $attachment['filename'] ) . '"' );
+		header( 'Content-Length: ' . (string) filesize( $path ) );
+		readfile( $path ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_read_readfile
+		exit;
 	}
 }

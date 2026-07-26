@@ -56,12 +56,11 @@ final class AdminAssets {
 				'itsdesk-admin',
 				'itsdeskAdmin',
 				array(
-					'restRoot'       => esc_url_raw( rest_url() ),
-					'nonce'          => wp_create_nonce( 'wp_rest' ),
-					'version'        => ITSDESK_VERSION,
-					'saasUrl'        => \Itsdesk\Connection\SaasConfig::base_url(),
-					'pluginUrl'      => ITSDESK_URL,
-					'connectionMode' => \Itsdesk\Connection\Transport\TransportFactory::mode(),
+					'restRoot'      => esc_url_raw( rest_url() ),
+					'nonce'         => wp_create_nonce( 'wp_rest' ),
+					'version'       => ITSDESK_VERSION,
+					'pluginUrl'     => ITSDESK_URL,
+					'currentUserId' => get_current_user_id(),
 				)
 			);
 

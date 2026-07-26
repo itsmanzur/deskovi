@@ -1,11 +1,20 @@
 export type Screen =
 	| 'overview'
-	| 'connection'
 	| 'tickets'
 	| 'widget'
 	| 'privacy'
 	| 'diagnostics'
 	| 'activity';
+
+export type TicketAttachment = {
+	id: string;
+	message_id?: string | null;
+	filename: string;
+	mime_type: string;
+	size_bytes: number;
+	uploaded_by: string;
+	created_at: string;
+};
 
 export type TicketMessage = {
 	id: string;
@@ -13,11 +22,11 @@ export type TicketMessage = {
 	body: string;
 	internal: boolean;
 	created_at: string;
+	attachments?: TicketAttachment[];
 };
 
 export type Ticket = {
 	id: string;
-	remote_id?: string | null;
 	status: string;
 	category: string;
 	subject: string;
@@ -26,12 +35,19 @@ export type Ticket = {
 	customer_user_id: number;
 	customer_email: string;
 	customer_name: string;
-	saas_url?: string | null;
-	sync_status: string;
 	idempotency_key?: string;
+	assigned_agent_id?: number | null;
+	assigned_agent_name?: string | null;
 	created_at: string;
 	updated_at: string;
 	messages: TicketMessage[];
+	attachments?: TicketAttachment[];
+};
+
+export type Agent = {
+	id: number;
+	name: string;
+	avatar_url?: string;
 };
 
 export type OrderTimelineEntry = {
@@ -82,35 +98,6 @@ export type TicketCategory = {
 	label: string;
 };
 
-export type ConnectionState = {
-	status: string;
-	mode?: string;
-	workspace_id?: string;
-	workspace_name: string;
-	site_uuid: string;
-	saas_url: string;
-	scopes?: string[];
-	public_key_fingerprint?: string;
-	connected_at?: string | null;
-	last_sync_at: string | null;
-	last_health_at: string | null;
-	health: string;
-};
-
-export type MockWorkspace = {
-	id: string;
-	name: string;
-};
-
-export type ConnectionStartResponse = {
-	mode: string;
-	state: string;
-	authorize_url: string;
-	mock_workspaces?: MockWorkspace[];
-	expires_in: number;
-	site_url?: string;
-};
-
 export type WidgetSettings = {
 	enabled: boolean;
 	placement: string;
@@ -126,10 +113,7 @@ export type PrivacySettings = {
 };
 
 export type OverviewData = {
-	connection: ConnectionState;
-	queue_failures: number;
-	queue_pending: number;
-	hpos_enabled: boolean;
+	hpos_enabled?: boolean;
 	widget: WidgetSettings;
 	privacy: PrivacySettings;
 };
@@ -145,7 +129,6 @@ export type DiagnosticsData = {
 };
 
 export type ActivityData = {
-	summary: { pending: number; failed: number; cursor: string };
 	activity: Array<{ when: string; type: string; event: string; result: string }>;
 };
 
@@ -155,9 +138,8 @@ declare global {
 			restRoot: string;
 			nonce: string;
 			version: string;
-			saasUrl: string;
 			pluginUrl: string;
-			connectionMode?: string;
+			currentUserId: number;
 		};
 	}
 }

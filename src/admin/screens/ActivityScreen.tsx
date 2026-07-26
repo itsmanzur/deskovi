@@ -1,9 +1,7 @@
 import { useEffect, useState } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 import { fetchActivity } from '../api';
-import { MetricCard } from '../components/MetricCard';
 import { SkeletonPanel } from '../components/Skeleton';
-import { IconQueue, IconSync } from '../components/Icons';
 import type { ActivityData } from '../types';
 
 export function ActivityScreen() {
@@ -40,11 +38,8 @@ export function ActivityScreen() {
 		if ( r === 'ok' || r === 'success' ) {
 			return 'ok';
 		}
-		if ( r === 'blocked' || r === 'fail' || r === 'failed' ) {
+		if ( r === 'fail' || r === 'failed' ) {
 			return 'danger';
-		}
-		if ( r === 'retry' ) {
-			return 'warn';
 		}
 		return 'neutral';
 	};
@@ -56,30 +51,11 @@ export function ActivityScreen() {
 					<h2>{ __( 'Activity', 'deskovi' ) }</h2>
 					<p className="itsdesk-admin__muted">
 						{ __(
-							'Sync cursor, Action Scheduler visibility, and connection audit trail — so outages never become silent. Mock mode may run sync inline when Action Scheduler is unavailable; use WooCommerce AS for production queues.',
+							'A running log of ticket and account events on this site.',
 							'deskovi'
 						) }
 					</p>
 				</div>
-			</div>
-
-			<div className="itsdesk-metrics">
-				<MetricCard
-					label={ __( 'Sync cursor', 'deskovi' ) }
-					value={ data.summary.cursor || '—' }
-					icon={ <IconSync /> }
-				/>
-				<MetricCard
-					label={ __( 'Pending jobs', 'deskovi' ) }
-					value={ data.summary.pending }
-					icon={ <IconQueue /> }
-					tone={ data.summary.pending > 0 ? 'warn' : 'ok' }
-				/>
-				<MetricCard
-					label={ __( 'Failed jobs', 'deskovi' ) }
-					value={ data.summary.failed }
-					tone={ data.summary.failed > 0 ? 'danger' : 'ok' }
-				/>
 			</div>
 
 			<table className="itsdesk-table">
