@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from '@wordpress/element';
+import { useCallback, useEffect, useMemo, useRef, useState } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 import {
 	apiErrorMessage,
@@ -9,12 +9,20 @@ import {
 	fetchTicketCategories,
 	fetchTicketOrder,
 	fetchTickets,
+	formatBytes,
 	linkTicketOrder,
 	replyTicket,
+	uploadTicketAttachment,
 	updateTicketStatus,
 } from '../api';
+import { IconFileGeneric, IconPaperclip } from '../components/Icons';
 import { SkeletonPanel } from '../components/Skeleton';
-import type { Agent, OrderSnapshot, Ticket, TicketCategory } from '../types';
+import type { Agent, OrderSnapshot, Ticket, TicketAttachment, TicketCategory } from '../types';
+
+// Must match AttachmentService::max_size() on the server (default 5 MB).
+// If the server-side default changes, update this constant to match.
+const MAX_ATTACHMENT_BYTES = 5 * 1024 * 1024;
+const ALLOWED_EXTENSIONS = [ 'jpg', 'jpeg', 'png', 'gif', 'webp', 'pdf', 'txt' ];
 
 type AssigneeFilter = 'all' | 'unassigned' | 'mine';
 
@@ -68,6 +76,7 @@ export function TicketsScreen( { onToast }: Props ) {
 	const [ showCreate, setShowCreate ] = useState( false );
 
 	const currentUserId = window.itsdeskAdmin?.currentUserId ?? 0;
+	const restRoot = window.itsdeskAdmin?.restRoot ?? '';
 
 	const [ subject, setSubject ] = useState( '' );
 	const [ body, setBody ] = useState( '' );
@@ -79,6 +88,9 @@ export function TicketsScreen( { onToast }: Props ) {
 	const [ orderLoading, setOrderLoading ] = useState( false );
 	const [ linkOrderId, setLinkOrderId ] = useState( '' );
 	const [ showTimeline, setShowTimeline ] = useState( false );
+	const [ pendingFiles, setPendingFiles ] = useState< File[] >( [] );
+	const [ uploadingFiles, setUploadingFiles ] = useState( false );
+	const fileInputRef = useRef< HTMLInputElement >( null );
 
 	const loadList = useCallback( () => {
 		setLoading( true );
@@ -214,18 +226,90 @@ export function TicketsScreen( { onToast }: Props ) {
 			} );
 	};
 
+	/**
+	 * Validate and stage files for upload. Rejects files that exceed the
+	 * server-side size limit or have a disallowed extension, reporting each
+	 * rejection via onToast so the user knows immediately.
+	 */
+	const addFiles = ( files: FileList | null ) => {
+		if ( ! files ) {
+			return;
+		}
+		const valid: File[] = [];
+		Array.from( files ).forEach( ( file ) => {
+			const ext = file.name.split( '.' ).pop()?.toLowerCase() ?? '';
+			if ( file.size > MAX_ATTACHMENT_BYTES ) {
+				onToast(
+					`${ file.name } ${ __( 'is too large (max 5 MB).', 'deskovi' ) }`,
+					'danger'
+				);
+				return;
+			}
+			if ( ! ALLOWED_EXTENSIONS.includes( ext ) ) {
+				onToast(
+					`${ file.name } ${ __(
+						'is not an allowed type (jpg, jpeg, png, gif, webp, pdf, txt).',
+						'deskovi'
+					) }`,
+					'danger'
+				);
+				return;
+			}
+			valid.push( file );
+		} );
+		if ( valid.length > 0 ) {
+			setPendingFiles( ( prev ) => [ ...prev, ...valid ] );
+		}
+	};
+
+	const removeFile = ( index: number ) => {
+		setPendingFiles( ( prev ) => prev.filter( ( _, i ) => i !== index ) );
+	};
+
 	const onReply = () => {
 		if ( ! selected ) {
 			return;
 		}
+		const ticketId = selected.id;
+		const filesToUpload = [ ...pendingFiles ];
 		setBusy( true );
-		replyTicket( selected.id, { body: replyBody, internal: replyInternal } )
-			.then( ( ticket ) => {
-				setSelected( ticket );
+		replyTicket( ticketId, { body: replyBody, internal: replyInternal } )
+			.then( async ( ticket ) => {
 				setReplyBody( '' );
 				setReplyInternal( false );
+				setPendingFiles( [] );
 				setBusy( false );
 				onToast( __( 'Reply sent.', 'deskovi' ) );
+
+				if ( filesToUpload.length > 0 ) {
+					// Find the newly created message (last in the list) to attach files to it.
+					const newMessageId =
+						ticket.messages[ ticket.messages.length - 1 ]?.id;
+					setUploadingFiles( true );
+					for ( const file of filesToUpload ) {
+						try {
+							await uploadTicketAttachment(
+								ticketId,
+								file,
+								newMessageId
+							);
+						} catch ( err: unknown ) {
+							// Report per-file failure but continue uploading remaining files.
+							onToast( apiErrorMessage( err ), 'danger' );
+						}
+					}
+					setUploadingFiles( false );
+					// Re-fetch to surface the newly attached files in the thread.
+					try {
+						const refreshed = await fetchTicket( ticketId );
+						setSelected( refreshed );
+					} catch ( err: unknown ) {
+						onToast( apiErrorMessage( err ), 'danger' );
+					}
+				} else {
+					setSelected( ticket );
+				}
+
 				loadList();
 			} )
 			.catch( ( err: unknown ) => {
@@ -729,6 +813,39 @@ export function TicketsScreen( { onToast }: Props ) {
 											</span>
 										</div>
 										<p>{ m.body }</p>
+										{ m.attachments && m.attachments.length > 0 && (
+											<div className="itsdesk-attachment-list">
+												{ m.attachments.map(
+													( att: TicketAttachment ) => (
+														<a
+															key={ att.id }
+															className="itsdesk-attachment-chip itsdesk-attachment-chip--link"
+															href={ `${ restRoot }itsdesk/v1/attachments/${ att.id }` }
+															target="_blank"
+															rel="noopener noreferrer"
+														>
+															{ att.mime_type.startsWith(
+																'image/'
+															) ? (
+																<img
+																	className="itsdesk-attachment-thumb"
+																	src={ `${ restRoot }itsdesk/v1/attachments/${ att.id }` }
+																	alt={ att.filename }
+																/>
+															) : (
+																<IconFileGeneric />
+															) }
+															<span className="itsdesk-attachment-name">
+																{ att.filename }
+															</span>
+															<span className="itsdesk-attachment-size">
+																{ formatBytes( att.size_bytes ) }
+															</span>
+														</a>
+													)
+												) }
+											</div>
+										) }
 									</div>
 								) ) }
 							</div>
@@ -737,6 +854,48 @@ export function TicketsScreen( { onToast }: Props ) {
 								<label htmlFor="itsdesk-tkt-reply">
 									{ __( 'Reply', 'deskovi' ) }
 								</label>
+								{ /* Hidden file input — triggered by the attach button below */ }
+								<input
+									ref={ fileInputRef }
+									type="file"
+									multiple
+									accept="image/jpeg,image/png,image/gif,image/webp,application/pdf,text/plain"
+									style={ { display: 'none' } }
+									onChange={ ( e ) => {
+										addFiles(
+											( e.target as HTMLInputElement ).files
+										);
+										// Reset so selecting the same file again after
+										// removing it still triggers onChange.
+										( e.target as HTMLInputElement ).value = '';
+									} }
+								/>
+								{ pendingFiles.length > 0 && (
+									<div className="itsdesk-attachment-chips">
+										{ pendingFiles.map( ( file, idx ) => (
+											<span
+												key={ idx }
+												className="itsdesk-attachment-chip"
+											>
+												<IconFileGeneric size={ 13 } />
+												<span className="itsdesk-attachment-name">
+													{ file.name }
+												</span>
+												<span className="itsdesk-attachment-size">
+													{ formatBytes( file.size ) }
+												</span>
+												<button
+													type="button"
+													className="itsdesk-attachment-chip__remove"
+													onClick={ () => removeFile( idx ) }
+													aria-label={ __( 'Remove file', 'deskovi' ) }
+												>
+													×
+												</button>
+											</span>
+										) ) }
+									</div>
+								) }
 								<textarea
 									id="itsdesk-tkt-reply"
 									className="itsdesk-textarea"
@@ -767,12 +926,24 @@ export function TicketsScreen( { onToast }: Props ) {
 								<button
 									type="button"
 									className="itsdesk-btn itsdesk-btn--primary"
-									disabled={ busy || ! replyBody }
+									disabled={ busy || uploadingFiles || ! replyBody }
 									onClick={ onReply }
 								>
-									{ busy
-										? __( 'Sending…', 'deskovi' )
-										: __( 'Send reply', 'deskovi' ) }
+									{ uploadingFiles
+										? __( 'Uploading files…', 'deskovi' )
+										: busy
+											? __( 'Sending…', 'deskovi' )
+											: __( 'Send reply', 'deskovi' ) }
+								</button>
+								<button
+									type="button"
+									className="itsdesk-btn itsdesk-btn--secondary itsdesk-attach-btn"
+									disabled={ busy || uploadingFiles }
+									onClick={ () => fileInputRef.current?.click() }
+									aria-label={ __( 'Attach file', 'deskovi' ) }
+								>
+									<IconPaperclip size={ 16 } />
+									{ __( 'Attach', 'deskovi' ) }
 								</button>
 							</div>
 						</div>

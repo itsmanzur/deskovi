@@ -158,3 +158,31 @@ export function IconTicket( { size = 18, className }: IconProps ) {
 		</svg>
 	);
 }
+
+export function IconPaperclip( { size = 18, className }: IconProps ) {
+	return (
+		<svg width={ size } height={ size } viewBox="0 0 24 24" fill="none" className={ className } aria-hidden="true">
+			<path
+				d="M21 11.5L12.5 20a5.657 5.657 0 0 1-8-8L13 3.5a3.771 3.771 0 0 1 5.334 5.334L9.83 17.34a1.886 1.886 0 0 1-2.667-2.667L15 7"
+				stroke="currentColor"
+				strokeWidth="1.75"
+				strokeLinecap="round"
+				strokeLinejoin="round"
+			/>
+		</svg>
+	);
+}
+
+export function IconFileGeneric( { size = 16, className }: IconProps ) {
+	return (
+		<svg width={ size } height={ size } viewBox="0 0 24 24" fill="none" className={ className } aria-hidden="true">
+			<path
+				d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8l-6-6Z"
+				stroke="currentColor"
+				strokeWidth="1.75"
+				strokeLinejoin="round"
+			/>
+			<path d="M14 2v6h6M16 13H8M16 17H8M10 9H8" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" />
+		</svg>
+	);
+}
