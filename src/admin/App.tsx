@@ -5,6 +5,7 @@ import { SkeletonPanel } from './components/Skeleton';
 import { Toast } from './components/Toast';
 import {
 	IconActivity,
+	IconBell,
 	IconMark,
 	IconOverview,
 	IconPulse,
@@ -14,6 +15,7 @@ import {
 } from './components/Icons';
 import { ActivityScreen } from './screens/ActivityScreen';
 import { DiagnosticsScreen } from './screens/DiagnosticsScreen';
+import { NotificationsScreen } from './screens/NotificationsScreen';
 import { OverviewScreen } from './screens/OverviewScreen';
 import { PrivacyScreen } from './screens/PrivacyScreen';
 import { TicketsScreen } from './screens/TicketsScreen';
@@ -44,6 +46,11 @@ const NAV: Array< {
 		id: 'privacy',
 		label: __( 'Data & Privacy', 'deskovi' ),
 		icon: <IconShield size={ 17 } />,
+	},
+	{
+		id: 'notifications',
+		label: __( 'Notifications', 'deskovi' ),
+		icon: <IconBell size={ 17 } />,
 	},
 	{
 		id: 'diagnostics',
@@ -123,6 +130,9 @@ export function App() {
 						onError={ ( msg ) => showToast( msg, 'danger' ) }
 					/>
 				);
+				break;
+			case 'notifications':
+				body = <NotificationsScreen onToast={ showToast } />;
 				break;
 			case 'diagnostics':
 				body = <DiagnosticsScreen onToast={ showToast } />;

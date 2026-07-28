@@ -13,6 +13,7 @@ defined( 'ABSPATH' ) || exit;
 use Itsdesk\Diagnostics\ActivityLogger;
 use Itsdesk\Diagnostics\EnvironmentReport;
 use Itsdesk\Privacy\Settings as PrivacySettings;
+use Itsdesk\Tickets\NotificationSettings;
 use Itsdesk\Widget\Settings as WidgetSettings;
 use WP_Error;
 use WP_REST_Request;
@@ -77,6 +78,23 @@ final class AdminController {
 				array(
 					'methods'             => WP_REST_Server::EDITABLE,
 					'callback'            => array( $this, 'update_privacy' ),
+					'permission_callback' => array( $this, 'can_manage' ),
+				),
+			)
+		);
+
+		register_rest_route(
+			self::REST_NAMESPACE,
+			'/notifications',
+			array(
+				array(
+					'methods'             => WP_REST_Server::READABLE,
+					'callback'            => array( $this, 'get_notifications' ),
+					'permission_callback' => array( $this, 'can_manage' ),
+				),
+				array(
+					'methods'             => WP_REST_Server::EDITABLE,
+					'callback'            => array( $this, 'update_notifications' ),
 					'permission_callback' => array( $this, 'can_manage' ),
 				),
 			)
@@ -163,6 +181,28 @@ final class AdminController {
 	 */
 	public function update_privacy( WP_REST_Request $request ) {
 		$result = ( new PrivacySettings() )->update( $request->get_json_params() ?: array() );
+		if ( is_wp_error( $result ) ) {
+			return $result;
+		}
+
+		return new WP_REST_Response( $result, 200 );
+	}
+
+	/**
+	 * GET /notifications
+	 */
+	public function get_notifications(): WP_REST_Response {
+		return new WP_REST_Response( ( new NotificationSettings() )->get(), 200 );
+	}
+
+	/**
+	 * PUT/POST /notifications
+	 *
+	 * @param WP_REST_Request $request Request.
+	 * @return WP_REST_Response|WP_Error
+	 */
+	public function update_notifications( WP_REST_Request $request ) {
+		$result = ( new NotificationSettings() )->update( $request->get_json_params() ?: array() );
 		if ( is_wp_error( $result ) ) {
 			return $result;
 		}

@@ -116,6 +116,31 @@ export function WidgetScreen( { initial, onSaved, onError }: Props ) {
 					</select>
 				</div>
 
+				<div className="itsdesk-field">
+					<label htmlFor="itsdesk-widget-launcher-label">
+						{ __( 'Launcher button label', 'deskovi' ) }
+					</label>
+					<input
+						id="itsdesk-widget-launcher-label"
+						className="itsdesk-input"
+						maxLength={ 40 }
+						value={ settings.launcher_label }
+						disabled={ ! settings.enabled }
+						onChange={ ( e ) =>
+							setSettings( {
+								...settings,
+								launcher_label: ( e.target as HTMLInputElement ).value,
+							} )
+						}
+					/>
+					<p className="itsdesk-admin__muted">
+						{ __(
+							"Leave empty to show an icon-only button. Add a short label like 'Chat with us' if you want text next to the icon.",
+							'deskovi'
+						) }
+					</p>
+				</div>
+
 				<div className="itsdesk-health" style={ { marginTop: 8 } }>
 					<div>
 						<strong>{ __( 'Live behavior', 'deskovi' ) }</strong>

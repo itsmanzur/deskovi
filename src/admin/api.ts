@@ -3,6 +3,7 @@ import type {
 	ActivityData,
 	Agent,
 	DiagnosticsData,
+	NotificationSettings,
 	OrderSnapshot,
 	OverviewData,
 	PrivacySettings,
@@ -55,6 +56,20 @@ export function fetchPrivacy(): Promise< PrivacySettings > {
 export function savePrivacy( data: Partial< PrivacySettings > ): Promise< PrivacySettings > {
 	return apiFetch( {
 		path: `${ base }/privacy`,
+		method: 'POST',
+		data,
+	} );
+}
+
+export function fetchNotificationSettings(): Promise< NotificationSettings > {
+	return apiFetch( { path: `${ base }/notifications` } );
+}
+
+export function saveNotificationSettings(
+	data: Partial< NotificationSettings >
+): Promise< NotificationSettings > {
+	return apiFetch( {
+		path: `${ base }/notifications`,
 		method: 'POST',
 		data,
 	} );

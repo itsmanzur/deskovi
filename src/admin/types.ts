@@ -3,6 +3,7 @@ export type Screen =
 	| 'tickets'
 	| 'widget'
 	| 'privacy'
+	| 'notifications'
 	| 'diagnostics'
 	| 'activity';
 
@@ -102,6 +103,14 @@ export type WidgetSettings = {
 	enabled: boolean;
 	placement: string;
 	theme: string;
+	launcher_label: string;
+};
+
+export type NotificationSettings = {
+	agent_new_ticket: boolean;
+	agent_new_reply: boolean;
+	customer_reply: boolean;
+	agent_assigned: boolean;
 };
 
 export type PrivacySettings = {

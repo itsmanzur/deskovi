@@ -97,6 +97,7 @@ final class Frontend {
 				'loginUrl'            => wp_login_url(),
 				'placement'           => (string) ( $settings['placement'] ?? 'bottom-right' ),
 				'theme'               => (string) ( $settings['theme'] ?? 'system' ),
+				'launcherLabel'       => (string) ( $settings['launcher_label'] ?? '' ),
 				'assetUrl'            => esc_url_raw( ITSDESK_URL . 'assets/widget/' ),
 				'i18n'                => array(
 					'support'         => __( 'Support', 'deskovi' ),

@@ -284,6 +284,8 @@ final class TicketService {
 			'OK'
 		);
 
+		do_action( 'itsdesk_ticket_created', $ticket );
+
 		return $ticket;
 	}
 
@@ -339,6 +341,8 @@ final class TicketService {
 
 		$this->repo->save( $ticket );
 		$this->logger->log( 'Ticket', __( 'Reply added to ticket', 'deskovi' ), 'OK' );
+
+		do_action( 'itsdesk_ticket_replied', $ticket, $message );
 
 		return $this->decorate_ticket( $ticket );
 	}
@@ -400,11 +404,14 @@ final class TicketService {
 			);
 		}
 
+		$previous_agent_id = ! empty( $ticket['assigned_agent_id'] ) ? (int) $ticket['assigned_agent_id'] : null;
+
 		if ( null === $agent_id || $agent_id <= 0 ) {
 			$ticket['assigned_agent_id'] = null;
 			$ticket['updated_at']        = gmdate( 'c' );
 			$this->repo->save( $ticket );
 			$this->logger->log( 'Ticket', __( 'Ticket unassigned', 'deskovi' ), 'OK' );
+			do_action( 'itsdesk_ticket_assigned', $ticket, null, $previous_agent_id );
 			return $ticket;
 		}
 
@@ -430,6 +437,8 @@ final class TicketService {
 			),
 			'OK'
 		);
+
+		do_action( 'itsdesk_ticket_assigned', $ticket, $agent_id, $previous_agent_id );
 
 		return $ticket;
 	}

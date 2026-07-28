@@ -24,9 +24,10 @@ final class Settings {
 	 */
 	public static function defaults(): array {
 		return array(
-			'enabled'   => false,
-			'placement' => 'bottom-right',
-			'theme'     => 'system',
+			'enabled'        => false,
+			'placement'      => 'bottom-right',
+			'theme'          => 'system',
+			'launcher_label' => '',
 		);
 	}
 
@@ -81,6 +82,11 @@ final class Settings {
 				);
 			}
 			$current['theme'] = $value;
+		}
+
+		if ( isset( $input['launcher_label'] ) ) {
+			$value = sanitize_text_field( (string) $input['launcher_label'] );
+			$current['launcher_label'] = mb_substr( $value, 0, 40 );
 		}
 
 		update_option( self::OPTION_KEY, $current, false );

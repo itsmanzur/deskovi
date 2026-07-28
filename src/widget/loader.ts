@@ -31,13 +31,23 @@ function resolveTheme( theme: string ): 'light' | 'dark' {
 
 const FAB_CSS = `
 :host{all:initial;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif}
-.dk-fab{position:fixed;z-index:99999;bottom:20px;min-width:52px;height:52px;padding:0 14px;border-radius:999px;border:none;cursor:pointer;background:#0f766e;color:#fff;box-shadow:0 8px 24px rgba(16,42,51,.22);display:inline-flex;align-items:center;justify-content:center;gap:6px;font-size:13px;font-weight:700}
+.dk-fab{position:fixed;z-index:99999;bottom:20px;min-width:52px;max-width:min(240px, calc(100vw - 40px));height:52px;padding:0 14px;border-radius:999px;border:none;cursor:pointer;background:#0f766e;color:#fff;box-shadow:0 8px 24px rgba(16,42,51,.22);display:inline-flex;align-items:center;justify-content:center;gap:6px;font-size:13px;font-weight:700}
 .dk-fab:hover{background:#0d5f59}
 .dk-fab.is-left{left:20px;right:auto}
 .dk-fab.is-right{right:20px;left:auto}
-.dk-badge{min-width:18px;height:18px;padding:0 5px;border-radius:999px;background:#b42318;color:#fff;font-size:11px;line-height:18px;font-weight:700}
+.dk-fab.is-icon-only{width:52px;min-width:52px;max-width:52px;padding:0;border-radius:50%}
+.dk-fab-icon{display:flex;flex-shrink:0}
+.dk-fab-icon svg{display:block}
+.dk-fab-label{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
+.dk-badge{min-width:18px;flex-shrink:0;height:18px;padding:0 5px;border-radius:999px;background:#b42318;color:#fff;font-size:11px;line-height:18px;font-weight:700}
 :host([data-theme="dark"]) .dk-fab{background:#2dd4bf;color:#102a33}
 `;
+
+const FAB_ICON =
+	'<svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true" focusable="false">' +
+	'<path d="M4 7.5C4 5.567 5.567 4 7.5 4H16.5C18.433 4 20 5.567 20 7.5V13.5C20 15.433 18.433 17 16.5 17H11L7 20V17H7.5C5.567 17 4 15.433 4 13.5V7.5Z" stroke="currentColor" stroke-width="1.75" stroke-linejoin="round"/>' +
+	'<path d="M8 9.5H16M8 12.5H13" stroke="currentColor" stroke-width="1.75" stroke-linecap="round"/>' +
+	'</svg>';
 
 class DeskoviSupport extends HTMLElement {
 	#shadow: ShadowRoot;
@@ -90,13 +100,26 @@ class DeskoviSupport extends HTMLElement {
 		style.textContent = FAB_CSS;
 		this.#shadow.appendChild( style );
 
+		const label = ( cfg.launcherLabel || '' ).trim();
+
 		const btn = document.createElement( 'button' );
 		btn.type = 'button';
 		btn.className =
-			'dk-fab ' + ( cfg.placement === 'bottom-left' ? 'is-left' : 'is-right' );
-		btn.setAttribute( 'aria-label', cfg.i18n.support || 'Support' );
+			'dk-fab ' +
+			( cfg.placement === 'bottom-left' ? 'is-left' : 'is-right' ) +
+			( label ? '' : ' is-icon-only' );
+		btn.setAttribute( 'aria-label', label || cfg.i18n.support || 'Support' );
 		btn.setAttribute( 'aria-expanded', 'false' );
-		btn.textContent = cfg.i18n.support || 'Support';
+		const icon = document.createElement( 'span' );
+		icon.className = 'dk-fab-icon';
+		icon.innerHTML = FAB_ICON;
+		btn.append( icon );
+		if ( label ) {
+			const labelEl = document.createElement( 'span' );
+			labelEl.className = 'dk-fab-label';
+			labelEl.textContent = label;
+			btn.append( labelEl );
+		}
 		btn.addEventListener( 'click', () => {
 			void this.toggle();
 		} );

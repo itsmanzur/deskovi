@@ -19,6 +19,7 @@ use Itsdesk\Rest\AdminController;
 use Itsdesk\Rest\GuestController;
 use Itsdesk\Rest\OrderController;
 use Itsdesk\Rest\TicketController;
+use Itsdesk\Tickets\Notifications as TicketNotifications;
 use Itsdesk\Tickets\Schema as TicketSchema;
 use Itsdesk\Widget\Frontend as WidgetFrontend;
 
@@ -68,6 +69,7 @@ final class Plugin {
 		( new AdminAssets() )->register();
 		( new AdminController() )->register();
 		( new TicketController() )->register();
+		( new TicketNotifications() )->register();
 		( new OrderController() )->register();
 		( new GuestController() )->register();
 		( new WidgetFrontend() )->register();

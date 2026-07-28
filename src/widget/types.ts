@@ -7,6 +7,7 @@ export type WidgetConfig = {
 	loginUrl: string;
 	placement: 'bottom-right' | 'bottom-left' | string;
 	theme: 'system' | 'light' | 'dark' | string;
+	launcherLabel: string;
 	assetUrl: string;
 	i18n: Record< string, string >;
 };

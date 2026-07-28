@@ -173,6 +173,20 @@ export function IconPaperclip( { size = 18, className }: IconProps ) {
 	);
 }
 
+export function IconBell( { size = 18, className }: IconProps ) {
+	return (
+		<svg width={ size } height={ size } viewBox="0 0 24 24" fill="none" className={ className } aria-hidden="true">
+			<path
+				d="M6 10a6 6 0 0 1 12 0v4.5l1.5 3H4.5L6 14.5V10Z"
+				stroke="currentColor"
+				strokeWidth="1.75"
+				strokeLinejoin="round"
+			/>
+			<path d="M9.5 20a2.5 2.5 0 0 0 5 0" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" />
+		</svg>
+	);
+}
+
 export function IconFileGeneric( { size = 16, className }: IconProps ) {
 	return (
 		<svg width={ size } height={ size } viewBox="0 0 24 24" fill="none" className={ className } aria-hidden="true">
