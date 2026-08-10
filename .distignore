@@ -3,6 +3,7 @@
 .gitignore
 .gitattributes
 .github
+.claude
 .wordpress-org
 .zip-staging-deskovi
 scripts
