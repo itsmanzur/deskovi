@@ -4,7 +4,7 @@ Tags: woocommerce, helpdesk, support, tickets, customer-service
 Requires at least: 6.0
 Tested up to: 7.0
 Requires PHP: 7.4
-Stable tag: 1.0.0
+Stable tag: 1.1.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -18,6 +18,9 @@ Deskovi adds a self-contained support ticket system to your WooCommerce store. C
 
 * Ticket system with replies, status (open/pending/resolved/closed), and file attachments
 * WooCommerce order context for agents (HPOS-compatible)
+* Agent assignment, with per-agent ticket filtering
+* Canned replies (macros): reusable reply templates with one-click insert and placeholder substitution
+* Configurable email notifications for ticket events
 * Optional customer chat widget on the storefront
 * Guest email OTP verification for visitors who are not logged in
 * Privacy export and erase hooks for WordPress Tools → Export / Erase Personal Data
@@ -73,6 +76,12 @@ https://github.com/itsmanzur/deskovi
 2. Customer widget — optional storefront chat for shoppers
 
 == Changelog ==
+
+= 1.1.0 =
+* Add canned replies (macros): reusable reply templates with one-click insert and placeholder substitution ({customer_name}, {customer_email}, {order_id}, {agent_name})
+* Add file attachment uploads on ticket replies
+* Add agent assignment and per-agent ticket filtering
+* Add configurable email notification settings for ticket events
 
 = 1.0.0 =
 * Initial public release
