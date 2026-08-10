@@ -4,6 +4,7 @@ export type Screen =
 	| 'widget'
 	| 'privacy'
 	| 'notifications'
+	| 'macros'
 	| 'diagnostics'
 	| 'activity';
 
@@ -106,6 +107,14 @@ export type WidgetSettings = {
 	launcher_label: string;
 };
 
+export type CannedReply = {
+	id: string;
+	title: string;
+	body: string;
+	created_at: string;
+	updated_at: string;
+};
+
 export type NotificationSettings = {
 	agent_new_ticket: boolean;
 	agent_new_reply: boolean;
@@ -149,6 +158,7 @@ declare global {
 			version: string;
 			pluginUrl: string;
 			currentUserId: number;
+			currentUserName: string;
 		};
 	}
 }

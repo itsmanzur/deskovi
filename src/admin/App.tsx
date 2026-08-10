@@ -9,12 +9,14 @@ import {
 	IconMark,
 	IconOverview,
 	IconPulse,
+	IconQueue,
 	IconShield,
 	IconTicket,
 	IconWidget,
 } from './components/Icons';
 import { ActivityScreen } from './screens/ActivityScreen';
 import { DiagnosticsScreen } from './screens/DiagnosticsScreen';
+import { MacrosScreen } from './screens/MacrosScreen';
 import { NotificationsScreen } from './screens/NotificationsScreen';
 import { OverviewScreen } from './screens/OverviewScreen';
 import { PrivacyScreen } from './screens/PrivacyScreen';
@@ -51,6 +53,11 @@ const NAV: Array< {
 		id: 'notifications',
 		label: __( 'Notifications', 'deskovi' ),
 		icon: <IconBell size={ 17 } />,
+	},
+	{
+		id: 'macros',
+		label: __( 'Canned Replies', 'deskovi' ),
+		icon: <IconQueue size={ 17 } />,
 	},
 	{
 		id: 'diagnostics',
@@ -133,6 +140,9 @@ export function App() {
 				break;
 			case 'notifications':
 				body = <NotificationsScreen onToast={ showToast } />;
+				break;
+			case 'macros':
+				body = <MacrosScreen onToast={ showToast } />;
 				break;
 			case 'diagnostics':
 				body = <DiagnosticsScreen onToast={ showToast } />;

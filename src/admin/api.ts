@@ -2,6 +2,7 @@ import apiFetch from '@wordpress/api-fetch';
 import type {
 	ActivityData,
 	Agent,
+	CannedReply,
 	DiagnosticsData,
 	NotificationSettings,
 	OrderSnapshot,
@@ -72,6 +73,36 @@ export function saveNotificationSettings(
 		path: `${ base }/notifications`,
 		method: 'POST',
 		data,
+	} );
+}
+
+export function fetchMacros(): Promise< CannedReply[] > {
+	return apiFetch( { path: `${ base }/macros` } );
+}
+
+export function createMacro( data: { title: string; body: string } ): Promise< CannedReply > {
+	return apiFetch( {
+		path: `${ base }/macros`,
+		method: 'POST',
+		data,
+	} );
+}
+
+export function updateMacro(
+	id: string,
+	data: Partial< { title: string; body: string } >
+): Promise< CannedReply > {
+	return apiFetch( {
+		path: `${ base }/macros/${ id }`,
+		method: 'POST',
+		data,
+	} );
+}
+
+export function deleteMacro( id: string ): Promise< { deleted: boolean } > {
+	return apiFetch( {
+		path: `${ base }/macros/${ id }`,
+		method: 'DELETE',
 	} );
 }
 

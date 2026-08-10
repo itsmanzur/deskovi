@@ -5,6 +5,7 @@ import {
 	assignTicket,
 	createTicket,
 	fetchAgents,
+	fetchMacros,
 	fetchTicket,
 	fetchTicketCategories,
 	fetchTicketOrder,
@@ -17,7 +18,30 @@ import {
 } from '../api';
 import { IconFileGeneric, IconPaperclip } from '../components/Icons';
 import { SkeletonPanel } from '../components/Skeleton';
-import type { Agent, OrderSnapshot, Ticket, TicketAttachment, TicketCategory } from '../types';
+import type {
+	Agent,
+	CannedReply,
+	OrderSnapshot,
+	Ticket,
+	TicketAttachment,
+	TicketCategory,
+} from '../types';
+
+/**
+ * Substitute known canned-reply placeholders using the currently open
+ * ticket. Unrecognized {tokens} are left as-is rather than blanked out.
+ */
+function applyMacroPlaceholders( body: string, ticket: Ticket, agentName: string ): string {
+	return body
+		.split( '{customer_name}' )
+		.join( ticket.customer_name || ticket.customer_email )
+		.split( '{customer_email}' )
+		.join( ticket.customer_email )
+		.split( '{order_id}' )
+		.join( ticket.order_id ? `#${ ticket.order_id }` : '' )
+		.split( '{agent_name}' )
+		.join( agentName );
+}
 
 // Must match AttachmentService::max_size() on the server (default 5 MB).
 // If the server-side default changes, update this constant to match.
@@ -76,6 +100,7 @@ export function TicketsScreen( { onToast }: Props ) {
 	const [ showCreate, setShowCreate ] = useState( false );
 
 	const currentUserId = window.itsdeskAdmin?.currentUserId ?? 0;
+	const currentUserName = window.itsdeskAdmin?.currentUserName ?? '';
 	const restRoot = window.itsdeskAdmin?.restRoot ?? '';
 
 	const [ subject, setSubject ] = useState( '' );
@@ -91,6 +116,7 @@ export function TicketsScreen( { onToast }: Props ) {
 	const [ pendingFiles, setPendingFiles ] = useState< File[] >( [] );
 	const [ uploadingFiles, setUploadingFiles ] = useState( false );
 	const fileInputRef = useRef< HTMLInputElement >( null );
+	const [ macros, setMacros ] = useState< CannedReply[] >( [] );
 
 	const loadList = useCallback( () => {
 		setLoading( true );
@@ -124,6 +150,25 @@ export function TicketsScreen( { onToast }: Props ) {
 		loadList();
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [] );
+
+	useEffect( () => {
+		fetchMacros()
+			.then( ( data ) => setMacros( data ) )
+			.catch( ( err: unknown ) => onToast( apiErrorMessage( err ), 'danger' ) );
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [] );
+
+	const onInsertMacro = ( macroId: string ) => {
+		if ( ! selected || ! macroId ) {
+			return;
+		}
+		const macro = macros.find( ( m ) => m.id === macroId );
+		if ( ! macro ) {
+			return;
+		}
+		const inserted = applyMacroPlaceholders( macro.body, selected, currentUserName );
+		setReplyBody( ( current ) => ( current ? `${ current }\n${ inserted }` : inserted ) );
+	};
 
 	const openTicket = ( id: string ) => {
 		setSelectedId( id );
@@ -945,6 +990,26 @@ export function TicketsScreen( { onToast }: Props ) {
 									<IconPaperclip size={ 16 } />
 									{ __( 'Attach', 'deskovi' ) }
 								</button>
+								<select
+									className="itsdesk-select"
+									value=""
+									disabled={ busy || uploadingFiles || macros.length === 0 }
+									aria-label={ __( 'Insert canned reply', 'deskovi' ) }
+									onChange={ ( e ) => {
+										const value = ( e.target as HTMLSelectElement ).value;
+										onInsertMacro( value );
+										( e.target as HTMLSelectElement ).value = '';
+									} }
+								>
+									<option value="">
+										{ __( 'Insert canned reply…', 'deskovi' ) }
+									</option>
+									{ macros.map( ( macro ) => (
+										<option key={ macro.id } value={ macro.id }>
+											{ macro.title }
+										</option>
+									) ) }
+								</select>
 							</div>
 						</div>
 					) }

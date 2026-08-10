@@ -13,6 +13,7 @@ defined( 'ABSPATH' ) || exit;
 use Itsdesk\Diagnostics\ActivityLogger;
 use Itsdesk\Diagnostics\EnvironmentReport;
 use Itsdesk\Privacy\Settings as PrivacySettings;
+use Itsdesk\Tickets\CannedReplies;
 use Itsdesk\Tickets\NotificationSettings;
 use Itsdesk\Widget\Settings as WidgetSettings;
 use WP_Error;
@@ -95,6 +96,40 @@ final class AdminController {
 				array(
 					'methods'             => WP_REST_Server::EDITABLE,
 					'callback'            => array( $this, 'update_notifications' ),
+					'permission_callback' => array( $this, 'can_manage' ),
+				),
+			)
+		);
+
+		register_rest_route(
+			self::REST_NAMESPACE,
+			'/macros',
+			array(
+				array(
+					'methods'             => WP_REST_Server::READABLE,
+					'callback'            => array( $this, 'get_macros' ),
+					'permission_callback' => array( $this, 'can_manage' ),
+				),
+				array(
+					'methods'             => WP_REST_Server::EDITABLE,
+					'callback'            => array( $this, 'create_macro' ),
+					'permission_callback' => array( $this, 'can_manage' ),
+				),
+			)
+		);
+
+		register_rest_route(
+			self::REST_NAMESPACE,
+			'/macros/(?P<id>[a-zA-Z0-9_-]+)',
+			array(
+				array(
+					'methods'             => WP_REST_Server::EDITABLE,
+					'callback'            => array( $this, 'update_macro' ),
+					'permission_callback' => array( $this, 'can_manage' ),
+				),
+				array(
+					'methods'             => WP_REST_Server::DELETABLE,
+					'callback'            => array( $this, 'delete_macro' ),
 					'permission_callback' => array( $this, 'can_manage' ),
 				),
 			)
@@ -208,6 +243,65 @@ final class AdminController {
 		}
 
 		return new WP_REST_Response( $result, 200 );
+	}
+
+	/**
+	 * GET /macros
+	 */
+	public function get_macros(): WP_REST_Response {
+		return new WP_REST_Response( ( new CannedReplies() )->all(), 200 );
+	}
+
+	/**
+	 * POST /macros
+	 *
+	 * @param WP_REST_Request $request Request.
+	 * @return WP_REST_Response|WP_Error
+	 */
+	public function create_macro( WP_REST_Request $request ) {
+		$result = ( new CannedReplies() )->create( $request->get_json_params() ?: array() );
+		if ( is_wp_error( $result ) ) {
+			return $result;
+		}
+
+		return new WP_REST_Response( $result, 201 );
+	}
+
+	/**
+	 * POST /macros/{id}
+	 *
+	 * @param WP_REST_Request $request Request.
+	 * @return WP_REST_Response|WP_Error
+	 */
+	public function update_macro( WP_REST_Request $request ) {
+		$result = ( new CannedReplies() )->update(
+			(string) $request['id'],
+			$request->get_json_params() ?: array()
+		);
+		if ( is_wp_error( $result ) ) {
+			return $result;
+		}
+
+		return new WP_REST_Response( $result, 200 );
+	}
+
+	/**
+	 * DELETE /macros/{id}
+	 *
+	 * @param WP_REST_Request $request Request.
+	 * @return WP_REST_Response|WP_Error
+	 */
+	public function delete_macro( WP_REST_Request $request ) {
+		$deleted = ( new CannedReplies() )->delete( (string) $request['id'] );
+		if ( ! $deleted ) {
+			return new \WP_Error(
+				'itsdesk_macro_not_found',
+				__( 'Canned reply not found.', 'deskovi' ),
+				array( 'status' => 404 )
+			);
+		}
+
+		return new WP_REST_Response( array( 'deleted' => true ), 200 );
 	}
 
 	/**
