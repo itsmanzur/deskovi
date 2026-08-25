@@ -48,6 +48,18 @@ final class TicketService {
 	}
 
 	/**
+	 * Paginated, filterable admin listing.
+	 *
+	 * @param array<string, mixed> $args See TicketRepository::paginate().
+	 * @return array{tickets: array<int, array<string, mixed>>, total: int, page: int, per_page: int, total_pages: int}
+	 */
+	public function list_paginated( array $args ): array {
+		$result            = $this->repo->paginate( $args );
+		$result['tickets'] = array_map( array( $this, 'add_agent_name' ), $result['tickets'] );
+		return $result;
+	}
+
+	/**
 	 * List for customer (WP user).
 	 *
 	 * @return array<int, array<string, mixed>>

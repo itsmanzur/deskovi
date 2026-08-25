@@ -46,6 +46,14 @@ export type Ticket = {
 	attachments?: TicketAttachment[];
 };
 
+export type PaginatedTickets = {
+	tickets: Ticket[];
+	total: number;
+	page: number;
+	per_page: number;
+	total_pages: number;
+};
+
 export type Agent = {
 	id: number;
 	name: string;

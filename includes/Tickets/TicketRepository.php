@@ -34,6 +34,75 @@ final class TicketRepository {
 	}
 
 	/**
+	 * Paginated, filterable admin listing — for large ticket tables where
+	 * all() would load everything into memory on every request.
+	 *
+	 * @param array<string, mixed> $args {
+	 *     @type int    $page               1-indexed page number. Default 1.
+	 *     @type int    $per_page           Rows per page, capped at 100. Default 20.
+	 *     @type string $search             Matched against subject/customer_name/customer_email.
+	 *     @type string $status             Exact status match.
+	 *     @type string $assignee           'unassigned' → assigned_agent_id IS NULL.
+	 *     @type int    $assigned_agent_id  Exact assignee match.
+	 * }
+	 * @return array{tickets: array<int, array<string, mixed>>, total: int, page: int, per_page: int, total_pages: int}
+	 */
+	public function paginate( array $args ): array {
+		global $wpdb;
+		$table = Schema::tickets_table();
+
+		$page     = max( 1, (int) ( $args['page'] ?? 1 ) );
+		$per_page = min( 100, max( 1, (int) ( $args['per_page'] ?? 20 ) ) );
+		$offset   = ( $page - 1 ) * $per_page;
+
+		$where  = array();
+		$params = array();
+
+		$search = trim( (string) ( $args['search'] ?? '' ) );
+		if ( '' !== $search ) {
+			$like     = '%' . $wpdb->esc_like( $search ) . '%';
+			$where[]  = '(subject LIKE %s OR customer_name LIKE %s OR customer_email LIKE %s)';
+			$params[] = $like;
+			$params[] = $like;
+			$params[] = $like;
+		}
+
+		$status = (string) ( $args['status'] ?? '' );
+		if ( '' !== $status ) {
+			$where[]  = 'status = %s';
+			$params[] = $status;
+		}
+
+		if ( 'unassigned' === ( $args['assignee'] ?? '' ) ) {
+			$where[] = 'assigned_agent_id IS NULL';
+		} elseif ( ! empty( $args['assigned_agent_id'] ) ) {
+			$where[]  = 'assigned_agent_id = %d';
+			$params[] = (int) $args['assigned_agent_id'];
+		}
+
+		$where_sql = $where ? ( 'WHERE ' . implode( ' AND ', $where ) ) : '';
+
+		$count_sql = "SELECT COUNT(*) FROM {$table} {$where_sql}"; // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name is internal constant, $where_sql built from prepared fragments above.
+		$total     = (int) ( $params
+			? $wpdb->get_var( $wpdb->prepare( $count_sql, $params ) ) // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- custom plugin table, no core caching API applies.
+			: $wpdb->get_var( $count_sql ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- custom plugin table, no core caching API applies; no user input in $count_sql when $params is empty.
+
+		$list_params = array_merge( $params, array( $per_page, $offset ) );
+		$rows        = $wpdb->get_results( // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- custom plugin table, no core caching API applies.
+			$wpdb->prepare( "SELECT * FROM {$table} {$where_sql} ORDER BY updated_at DESC LIMIT %d OFFSET %d", $list_params ), // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name is internal constant, $where_sql built from prepared fragments above.
+			ARRAY_A
+		);
+
+		return array(
+			'tickets'     => $this->hydrate_rows( is_array( $rows ) ? $rows : array() ),
+			'total'       => $total,
+			'page'        => $page,
+			'per_page'    => $per_page,
+			'total_pages' => (int) max( 1, ceil( $total / $per_page ) ),
+		);
+	}
+
+	/**
 	 * @return array<string, mixed>|null
 	 */
 	public function find( string $id ): ?array {

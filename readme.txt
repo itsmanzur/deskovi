@@ -79,7 +79,7 @@ https://github.com/itsmanzur/deskovi
 
 = 1.1.0 =
 * Add canned replies (macros): reusable reply templates with one-click insert and placeholder substitution ({customer_name}, {customer_email}, {order_id}, {agent_name})
-* Add file attachment uploads on ticket replies
+* Add file attachment upload UI in the agent reply composer
 * Add agent assignment and per-agent ticket filtering
 * Add configurable email notification settings for ticket events
 

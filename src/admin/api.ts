@@ -7,6 +7,7 @@ import type {
 	NotificationSettings,
 	OrderSnapshot,
 	OverviewData,
+	PaginatedTickets,
 	PrivacySettings,
 	Ticket,
 	TicketCategory,
@@ -114,8 +115,25 @@ export function fetchActivity(): Promise< ActivityData > {
 	return apiFetch( { path: `${ base }/activity` } );
 }
 
-export function fetchTickets(): Promise< { tickets: Ticket[] } > {
-	return apiFetch( { path: `${ base }/tickets` } );
+export type FetchTicketsParams = {
+	page?: number;
+	per_page?: number;
+	search?: string;
+	status?: string;
+	assignee?: 'unassigned';
+	assigned_agent_id?: number;
+};
+
+export function fetchTickets( params: FetchTicketsParams = {} ): Promise< PaginatedTickets > {
+	const query = new URLSearchParams();
+	if ( params.page ) query.set( 'page', String( params.page ) );
+	if ( params.per_page ) query.set( 'per_page', String( params.per_page ) );
+	if ( params.search ) query.set( 'search', params.search );
+	if ( params.status ) query.set( 'status', params.status );
+	if ( params.assignee ) query.set( 'assignee', params.assignee );
+	if ( params.assigned_agent_id ) query.set( 'assigned_agent_id', String( params.assigned_agent_id ) );
+	const qs = query.toString();
+	return apiFetch( { path: `${ base }/tickets${ qs ? `?${ qs }` : '' }` } );
 }
 
 export function fetchTicket( id: string ): Promise< Ticket > {

@@ -1,5 +1,5 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from '@wordpress/element';
-import { __ } from '@wordpress/i18n';
+import { useCallback, useEffect, useRef, useState } from '@wordpress/element';
+import { __, sprintf } from '@wordpress/i18n';
 import {
 	apiErrorMessage,
 	assignTicket,
@@ -90,6 +90,11 @@ function labelStatus( value: string ): string {
 
 export function TicketsScreen( { onToast }: Props ) {
 	const [ tickets, setTickets ] = useState< Ticket[] >( [] );
+	const [ totalTickets, setTotalTickets ] = useState( 0 );
+	const [ page, setPage ] = useState( 1 );
+	const [ totalPages, setTotalPages ] = useState( 1 );
+	const [ searchInput, setSearchInput ] = useState( '' );
+	const [ search, setSearch ] = useState( '' );
 	const [ categories, setCategories ] = useState< TicketCategory[] >( [] );
 	const [ agents, setAgents ] = useState< Agent[] >( [] );
 	const [ assigneeFilter, setAssigneeFilter ] = useState< AssigneeFilter >( 'all' );
@@ -118,36 +123,42 @@ export function TicketsScreen( { onToast }: Props ) {
 	const fileInputRef = useRef< HTMLInputElement >( null );
 	const [ macros, setMacros ] = useState< CannedReply[] >( [] );
 
-	const loadList = useCallback( () => {
+	const loadTickets = useCallback( () => {
 		setLoading( true );
-		Promise.all( [ fetchTickets(), fetchTicketCategories(), fetchAgents() ] )
-			.then( ( [ ticketRes, catRes, agentRes ] ) => {
-				setTickets( ticketRes.tickets || [] );
-				setCategories( catRes.categories || [] );
-				setAgents( agentRes.agents || [] );
-				if ( catRes.categories?.[ 0 ] && ! category ) {
-					setCategory( catRes.categories[ 0 ].id );
-				}
+		const params: Parameters< typeof fetchTickets >[ 0 ] = { page, per_page: 20, search };
+		if ( assigneeFilter === 'unassigned' ) {
+			params.assignee = 'unassigned';
+		} else if ( assigneeFilter === 'mine' ) {
+			params.assigned_agent_id = currentUserId;
+		}
+		fetchTickets( params )
+			.then( ( res ) => {
+				setTickets( res.tickets || [] );
+				setTotalTickets( res.total );
+				setTotalPages( res.total_pages );
 				setLoading( false );
 			} )
 			.catch( ( err: unknown ) => {
 				onToast( apiErrorMessage( err ), 'danger' );
 				setLoading( false );
 			} );
-	}, [ category, onToast ] );
-
-	const visibleTickets = useMemo( () => {
-		if ( assigneeFilter === 'unassigned' ) {
-			return tickets.filter( ( t ) => ! t.assigned_agent_id );
-		}
-		if ( assigneeFilter === 'mine' ) {
-			return tickets.filter( ( t ) => t.assigned_agent_id === currentUserId );
-		}
-		return tickets;
-	}, [ tickets, assigneeFilter, currentUserId ] );
+	}, [ page, search, assigneeFilter, currentUserId, onToast ] );
 
 	useEffect( () => {
-		loadList();
+		loadTickets();
+	}, [ loadTickets ] );
+
+	// One-time lookups, unrelated to ticket list pagination/filtering.
+	useEffect( () => {
+		Promise.all( [ fetchTicketCategories(), fetchAgents() ] )
+			.then( ( [ catRes, agentRes ] ) => {
+				setCategories( catRes.categories || [] );
+				setAgents( agentRes.agents || [] );
+				if ( catRes.categories?.[ 0 ] && ! category ) {
+					setCategory( catRes.categories[ 0 ].id );
+				}
+			} )
+			.catch( ( err: unknown ) => onToast( apiErrorMessage( err ), 'danger' ) );
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [] );
 
@@ -157,6 +168,16 @@ export function TicketsScreen( { onToast }: Props ) {
 			.catch( ( err: unknown ) => onToast( apiErrorMessage( err ), 'danger' ) );
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [] );
+
+	// Debounce search input into the value that actually triggers a fetch,
+	// and reset back to page 1 so a new search doesn't land on a stale page.
+	useEffect( () => {
+		const timeout = setTimeout( () => {
+			setPage( 1 );
+			setSearch( searchInput );
+		}, 350 );
+		return () => clearTimeout( timeout );
+	}, [ searchInput ] );
 
 	const onInsertMacro = ( macroId: string ) => {
 		if ( ! selected || ! macroId ) {
@@ -217,7 +238,7 @@ export function TicketsScreen( { onToast }: Props ) {
 						? __( 'Order linked.', 'deskovi' )
 						: __( 'Order unlinked.', 'deskovi' )
 				);
-				loadList();
+				loadTickets();
 			} )
 			.catch( ( err: unknown ) => {
 				onToast( apiErrorMessage( err ), 'danger' );
@@ -239,7 +260,7 @@ export function TicketsScreen( { onToast }: Props ) {
 				setLinkOrderId( '' );
 				setOrderLoading( false );
 				onToast( __( 'Order unlinked.', 'deskovi' ) );
-				loadList();
+				loadTickets();
 			} )
 			.catch( ( err: unknown ) => {
 				onToast( apiErrorMessage( err ), 'danger' );
@@ -262,7 +283,7 @@ export function TicketsScreen( { onToast }: Props ) {
 				setOrderId( '' );
 				setShowCreate( false );
 				setBusy( false );
-				loadList();
+				loadTickets();
 				openTicket( ticket.id );
 			} )
 			.catch( ( err: unknown ) => {
@@ -355,7 +376,7 @@ export function TicketsScreen( { onToast }: Props ) {
 					setSelected( ticket );
 				}
 
-				loadList();
+				loadTickets();
 			} )
 			.catch( ( err: unknown ) => {
 				onToast( apiErrorMessage( err ), 'danger' );
@@ -373,7 +394,7 @@ export function TicketsScreen( { onToast }: Props ) {
 				setSelected( ticket );
 				setBusy( false );
 				onToast( __( 'Assignment updated.', 'deskovi' ) );
-				loadList();
+				loadTickets();
 			} )
 			.catch( ( err: unknown ) => {
 				onToast( apiErrorMessage( err ), 'danger' );
@@ -391,7 +412,7 @@ export function TicketsScreen( { onToast }: Props ) {
 				setSelected( ticket );
 				setBusy( false );
 				onToast( __( 'Status updated.', 'deskovi' ) );
-				loadList();
+				loadTickets();
 			} )
 			.catch( ( err: unknown ) => {
 				onToast( apiErrorMessage( err ), 'danger' );
@@ -419,7 +440,7 @@ export function TicketsScreen( { onToast }: Props ) {
 				<button
 					type="button"
 					className="itsdesk-btn itsdesk-btn--secondary"
-					onClick={ loadList }
+					onClick={ loadTickets }
 					disabled={ busy }
 				>
 					{ __( 'Refresh', 'deskovi' ) }
@@ -435,6 +456,18 @@ export function TicketsScreen( { onToast }: Props ) {
 				>
 					{ __( 'New ticket', 'deskovi' ) }
 				</button>
+			</div>
+
+			<div className="itsdesk-field" style={ { marginTop: 12 } }>
+				<input
+					type="text"
+					className="itsdesk-input"
+					placeholder={ __( 'Search by subject, customer name, or email…', 'deskovi' ) }
+					value={ searchInput }
+					onChange={ ( e ) =>
+						setSearchInput( ( e.target as HTMLInputElement ).value )
+					}
+				/>
 			</div>
 
 			<div className="itsdesk-admin__actions">
@@ -454,21 +487,44 @@ export function TicketsScreen( { onToast }: Props ) {
 								? ' itsdesk-btn--primary'
 								: ' itsdesk-btn--secondary' )
 						}
-						onClick={ () => setAssigneeFilter( value ) }
+						onClick={ () => {
+							setAssigneeFilter( value );
+							setPage( 1 );
+						} }
 					>
 						{ label }
 					</button>
 				) ) }
 			</div>
 
+			<p className="itsdesk-admin__muted" style={ { marginTop: 8 } }>
+				{ search
+					? sprintf(
+							/* translators: 1: result count, 2: search query */
+							__( '%1$d result(s) for "%2$s"', 'deskovi' ),
+							totalTickets,
+							search
+					  )
+					: sprintf(
+							/* translators: %d: total ticket count */
+							__( '%d ticket(s) found', 'deskovi' ),
+							totalTickets
+					  ) }
+			</p>
+
 			<div className="itsdesk-tickets">
 				<aside className="itsdesk-tickets__list">
-					{ visibleTickets.length === 0 ? (
+					{ loading && tickets.length > 0 && (
+						<p className="itsdesk-admin__muted">{ __( 'Loading…', 'deskovi' ) }</p>
+					) }
+					{ tickets.length === 0 ? (
 						<p className="itsdesk-admin__muted">
-							{ __( 'No tickets yet. Create one to test the bridge.', 'deskovi' ) }
+							{ search || assigneeFilter !== 'all'
+								? __( 'No tickets match this search/filter.', 'deskovi' )
+								: __( 'No tickets yet. Create one to test the bridge.', 'deskovi' ) }
 						</p>
 					) : (
-						visibleTickets.map( ( t ) => (
+						tickets.map( ( t ) => (
 							<button
 								key={ t.id }
 								type="button"
@@ -499,6 +555,34 @@ export function TicketsScreen( { onToast }: Props ) {
 								</div>
 							</button>
 						) )
+					) }
+					{ totalPages > 1 && (
+						<div className="itsdesk-admin__actions" style={ { marginTop: 12 } }>
+							<button
+								type="button"
+								className="itsdesk-btn itsdesk-btn--secondary"
+								disabled={ page <= 1 || loading }
+								onClick={ () => setPage( ( p ) => Math.max( 1, p - 1 ) ) }
+							>
+								{ __( 'Previous', 'deskovi' ) }
+							</button>
+							<span className="itsdesk-admin__muted">
+								{ sprintf(
+									/* translators: 1: current page, 2: total pages */
+									__( 'Page %1$d of %2$d', 'deskovi' ),
+									page,
+									totalPages
+								) }
+							</span>
+							<button
+								type="button"
+								className="itsdesk-btn itsdesk-btn--secondary"
+								disabled={ page >= totalPages || loading }
+								onClick={ () => setPage( ( p ) => p + 1 ) }
+							>
+								{ __( 'Next', 'deskovi' ) }
+							</button>
+						</div>
 					) }
 				</aside>
 

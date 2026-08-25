@@ -230,13 +230,43 @@ final class TicketController {
 	}
 
 	/**
-	 * Admin list.
+	 * Admin list — paginated, with optional search/status/assignee filters.
+	 *
+	 * @param WP_REST_Request $request Request.
 	 */
-	public function admin_list(): WP_REST_Response {
-		return new WP_REST_Response(
-			array( 'tickets' => ( new TicketService() )->list_all() ),
-			200
-		);
+	public function admin_list( WP_REST_Request $request ): WP_REST_Response {
+		$args = array();
+
+		$page = (int) $request->get_param( 'page' );
+		if ( $page > 0 ) {
+			$args['page'] = $page;
+		}
+
+		$per_page = (int) $request->get_param( 'per_page' );
+		if ( $per_page > 0 ) {
+			$args['per_page'] = $per_page;
+		}
+
+		$search = sanitize_text_field( (string) $request->get_param( 'search' ) );
+		if ( '' !== $search ) {
+			$args['search'] = $search;
+		}
+
+		$status = sanitize_key( (string) $request->get_param( 'status' ) );
+		if ( in_array( $status, array( 'open', 'pending', 'resolved', 'closed' ), true ) ) {
+			$args['status'] = $status;
+		}
+
+		if ( 'unassigned' === sanitize_key( (string) $request->get_param( 'assignee' ) ) ) {
+			$args['assignee'] = 'unassigned';
+		}
+
+		$agent_id = (int) $request->get_param( 'assigned_agent_id' );
+		if ( $agent_id > 0 ) {
+			$args['assigned_agent_id'] = $agent_id;
+		}
+
+		return new WP_REST_Response( ( new TicketService() )->list_paginated( $args ), 200 );
 	}
 
 	/**
