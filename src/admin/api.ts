@@ -7,7 +7,6 @@ import type {
 	NotificationSettings,
 	OrderSnapshot,
 	OverviewData,
-	PaginatedTickets,
 	PrivacySettings,
 	Ticket,
 	TicketCategory,
@@ -115,23 +114,27 @@ export function fetchActivity(): Promise< ActivityData > {
 	return apiFetch( { path: `${ base }/activity` } );
 }
 
-export type FetchTicketsParams = {
+export type TicketListParams = {
 	page?: number;
 	per_page?: number;
 	search?: string;
-	status?: string;
-	assignee?: 'unassigned';
-	assigned_agent_id?: number;
+	assignee?: string; // 'all' | 'unassigned' | numeric string
 };
 
-export function fetchTickets( params: FetchTicketsParams = {} ): Promise< PaginatedTickets > {
+export type TicketListResponse = {
+	tickets: Ticket[];
+	total: number;
+	page: number;
+	per_page: number;
+	total_pages: number;
+};
+
+export function fetchTickets( params: TicketListParams = {} ): Promise< TicketListResponse > {
 	const query = new URLSearchParams();
 	if ( params.page ) query.set( 'page', String( params.page ) );
 	if ( params.per_page ) query.set( 'per_page', String( params.per_page ) );
 	if ( params.search ) query.set( 'search', params.search );
-	if ( params.status ) query.set( 'status', params.status );
-	if ( params.assignee ) query.set( 'assignee', params.assignee );
-	if ( params.assigned_agent_id ) query.set( 'assigned_agent_id', String( params.assigned_agent_id ) );
+	if ( params.assignee && params.assignee !== 'all' ) query.set( 'assignee', params.assignee );
 	const qs = query.toString();
 	return apiFetch( { path: `${ base }/tickets${ qs ? `?${ qs }` : '' }` } );
 }

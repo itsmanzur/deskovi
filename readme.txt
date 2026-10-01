@@ -4,7 +4,7 @@ Tags: woocommerce, helpdesk, support, tickets, customer-service
 Requires at least: 6.0
 Tested up to: 7.0
 Requires PHP: 7.4
-Stable tag: 1.1.0
+Stable tag: 1.2.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -76,6 +76,11 @@ https://github.com/itsmanzur/deskovi
 2. Customer widget — optional storefront chat for shoppers
 
 == Changelog ==
+
+= 1.2.0 =
+* Add server-side pagination to the admin tickets list
+* Add ticket search by subject, customer name, or email
+* Add server-side assignee filter (All / Unassigned / Assigned to me)
 
 = 1.1.0 =
 * Add canned replies (macros): reusable reply templates with one-click insert and placeholder substitution ({customer_name}, {customer_email}, {order_id}, {agent_name})

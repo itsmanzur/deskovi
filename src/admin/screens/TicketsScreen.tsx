@@ -95,6 +95,7 @@ export function TicketsScreen( { onToast }: Props ) {
 	const [ totalPages, setTotalPages ] = useState( 1 );
 	const [ searchInput, setSearchInput ] = useState( '' );
 	const [ search, setSearch ] = useState( '' );
+	const PER_PAGE = 20;
 	const [ categories, setCategories ] = useState< TicketCategory[] >( [] );
 	const [ agents, setAgents ] = useState< Agent[] >( [] );
 	const [ assigneeFilter, setAssigneeFilter ] = useState< AssigneeFilter >( 'all' );
@@ -123,26 +124,23 @@ export function TicketsScreen( { onToast }: Props ) {
 	const fileInputRef = useRef< HTMLInputElement >( null );
 	const [ macros, setMacros ] = useState< CannedReply[] >( [] );
 
+	const resolvedAssignee =
+		assigneeFilter === 'mine' ? String( currentUserId ) : assigneeFilter;
+
 	const loadTickets = useCallback( () => {
 		setLoading( true );
-		const params: Parameters< typeof fetchTickets >[ 0 ] = { page, per_page: 20, search };
-		if ( assigneeFilter === 'unassigned' ) {
-			params.assignee = 'unassigned';
-		} else if ( assigneeFilter === 'mine' ) {
-			params.assigned_agent_id = currentUserId;
-		}
-		fetchTickets( params )
+		fetchTickets( { page, per_page: PER_PAGE, search, assignee: resolvedAssignee } )
 			.then( ( res ) => {
 				setTickets( res.tickets || [] );
 				setTotalTickets( res.total );
-				setTotalPages( res.total_pages );
+				setTotalPages( res.total_pages || 1 );
 				setLoading( false );
 			} )
 			.catch( ( err: unknown ) => {
 				onToast( apiErrorMessage( err ), 'danger' );
 				setLoading( false );
 			} );
-	}, [ page, search, assigneeFilter, currentUserId, onToast ] );
+	}, [ page, search, resolvedAssignee, onToast ] );
 
 	useEffect( () => {
 		loadTickets();
@@ -169,15 +167,16 @@ export function TicketsScreen( { onToast }: Props ) {
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [] );
 
-	// Debounce search input into the value that actually triggers a fetch,
-	// and reset back to page 1 so a new search doesn't land on a stale page.
+	// Debounce search input into the value that actually triggers a fetch.
 	useEffect( () => {
-		const timeout = setTimeout( () => {
-			setPage( 1 );
-			setSearch( searchInput );
-		}, 350 );
-		return () => clearTimeout( timeout );
+		const t = setTimeout( () => setSearch( searchInput.trim() ), 300 );
+		return () => clearTimeout( t );
 	}, [ searchInput ] );
+
+	// Reset to page 1 whenever the search term or assignee filter changes.
+	useEffect( () => {
+		setPage( 1 );
+	}, [ search, assigneeFilter ] );
 
 	const onInsertMacro = ( macroId: string ) => {
 		if ( ! selected || ! macroId ) {
@@ -460,9 +459,9 @@ export function TicketsScreen( { onToast }: Props ) {
 
 			<div className="itsdesk-field" style={ { marginTop: 12 } }>
 				<input
-					type="text"
+					type="search"
 					className="itsdesk-input"
-					placeholder={ __( 'Search by subject, customer name, or email…', 'deskovi' ) }
+					placeholder={ __( 'Search subject, name, or email…', 'deskovi' ) }
 					value={ searchInput }
 					onChange={ ( e ) =>
 						setSearchInput( ( e.target as HTMLInputElement ).value )
@@ -487,10 +486,7 @@ export function TicketsScreen( { onToast }: Props ) {
 								? ' itsdesk-btn--primary'
 								: ' itsdesk-btn--secondary' )
 						}
-						onClick={ () => {
-							setAssigneeFilter( value );
-							setPage( 1 );
-						} }
+						onClick={ () => setAssigneeFilter( value ) }
 					>
 						{ label }
 					</button>
@@ -557,16 +553,16 @@ export function TicketsScreen( { onToast }: Props ) {
 						) )
 					) }
 					{ totalPages > 1 && (
-						<div className="itsdesk-admin__actions" style={ { marginTop: 12 } }>
+						<div className="itsdesk-pagination">
 							<button
 								type="button"
 								className="itsdesk-btn itsdesk-btn--secondary"
 								disabled={ page <= 1 || loading }
 								onClick={ () => setPage( ( p ) => Math.max( 1, p - 1 ) ) }
 							>
-								{ __( 'Previous', 'deskovi' ) }
+								{ __( 'Prev', 'deskovi' ) }
 							</button>
-							<span className="itsdesk-admin__muted">
+							<span>
 								{ sprintf(
 									/* translators: 1: current page, 2: total pages */
 									__( 'Page %1$d of %2$d', 'deskovi' ),
@@ -578,7 +574,7 @@ export function TicketsScreen( { onToast }: Props ) {
 								type="button"
 								className="itsdesk-btn itsdesk-btn--secondary"
 								disabled={ page >= totalPages || loading }
-								onClick={ () => setPage( ( p ) => p + 1 ) }
+								onClick={ () => setPage( ( p ) => Math.min( totalPages, p + 1 ) ) }
 							>
 								{ __( 'Next', 'deskovi' ) }
 							</button>

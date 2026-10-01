@@ -32,31 +32,34 @@ final class TicketService {
 	}
 
 	/**
-	 * List all (admin).
+	 * List all (admin), paginated + filtered.
 	 *
-	 * @return array<int, array<string, mixed>>
+	 * @param array{page?: int, per_page?: int, search?: string, assignee?: string} $args
+	 * @return array{items: array<int, array<string, mixed>>, total: int, page: int, per_page: int}
 	 */
-	public function list_all(): array {
-		$tickets = $this->repo->all();
-		usort(
-			$tickets,
-			static function ( $a, $b ) {
-				return strcmp( (string) ( $b['updated_at'] ?? '' ), (string) ( $a['updated_at'] ?? '' ) );
-			}
-		);
-		return array_map( array( $this, 'add_agent_name' ), $tickets );
-	}
+	public function list_all( array $args = array() ): array {
+		$page     = max( 1, (int) ( $args['page'] ?? 1 ) );
+		$per_page = min( 100, max( 1, (int) ( $args['per_page'] ?? 20 ) ) );
+		$search   = isset( $args['search'] ) ? trim( (string) $args['search'] ) : '';
+		$assignee = isset( $args['assignee'] ) ? (string) $args['assignee'] : 'all';
 
-	/**
-	 * Paginated, filterable admin listing.
-	 *
-	 * @param array<string, mixed> $args See TicketRepository::paginate().
-	 * @return array{tickets: array<int, array<string, mixed>>, total: int, page: int, per_page: int, total_pages: int}
-	 */
-	public function list_paginated( array $args ): array {
-		$result            = $this->repo->paginate( $args );
-		$result['tickets'] = array_map( array( $this, 'add_agent_name' ), $result['tickets'] );
-		return $result;
+		$result = $this->repo->paginated(
+			array(
+				'page'     => $page,
+				'per_page' => $per_page,
+				'search'   => $search,
+				'assignee' => $assignee,
+			)
+		);
+
+		$items = array_map( array( $this, 'add_agent_name' ), $result['items'] );
+
+		return array(
+			'items'    => $items,
+			'total'    => $result['total'],
+			'page'     => $page,
+			'per_page' => $per_page,
+		);
 	}
 
 	/**

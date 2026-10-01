@@ -34,20 +34,20 @@ final class TicketRepository {
 	}
 
 	/**
-	 * Paginated, filterable admin listing — for large ticket tables where
-	 * all() would load everything into memory on every request.
+	 * Paginated, filtered ticket listing for the admin screen — for large
+	 * ticket tables where all() would load everything into memory on every
+	 * request. Only the current page's rows are hydrated (messages +
+	 * attachments), not the whole table.
 	 *
-	 * @param array<string, mixed> $args {
-	 *     @type int    $page               1-indexed page number. Default 1.
-	 *     @type int    $per_page           Rows per page, capped at 100. Default 20.
-	 *     @type string $search             Matched against subject/customer_name/customer_email.
-	 *     @type string $status             Exact status match.
-	 *     @type string $assignee           'unassigned' → assigned_agent_id IS NULL.
-	 *     @type int    $assigned_agent_id  Exact assignee match.
-	 * }
-	 * @return array{tickets: array<int, array<string, mixed>>, total: int, page: int, per_page: int, total_pages: int}
+	 * @param array{
+	 *     page: int,
+	 *     per_page: int,
+	 *     search: string,
+	 *     assignee: string,   // 'all' | 'unassigned' | numeric string (agent user id)
+	 * } $args
+	 * @return array{items: array<int, array<string, mixed>>, total: int}
 	 */
-	public function paginate( array $args ): array {
+	public function paginated( array $args ): array {
 		global $wpdb;
 		$table = Schema::tickets_table();
 
@@ -67,17 +67,12 @@ final class TicketRepository {
 			$params[] = $like;
 		}
 
-		$status = (string) ( $args['status'] ?? '' );
-		if ( '' !== $status ) {
-			$where[]  = 'status = %s';
-			$params[] = $status;
-		}
-
-		if ( 'unassigned' === ( $args['assignee'] ?? '' ) ) {
+		$assignee = (string) ( $args['assignee'] ?? 'all' );
+		if ( 'unassigned' === $assignee ) {
 			$where[] = 'assigned_agent_id IS NULL';
-		} elseif ( ! empty( $args['assigned_agent_id'] ) ) {
+		} elseif ( is_numeric( $assignee ) ) {
 			$where[]  = 'assigned_agent_id = %d';
-			$params[] = (int) $args['assigned_agent_id'];
+			$params[] = (int) $assignee;
 		}
 
 		$where_sql = $where ? ( 'WHERE ' . implode( ' AND ', $where ) ) : '';
@@ -94,11 +89,8 @@ final class TicketRepository {
 		);
 
 		return array(
-			'tickets'     => $this->hydrate_rows( is_array( $rows ) ? $rows : array() ),
-			'total'       => $total,
-			'page'        => $page,
-			'per_page'    => $per_page,
-			'total_pages' => (int) max( 1, ceil( $total / $per_page ) ),
+			'items' => $this->hydrate_rows( is_array( $rows ) ? $rows : array() ),
+			'total' => $total,
 		);
 	}
 

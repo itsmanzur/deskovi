@@ -287,6 +287,16 @@
 	align-items: center;
 }
 
+.itsdesk-pagination {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	gap: 8px;
+	margin-top: 12px;
+	padding-top: 12px;
+	border-top: 1px solid var(--dk-line);
+}
+
 /* —— Badges —— */
 .itsdesk-badge {
 	display: inline-flex;
