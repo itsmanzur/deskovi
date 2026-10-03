@@ -51,3 +51,4 @@ docker-compose.yml
 .env.*
 *.log
 *.zip
+demo
