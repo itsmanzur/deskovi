@@ -3,6 +3,8 @@ import { __, sprintf } from '@wordpress/i18n';
 import {
 	apiErrorMessage,
 	assignTicket,
+	bulkDeleteTickets,
+	bulkSetTicketStatus,
 	createTicket,
 	fetchAgents,
 	fetchMacros,
@@ -12,8 +14,12 @@ import {
 	fetchTickets,
 	formatBytes,
 	linkTicketOrder,
+	refundOrder,
 	replyTicket,
+	resendOrderInvoice,
+	ticketsExportUrl,
 	uploadTicketAttachment,
+	updateTicketPriority,
 	updateTicketStatus,
 } from '../api';
 import { IconFileGeneric, IconPaperclip } from '../components/Icons';
@@ -67,6 +73,31 @@ function statusTone( status: string ): string {
 	return 'neutral';
 }
 
+// Reuses the same .itsdesk-badge tone classes as statusTone() above —
+// warn/danger already read as amber/red, no new badge CSS needed.
+function priorityTone( priority: string ): string {
+	if ( priority === 'urgent' ) {
+		return 'danger';
+	}
+	if ( priority === 'high' ) {
+		return 'warn';
+	}
+	return 'neutral';
+}
+
+function labelPriority( priority: string ): string {
+	if ( priority === 'urgent' ) {
+		return __( 'Urgent', 'deskovi' );
+	}
+	if ( priority === 'high' ) {
+		return __( 'High', 'deskovi' );
+	}
+	if ( priority === 'low' ) {
+		return __( 'Low', 'deskovi' );
+	}
+	return __( 'Normal', 'deskovi' );
+}
+
 function formatWhen( value: string ): string {
 	if ( ! value ) {
 		return '—';
@@ -107,6 +138,7 @@ export function TicketsScreen( { onToast }: Props ) {
 
 	const currentUserId = window.itsdeskAdmin?.currentUserId ?? 0;
 	const currentUserName = window.itsdeskAdmin?.currentUserName ?? '';
+	const canManageOrders = window.itsdeskAdmin?.canManageOrders ?? false;
 	const restRoot = window.itsdeskAdmin?.restRoot ?? '';
 
 	const [ subject, setSubject ] = useState( '' );
@@ -117,12 +149,15 @@ export function TicketsScreen( { onToast }: Props ) {
 	const [ replyInternal, setReplyInternal ] = useState( false );
 	const [ orderContext, setOrderContext ] = useState< OrderSnapshot | null >( null );
 	const [ orderLoading, setOrderLoading ] = useState( false );
+	const [ refundAmount, setRefundAmount ] = useState( '' );
+	const [ refundReason, setRefundReason ] = useState( '' );
 	const [ linkOrderId, setLinkOrderId ] = useState( '' );
 	const [ showTimeline, setShowTimeline ] = useState( false );
 	const [ pendingFiles, setPendingFiles ] = useState< File[] >( [] );
 	const [ uploadingFiles, setUploadingFiles ] = useState( false );
 	const fileInputRef = useRef< HTMLInputElement >( null );
 	const [ macros, setMacros ] = useState< CannedReply[] >( [] );
+	const [ selectedIds, setSelectedIds ] = useState< string[] >( [] );
 
 	const resolvedAssignee =
 		assigneeFilter === 'mine' ? String( currentUserId ) : assigneeFilter;
@@ -177,6 +212,13 @@ export function TicketsScreen( { onToast }: Props ) {
 	useEffect( () => {
 		setPage( 1 );
 	}, [ search, assigneeFilter ] );
+
+	// Clear bulk selection whenever the list reloads (new page/search/filter,
+	// or after a bulk action completes) so stale ids from a previous page
+	// or state can't silently carry over.
+	useEffect( () => {
+		setSelectedIds( [] );
+	}, [ tickets ] );
 
 	const onInsertMacro = ( macroId: string ) => {
 		if ( ! selected || ! macroId ) {
@@ -259,6 +301,50 @@ export function TicketsScreen( { onToast }: Props ) {
 				setLinkOrderId( '' );
 				setOrderLoading( false );
 				onToast( __( 'Order unlinked.', 'deskovi' ) );
+				loadTickets();
+			} )
+			.catch( ( err: unknown ) => {
+				onToast( apiErrorMessage( err ), 'danger' );
+				setOrderLoading( false );
+			} );
+	};
+
+	const onRefund = () => {
+		if ( ! selected ) {
+			return;
+		}
+		const trimmed = refundAmount.trim();
+		const amount = trimmed ? parseFloat( trimmed ) : null;
+		if ( trimmed && ( amount === null || Number.isNaN( amount ) || amount <= 0 ) ) {
+			onToast( __( 'Enter a valid refund amount, or leave it blank for the full remaining amount.', 'deskovi' ), 'danger' );
+			return;
+		}
+		setOrderLoading( true );
+		refundOrder( selected.id, amount, refundReason )
+			.then( ( ticket ) => {
+				setSelected( ticket );
+				setRefundAmount( '' );
+				setRefundReason( '' );
+				setOrderLoading( false );
+				onToast( __( 'Refund issued.', 'deskovi' ) );
+				loadTickets();
+			} )
+			.catch( ( err: unknown ) => {
+				onToast( apiErrorMessage( err ), 'danger' );
+				setOrderLoading( false );
+			} );
+	};
+
+	const onResendInvoice = () => {
+		if ( ! selected ) {
+			return;
+		}
+		setOrderLoading( true );
+		resendOrderInvoice( selected.id )
+			.then( ( ticket ) => {
+				setSelected( ticket );
+				setOrderLoading( false );
+				onToast( __( 'Invoice email resent.', 'deskovi' ) );
 				loadTickets();
 			} )
 			.catch( ( err: unknown ) => {
@@ -419,6 +505,63 @@ export function TicketsScreen( { onToast }: Props ) {
 			} );
 	};
 
+	const onPriority = ( priority: string ) => {
+		if ( ! selected ) {
+			return;
+		}
+		setBusy( true );
+		updateTicketPriority( selected.id, priority )
+			.then( ( ticket ) => {
+				setSelected( ticket );
+				setBusy( false );
+				onToast( __( 'Priority updated.', 'deskovi' ) );
+				loadTickets();
+			} )
+			.catch( ( err: unknown ) => {
+				onToast( apiErrorMessage( err ), 'danger' );
+				setBusy( false );
+			} );
+	};
+
+	const toggleSelected = ( id: string ) => {
+		setSelectedIds( ( prev ) =>
+			prev.includes( id ) ? prev.filter( ( x ) => x !== id ) : [ ...prev, id ]
+		);
+	};
+
+	const onBulkSetStatus = ( status: string ) => {
+		if ( ! status ) {
+			return;
+		}
+		bulkSetTicketStatus( selectedIds, status )
+			.then( () => {
+				onToast( __( 'Status updated for selected tickets.', 'deskovi' ) );
+				loadTickets();
+			} )
+			.catch( ( err: unknown ) => onToast( apiErrorMessage( err ), 'danger' ) );
+	};
+
+	const onBulkDelete = () => {
+		// eslint-disable-next-line no-alert
+		if (
+			! window.confirm(
+				sprintf(
+					/* translators: %d: number of tickets to delete */
+					__( "Delete %d ticket(s)? This can't be undone.", 'deskovi' ),
+					selectedIds.length
+				)
+			)
+		) {
+			return;
+		}
+		bulkDeleteTickets( selectedIds )
+			.then( () => {
+				onToast( __( 'Selected tickets deleted.', 'deskovi' ) );
+				loadTickets();
+			} )
+			.catch( ( err: unknown ) => onToast( apiErrorMessage( err ), 'danger' ) );
+	};
+
 	if ( loading && tickets.length === 0 ) {
 		return <SkeletonPanel />;
 	}
@@ -457,16 +600,26 @@ export function TicketsScreen( { onToast }: Props ) {
 				</button>
 			</div>
 
-			<div className="itsdesk-field" style={ { marginTop: 12 } }>
-				<input
-					type="search"
-					className="itsdesk-input"
-					placeholder={ __( 'Search subject, name, or email…', 'deskovi' ) }
-					value={ searchInput }
-					onChange={ ( e ) =>
-						setSearchInput( ( e.target as HTMLInputElement ).value )
-					}
-				/>
+			<div className="itsdesk-admin__actions" style={ { marginTop: 12 } }>
+				<div className="itsdesk-field" style={ { flex: 1, minWidth: 220, margin: 0 } }>
+					<input
+						type="search"
+						className="itsdesk-input"
+						placeholder={ __( 'Search subject, name, or email…', 'deskovi' ) }
+						value={ searchInput }
+						onChange={ ( e ) =>
+							setSearchInput( ( e.target as HTMLInputElement ).value )
+						}
+					/>
+				</div>
+				<a
+					className="itsdesk-btn itsdesk-btn--secondary"
+					href={ ticketsExportUrl( { search, assignee: resolvedAssignee } ) }
+					target="_blank"
+					rel="noreferrer"
+				>
+					{ __( 'Export CSV', 'deskovi' ) }
+				</a>
 			</div>
 
 			<div className="itsdesk-admin__actions">
@@ -510,6 +663,57 @@ export function TicketsScreen( { onToast }: Props ) {
 
 			<div className="itsdesk-tickets">
 				<aside className="itsdesk-tickets__list">
+					{ tickets.length > 0 && (
+						<label className="itsdesk-checkline" style={ { marginBottom: 8 } }>
+							<input
+								type="checkbox"
+								checked={
+									tickets.length > 0 && selectedIds.length === tickets.length
+								}
+								onChange={ () =>
+									setSelectedIds(
+										selectedIds.length === tickets.length
+											? []
+											: tickets.map( ( t ) => t.id )
+									)
+								}
+							/>
+							<span>{ __( 'Select all', 'deskovi' ) }</span>
+						</label>
+					) }
+
+					{ selectedIds.length > 0 && (
+						<div className="itsdesk-bulk-bar">
+							<span>
+								{ sprintf(
+									/* translators: %d: number of selected tickets */
+									__( '%d selected', 'deskovi' ),
+									selectedIds.length
+								) }
+							</span>
+							<select
+								className="itsdesk-select"
+								value=""
+								onChange={ ( e ) =>
+									onBulkSetStatus( ( e.target as HTMLSelectElement ).value )
+								}
+							>
+								<option value="">{ __( 'Set status…', 'deskovi' ) }</option>
+								<option value="open">{ __( 'Open', 'deskovi' ) }</option>
+								<option value="pending">{ __( 'Pending', 'deskovi' ) }</option>
+								<option value="resolved">{ __( 'Resolved', 'deskovi' ) }</option>
+								<option value="closed">{ __( 'Closed', 'deskovi' ) }</option>
+							</select>
+							<button
+								type="button"
+								className="itsdesk-btn itsdesk-btn--danger"
+								onClick={ onBulkDelete }
+							>
+								{ __( 'Delete', 'deskovi' ) }
+							</button>
+						</div>
+					) }
+
 					{ loading && tickets.length > 0 && (
 						<p className="itsdesk-admin__muted">{ __( 'Loading…', 'deskovi' ) }</p>
 					) }
@@ -521,35 +725,54 @@ export function TicketsScreen( { onToast }: Props ) {
 						</p>
 					) : (
 						tickets.map( ( t ) => (
-							<button
+							<div
 								key={ t.id }
-								type="button"
 								className={
 									'itsdesk-ticket-row' +
 									( selectedId === t.id ? ' is-active' : '' )
 								}
-								onClick={ () => openTicket( t.id ) }
 							>
-								<div className="itsdesk-ticket-row__top">
-									<strong>{ t.subject }</strong>
-									<span
-										className={
-											'itsdesk-badge itsdesk-badge--' +
-											statusTone( t.status )
-										}
-									>
-										<span className="itsdesk-badge__dot" />
-										{ labelStatus( t.status ) }
-									</span>
+								<input
+									type="checkbox"
+									checked={ selectedIds.includes( t.id ) }
+									onClick={ ( e ) => e.stopPropagation() }
+									onChange={ () => toggleSelected( t.id ) }
+								/>
+								<div
+									className="itsdesk-ticket-row__content"
+									onClick={ () => openTicket( t.id ) }
+								>
+									<div className="itsdesk-ticket-row__top">
+										<strong>{ t.subject }</strong>
+										<span
+											className={
+												'itsdesk-badge itsdesk-badge--' +
+												statusTone( t.status )
+											}
+										>
+											<span className="itsdesk-badge__dot" />
+											{ labelStatus( t.status ) }
+										</span>
+										{ t.priority && t.priority !== 'normal' && (
+											<span
+												className={
+													'itsdesk-badge itsdesk-badge--' +
+													priorityTone( t.priority )
+												}
+											>
+												{ labelPriority( t.priority ) }
+											</span>
+										) }
+									</div>
+									<div className="itsdesk-ticket-row__meta">
+										<span>{ t.customer_name || t.customer_email || '—' }</span>
+										<span className="itsdesk-badge itsdesk-badge--neutral">
+											{ t.assigned_agent_name ||
+												__( 'Unassigned', 'deskovi' ) }
+										</span>
+									</div>
 								</div>
-								<div className="itsdesk-ticket-row__meta">
-									<span>{ t.customer_name || t.customer_email || '—' }</span>
-									<span className="itsdesk-badge itsdesk-badge--neutral">
-										{ t.assigned_agent_name ||
-											__( 'Unassigned', 'deskovi' ) }
-									</span>
-								</div>
-							</button>
+							</div>
 						) )
 					) }
 					{ totalPages > 1 && (
@@ -817,6 +1040,63 @@ export function TicketsScreen( { onToast }: Props ) {
 													) }
 												</>
 											) }
+										{ canManageOrders && (
+											<div className="itsdesk-card" style={ { marginTop: 14 } }>
+												<div className="itsdesk-card__head">
+													<h3>{ __( 'Refund', 'deskovi' ) }</h3>
+												</div>
+												<div className="itsdesk-field">
+													<label htmlFor="itsdesk-refund-amount">
+														{ __( 'Amount (leave blank for full remaining amount)', 'deskovi' ) }
+													</label>
+													<input
+														id="itsdesk-refund-amount"
+														className="itsdesk-input"
+														value={ refundAmount }
+														disabled={ orderLoading || busy }
+														onChange={ ( e ) =>
+															setRefundAmount( ( e.target as HTMLInputElement ).value )
+														}
+														placeholder="0.00"
+													/>
+												</div>
+												<div className="itsdesk-field">
+													<label htmlFor="itsdesk-refund-reason">
+														{ __( 'Reason (optional)', 'deskovi' ) }
+													</label>
+													<input
+														id="itsdesk-refund-reason"
+														className="itsdesk-input"
+														value={ refundReason }
+														disabled={ orderLoading || busy }
+														onChange={ ( e ) =>
+															setRefundReason( ( e.target as HTMLInputElement ).value )
+														}
+													/>
+												</div>
+												<div className="itsdesk-admin__actions">
+													<button
+														type="button"
+														className="itsdesk-btn itsdesk-btn--danger"
+														disabled={ orderLoading || busy }
+														onClick={ onRefund }
+													>
+														{ orderLoading
+															? __( 'Processing…', 'deskovi' )
+															: __( 'Issue refund', 'deskovi' ) }
+													</button>
+													<button
+														type="button"
+														className="itsdesk-btn itsdesk-btn--secondary"
+														disabled={ orderLoading || busy }
+														onClick={ onResendInvoice }
+													>
+														{ __( 'Resend invoice', 'deskovi' ) }
+													</button>
+												</div>
+											</div>
+										) }
+
 										<div className="itsdesk-admin__actions">
 											<button
 												type="button"
@@ -892,6 +1172,26 @@ export function TicketsScreen( { onToast }: Props ) {
 											{ a.name }
 										</option>
 									) ) }
+								</select>
+							</div>
+
+							<div className="itsdesk-field" style={ { marginTop: 14 } }>
+								<label htmlFor="itsdesk-tkt-priority">
+									{ __( 'Priority', 'deskovi' ) }
+								</label>
+								<select
+									id="itsdesk-tkt-priority"
+									className="itsdesk-select"
+									value={ selected.priority ?? 'normal' }
+									disabled={ busy }
+									onChange={ ( e ) =>
+										onPriority( ( e.target as HTMLSelectElement ).value )
+									}
+								>
+									<option value="low">{ __( 'Low', 'deskovi' ) }</option>
+									<option value="normal">{ __( 'Normal', 'deskovi' ) }</option>
+									<option value="high">{ __( 'High', 'deskovi' ) }</option>
+									<option value="urgent">{ __( 'Urgent', 'deskovi' ) }</option>
 								</select>
 							</div>
 

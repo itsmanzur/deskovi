@@ -187,6 +187,35 @@ export function IconBell( { size = 18, className }: IconProps ) {
 	);
 }
 
+export function IconFlag( { size = 18, className }: IconProps ) {
+	return (
+		<svg width={ size } height={ size } viewBox="0 0 24 24" fill="none" className={ className } aria-hidden="true">
+			<path d="M5 3v18" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" />
+			<path
+				d="M5 4.5h11.5c1.4 0 2.1 1.7 1.1 2.7L15 9.5l2.6 2.3c1 1 .3 2.7-1.1 2.7H5V4.5Z"
+				stroke="currentColor"
+				strokeWidth="1.75"
+				strokeLinejoin="round"
+			/>
+		</svg>
+	);
+}
+
+export function IconRefund( { size = 18, className }: IconProps ) {
+	return (
+		<svg width={ size } height={ size } viewBox="0 0 24 24" fill="none" className={ className } aria-hidden="true">
+			<path
+				d="M4.5 10a7.5 7.5 0 1 1 1.8 7.4"
+				stroke="currentColor"
+				strokeWidth="1.75"
+				strokeLinecap="round"
+			/>
+			<path d="M4.5 5v5h5" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" />
+			<path d="M12 8.3v7.4M9.8 10h3.2a1.6 1.6 0 0 1 0 3.2h-2a1.6 1.6 0 0 0 0 3.2h3.3" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+		</svg>
+	);
+}
+
 export function IconFileGeneric( { size = 16, className }: IconProps ) {
 	return (
 		<svg width={ size } height={ size } viewBox="0 0 24 24" fill="none" className={ className } aria-hidden="true">

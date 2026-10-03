@@ -13,6 +13,7 @@ defined( 'ABSPATH' ) || exit;
 use Itsdesk\Admin\Capabilities;
 use Itsdesk\Auth\GuestSession;
 use Itsdesk\Diagnostics\ActivityLogger;
+use Itsdesk\Orders\OrderActions;
 use Itsdesk\Orders\OrderContext;
 
 /**
@@ -405,6 +406,130 @@ final class TicketService {
 	}
 
 	/**
+	 * Update a ticket's priority (admin).
+	 *
+	 * @return array<string, mixed>|\WP_Error
+	 */
+	public function update_priority( string $ticket_id, string $priority ) {
+		$allowed  = array( 'low', 'normal', 'high', 'urgent' );
+		$priority = sanitize_key( $priority );
+		if ( ! in_array( $priority, $allowed, true ) ) {
+			return new \WP_Error(
+				'itsdesk_priority_invalid',
+				__( 'Invalid ticket priority.', 'deskovi' ),
+				array( 'status' => 400 )
+			);
+		}
+
+		$ticket = $this->repo->find( $ticket_id );
+		if ( null === $ticket ) {
+			return new \WP_Error(
+				'itsdesk_ticket_not_found',
+				__( 'Ticket not found.', 'deskovi' ),
+				array( 'status' => 404 )
+			);
+		}
+
+		$ticket['priority']   = $priority;
+		$ticket['updated_at'] = gmdate( 'c' );
+		$this->repo->save( $ticket );
+
+		$this->logger->log(
+			'Ticket',
+			sprintf(
+				/* translators: %s: priority */
+				__( 'Ticket priority set to %s', 'deskovi' ),
+				$priority
+			),
+			'OK'
+		);
+
+		return $ticket;
+	}
+
+	/**
+	 * Bulk delete tickets (admin).
+	 *
+	 * @param array<int, string> $ids Ticket ids.
+	 */
+	public function bulk_delete( array $ids ): int {
+		$removed = $this->repo->delete_ids( $ids );
+		if ( $removed > 0 ) {
+			$this->logger->log(
+				'Ticket',
+				sprintf(
+					/* translators: %d: number of tickets deleted */
+					__( '%d ticket(s) deleted in bulk', 'deskovi' ),
+					$removed
+				),
+				'OK'
+			);
+		}
+		return $removed;
+	}
+
+	/**
+	 * Bulk status update (admin).
+	 *
+	 * @param array<int, string> $ids Ticket ids.
+	 * @return array{updated: int}|\WP_Error
+	 */
+	public function bulk_update_status( array $ids, string $status ) {
+		$allowed = array( 'open', 'pending', 'resolved', 'closed' );
+		$status  = sanitize_key( $status );
+		if ( ! in_array( $status, $allowed, true ) ) {
+			return new \WP_Error(
+				'itsdesk_status_invalid',
+				__( 'Invalid ticket status.', 'deskovi' ),
+				array( 'status' => 400 )
+			);
+		}
+
+		$updated = 0;
+		foreach ( $ids as $id ) {
+			$ticket = $this->repo->find( $id );
+			if ( null === $ticket ) {
+				continue;
+			}
+			$ticket['status']     = $status;
+			$ticket['updated_at'] = gmdate( 'c' );
+			$this->repo->save( $ticket );
+			++$updated;
+		}
+
+		if ( $updated > 0 ) {
+			$this->logger->log(
+				'Ticket',
+				sprintf(
+					/* translators: 1: number of tickets updated, 2: status */
+					__( '%1$d ticket(s) set to %2$s in bulk', 'deskovi' ),
+					$updated,
+					$status
+				),
+				'OK'
+			);
+		}
+
+		return array( 'updated' => $updated );
+	}
+
+	/**
+	 * Rows for CSV export — same filters as list_all(), unpaginated.
+	 *
+	 * @param array{search?: string, assignee?: string} $args
+	 * @return array<int, array<string, mixed>>
+	 */
+	public function export_rows( array $args = array() ): array {
+		$rows = $this->repo->matching(
+			array(
+				'search'   => isset( $args['search'] ) ? trim( (string) $args['search'] ) : '',
+				'assignee' => isset( $args['assignee'] ) ? (string) $args['assignee'] : 'all',
+			)
+		);
+		return array_map( array( $this, 'add_agent_name' ), $rows );
+	}
+
+	/**
 	 * Assign (or unassign) a ticket to a support agent (admin).
 	 *
 	 * @return array<string, mixed>|\WP_Error
@@ -505,6 +630,134 @@ final class TicketService {
 				/* translators: %d: order id */
 				__( 'Order #%d linked to ticket', 'deskovi' ),
 				$order_id
+			),
+			'OK'
+		);
+
+		return $ticket;
+	}
+
+	/**
+	 * Issue a refund on the order linked to a ticket, appending a visible
+	 * system message to the thread so the action is on record.
+	 *
+	 * @return array<string, mixed>|\WP_Error
+	 */
+	public function refund_linked_order( string $ticket_id, ?float $amount, string $reason ) {
+		$ticket = $this->repo->find( $ticket_id );
+		if ( null === $ticket ) {
+			return new \WP_Error(
+				'itsdesk_ticket_not_found',
+				__( 'Ticket not found.', 'deskovi' ),
+				array( 'status' => 404 )
+			);
+		}
+
+		$order_id = ! empty( $ticket['order_id'] ) ? (int) $ticket['order_id'] : 0;
+		if ( $order_id <= 0 ) {
+			return new \WP_Error(
+				'itsdesk_order_not_linked',
+				__( 'This ticket has no linked order.', 'deskovi' ),
+				array( 'status' => 400 )
+			);
+		}
+
+		$result = ( new OrderActions() )->refund( $order_id, $amount, $reason );
+		if ( is_wp_error( $result ) ) {
+			return $result;
+		}
+
+		$now = gmdate( 'c' );
+		$body = ! empty( $result['gateway_refunded'] )
+			? sprintf(
+				/* translators: 1: refunded amount, 2: currency code, 3: order id */
+				__( 'Refund of %1$s %2$s issued on order #%3$d via the payment gateway.', 'deskovi' ),
+				number_format_i18n( (float) $result['amount'], 2 ),
+				$result['currency'],
+				$order_id
+			)
+			: sprintf(
+				/* translators: 1: refunded amount, 2: currency code, 3: order id */
+				__( 'Refund of %1$s %2$s recorded on order #%3$d. This order\'s payment method doesn\'t support automatic refunds — process the actual payment return manually if one is owed.', 'deskovi' ),
+				number_format_i18n( (float) $result['amount'], 2 ),
+				$result['currency'],
+				$order_id
+			);
+		$ticket['messages'][] = array(
+			'id'         => 'msg_' . wp_generate_uuid4(),
+			'author'     => 'system',
+			'body'       => $body,
+			'internal'   => false,
+			'created_at' => $now,
+		);
+		$ticket['updated_at'] = $now;
+		$this->repo->save( $ticket );
+
+		$this->logger->log(
+			'Order',
+			sprintf(
+				/* translators: 1: order id, 2: ticket id */
+				__( 'Refund issued on order #%1$d from ticket %2$s', 'deskovi' ),
+				$order_id,
+				$ticket_id
+			),
+			'OK'
+		);
+
+		return $ticket;
+	}
+
+	/**
+	 * Resend the customer invoice email for the order linked to a ticket.
+	 *
+	 * @return array<string, mixed>|\WP_Error
+	 */
+	public function resend_linked_order_invoice( string $ticket_id ) {
+		$ticket = $this->repo->find( $ticket_id );
+		if ( null === $ticket ) {
+			return new \WP_Error(
+				'itsdesk_ticket_not_found',
+				__( 'Ticket not found.', 'deskovi' ),
+				array( 'status' => 404 )
+			);
+		}
+
+		$order_id = ! empty( $ticket['order_id'] ) ? (int) $ticket['order_id'] : 0;
+		if ( $order_id <= 0 ) {
+			return new \WP_Error(
+				'itsdesk_order_not_linked',
+				__( 'This ticket has no linked order.', 'deskovi' ),
+				array( 'status' => 400 )
+			);
+		}
+
+		$result = ( new OrderActions() )->resend_invoice( $order_id );
+		if ( is_wp_error( $result ) ) {
+			return $result;
+		}
+
+		$now = gmdate( 'c' );
+		$ticket['messages'][] = array(
+			'id'         => 'msg_' . wp_generate_uuid4(),
+			'author'     => 'system',
+			'body'       => sprintf(
+				/* translators: %s: customer email */
+				__( 'Invoice email resent to %s.', 'deskovi' ),
+				$result['sent_to']
+			),
+			'internal'   => false,
+			'created_at' => $now,
+		);
+		$ticket['updated_at'] = $now;
+		$this->repo->save( $ticket );
+
+		$this->logger->log(
+			'Order',
+			sprintf(
+				/* translators: 1: order id, 2: ticket id */
+				__( 'Invoice resent for order #%1$d from ticket %2$s', 'deskovi' ),
+				$order_id,
+				$ticket_id
 			),
 			'OK'
 		);

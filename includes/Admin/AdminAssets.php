@@ -62,6 +62,7 @@ final class AdminAssets {
 					'pluginUrl'       => ITSDESK_URL,
 					'currentUserId'   => get_current_user_id(),
 					'currentUserName' => wp_get_current_user()->display_name,
+					'canManageOrders' => current_user_can( 'manage_itsdesk' ) && current_user_can( 'edit_shop_orders' ),
 				)
 			);
 

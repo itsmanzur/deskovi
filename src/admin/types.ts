@@ -5,6 +5,7 @@ export type Screen =
 	| 'privacy'
 	| 'notifications'
 	| 'macros'
+	| 'docs'
 	| 'diagnostics'
 	| 'activity';
 
@@ -30,6 +31,7 @@ export type TicketMessage = {
 export type Ticket = {
 	id: string;
 	status: string;
+	priority: string;
 	category: string;
 	subject: string;
 	order_id?: number | null;
@@ -159,6 +161,7 @@ declare global {
 			pluginUrl: string;
 			currentUserId: number;
 			currentUserName: string;
+			canManageOrders: boolean;
 		};
 	}
 }

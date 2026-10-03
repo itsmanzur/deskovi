@@ -82,6 +82,26 @@ final class OrderController {
 				),
 			)
 		);
+
+		register_rest_route(
+			self::REST_NAMESPACE,
+			'/tickets/(?P<id>[a-zA-Z0-9_-]+)/order/refund',
+			array(
+				'methods'             => WP_REST_Server::CREATABLE,
+				'callback'            => array( $this, 'ticket_order_refund' ),
+				'permission_callback' => array( $this, 'can_manage_orders' ),
+			)
+		);
+
+		register_rest_route(
+			self::REST_NAMESPACE,
+			'/tickets/(?P<id>[a-zA-Z0-9_-]+)/order/resend-invoice',
+			array(
+				'methods'             => WP_REST_Server::CREATABLE,
+				'callback'            => array( $this, 'ticket_order_resend_invoice' ),
+				'permission_callback' => array( $this, 'can_manage_orders' ),
+			)
+		);
 	}
 
 	/**
@@ -96,6 +116,16 @@ final class OrderController {
 	 */
 	public function can_customer(): bool {
 		return is_user_logged_in() || ( new GuestSession() )->is_authenticated();
+	}
+
+	/**
+	 * Permission: manage Deskovi AND WooCommerce orders. Refund/resend are
+	 * order-mutating — gated the same way WooCommerce's own order-refund
+	 * screen is (edit_shop_orders), not just the plugin's ticket-management
+	 * cap, since the itsdesk_agent role has no WooCommerce capability at all.
+	 */
+	public function can_manage_orders(): bool {
+		return current_user_can( 'manage_itsdesk' ) && current_user_can( 'edit_shop_orders' );
 	}
 
 	/**
@@ -275,6 +305,36 @@ final class OrderController {
 			),
 			200
 		);
+	}
+
+	/**
+	 * POST /tickets/{id}/order/refund
+	 */
+	public function ticket_order_refund( WP_REST_Request $request ): WP_REST_Response {
+		$ticket_id = sanitize_text_field( (string) $request['id'] );
+		$body      = $request->get_json_params() ?: array();
+		$amount    = isset( $body['amount'] ) && '' !== $body['amount'] ? (float) $body['amount'] : null;
+		$reason    = isset( $body['reason'] ) ? sanitize_text_field( (string) $body['reason'] ) : '';
+
+		$result = ( new TicketService() )->refund_linked_order( $ticket_id, $amount, $reason );
+		if ( is_wp_error( $result ) ) {
+			return $this->error_response( $result );
+		}
+
+		return new WP_REST_Response( $result, 200 );
+	}
+
+	/**
+	 * POST /tickets/{id}/order/resend-invoice
+	 */
+	public function ticket_order_resend_invoice( WP_REST_Request $request ): WP_REST_Response {
+		$ticket_id = sanitize_text_field( (string) $request['id'] );
+		$result    = ( new TicketService() )->resend_linked_order_invoice( $ticket_id );
+		if ( is_wp_error( $result ) ) {
+			return $this->error_response( $result );
+		}
+
+		return new WP_REST_Response( $result, 200 );
 	}
 
 	/**

@@ -6,6 +6,7 @@ import { Toast } from './components/Toast';
 import {
 	IconActivity,
 	IconBell,
+	IconFileGeneric,
 	IconMark,
 	IconOverview,
 	IconPulse,
@@ -16,6 +17,7 @@ import {
 } from './components/Icons';
 import { ActivityScreen } from './screens/ActivityScreen';
 import { DiagnosticsScreen } from './screens/DiagnosticsScreen';
+import { DocsScreen } from './screens/DocsScreen';
 import { MacrosScreen } from './screens/MacrosScreen';
 import { NotificationsScreen } from './screens/NotificationsScreen';
 import { OverviewScreen } from './screens/OverviewScreen';
@@ -68,6 +70,11 @@ const NAV: Array< {
 		id: 'activity',
 		label: __( 'Activity', 'deskovi' ),
 		icon: <IconActivity size={ 17 } />,
+	},
+	{
+		id: 'docs',
+		label: __( 'Docs & Features', 'deskovi' ),
+		icon: <IconFileGeneric size={ 17 } />,
 	},
 ];
 
@@ -149,6 +156,9 @@ export function App() {
 				break;
 			case 'activity':
 				body = <ActivityScreen />;
+				break;
+			case 'docs':
+				body = <DocsScreen />;
 				break;
 			default:
 				body = (

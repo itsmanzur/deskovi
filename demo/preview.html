@@ -1,0 +1,741 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Deskovi — Landing Page Preview</title>
+</head>
+<body style="margin:0;">
+<!-- ================================================
+  DESKOVI LANDING — SECTION 1: HERO
+  Paste this whole block into one Elementor "HTML" widget.
+  ================================================ -->
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@500&display=swap');
+
+  #dk-hero{
+    --dk-navy:#1E4750;
+    --dk-navy-deep:#122F35;
+    --dk-teal:#0F766E;
+    --dk-teal-deep:#0B5850;
+    --dk-mint:#2DD4BF;
+    --dk-paper:#F6F8F7;
+    --dk-line:#DCE6E4;
+    --dk-ink:#12262A;
+    --dk-muted:#5B7278;
+    box-sizing:border-box;
+    font-family:'IBM Plex Sans',-apple-system,sans-serif;
+    background:linear-gradient(160deg,var(--dk-navy-deep) 0%,var(--dk-navy) 62%,#1B4750 100%);
+    color:#EAF3F1;
+    padding:88px 6vw 76px;
+    position:relative;
+    overflow:hidden;
+  }
+  #dk-hero *{box-sizing:border-box;}
+  #dk-hero::before{
+    content:"";position:absolute;inset:0;
+    background-image:
+      linear-gradient(rgba(234,243,241,.05) 1px,transparent 1px),
+      linear-gradient(90deg,rgba(234,243,241,.05) 1px,transparent 1px);
+    background-size:56px 56px;
+    mask-image:radial-gradient(ellipse 70% 60% at 30% 20%,#000 40%,transparent 100%);
+    pointer-events:none;
+  }
+  .dk-hero-grid{
+    position:relative;z-index:1;
+    max-width:1180px;margin:0 auto;
+    display:grid;grid-template-columns:1.05fr .95fr;gap:56px;align-items:center;
+  }
+  .dk-eyebrow{
+    display:inline-flex;align-items:center;gap:8px;
+    font-family:'IBM Plex Mono',monospace;font-size:12px;font-weight:500;
+    letter-spacing:.06em;text-transform:uppercase;color:var(--dk-mint);
+    border:1px solid rgba(45,212,191,.35);border-radius:999px;
+    padding:6px 14px;margin-bottom:22px;
+  }
+  .dk-eyebrow::before{content:"";width:6px;height:6px;border-radius:50%;background:var(--dk-mint);}
+  #dk-hero h1{
+    font-family:'Space Grotesk',sans-serif;font-weight:700;
+    font-size:clamp(30px,4.2vw,48px);line-height:1.08;letter-spacing:-.015em;
+    margin:0 0 20px;color:#fff;
+  }
+  #dk-hero h1 em{
+    font-style:normal;color:var(--dk-mint);
+  }
+  .dk-hero-sub{
+    font-size:16.5px;line-height:1.6;color:#C7DBD8;
+    max-width:520px;margin:0 0 34px;
+  }
+  .dk-hero-cta{display:flex;gap:14px;flex-wrap:wrap;margin-bottom:38px;}
+  .dk-btn{
+    display:inline-flex;align-items:center;gap:9px;
+    font-family:'IBM Plex Sans',sans-serif;font-weight:600;font-size:14.5px;
+    padding:13px 22px;border-radius:9px;text-decoration:none;
+    transition:transform .15s ease,box-shadow .15s ease;
+  }
+  .dk-btn:hover{transform:translateY(-1px);}
+  .dk-btn-primary{background:var(--dk-mint);color:var(--dk-navy-deep);box-shadow:0 8px 24px -8px rgba(45,212,191,.55);}
+  .dk-btn-primary:hover{box-shadow:0 10px 28px -6px rgba(45,212,191,.7);}
+  .dk-btn-ghost{background:transparent;color:#EAF3F1;border:1px solid rgba(234,243,241,.3);}
+  .dk-btn-ghost:hover{border-color:rgba(234,243,241,.6);}
+  .dk-hero-facts{display:flex;gap:30px;flex-wrap:wrap;border-top:1px dashed rgba(234,243,241,.25);padding-top:22px;}
+  .dk-hero-facts div{font-size:12.5px;color:#8FB0AC;font-family:'IBM Plex Mono',monospace;}
+  .dk-hero-facts strong{display:block;color:#fff;font-family:'IBM Plex Sans',sans-serif;font-size:14.5px;font-weight:600;margin-bottom:2px;}
+
+  /* ---- Signature: the boundary diagram ---- */
+  .dk-boundary-wrap{position:relative;display:flex;justify-content:center;}
+  .dk-boundary{
+    width:100%;max-width:440px;
+    border:1.5px dashed rgba(45,212,191,.55);
+    border-radius:18px;
+    background:rgba(18,47,53,.55);
+    padding:22px 20px 20px;
+    backdrop-filter:blur(2px);
+  }
+  .dk-boundary-label{
+    font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--dk-mint);
+    letter-spacing:.05em;margin-bottom:16px;display:flex;align-items:center;gap:8px;
+  }
+  .dk-boundary-label::before{content:"⌂";font-size:13px;}
+  .dk-boundary-rows{display:grid;gap:10px;}
+  .dk-brow{
+    display:flex;align-items:center;gap:11px;
+    background:rgba(255,255,255,.05);border:1px solid rgba(234,243,241,.12);
+    border-radius:10px;padding:10px 12px;
+  }
+  .dk-brow .dk-ic{
+    width:28px;height:28px;border-radius:7px;flex-shrink:0;
+    background:rgba(45,212,191,.15);display:flex;align-items:center;justify-content:center;
+  }
+  .dk-brow .dk-ic svg{width:15px;height:15px;stroke:var(--dk-mint);}
+  .dk-brow span{font-size:13px;color:#DCEAE8;}
+  .dk-brow small{display:block;font-size:11px;color:#7FA29E;margin-top:1px;}
+  .dk-outside{
+    display:flex;align-items:center;gap:10px;justify-content:center;
+    margin-top:18px;padding-top:16px;border-top:1px dashed rgba(234,243,241,.18);
+    font-family:'IBM Plex Mono',monospace;font-size:11px;color:#6E8E8A;
+  }
+  .dk-outside svg{width:16px;height:16px;stroke:#6E8E8A;}
+
+  @media (max-width:860px){
+    .dk-hero-grid{grid-template-columns:1fr;}
+    #dk-hero{padding:64px 6vw 52px;}
+    .dk-boundary{max-width:100%;}
+  }
+</style>
+
+<div id="dk-hero">
+  <div class="dk-hero-grid">
+    <div>
+      <div class="dk-eyebrow">WooCommerce Helpdesk</div>
+      <h1>A support helpdesk that <em>never leaves</em> your server</h1>
+      <p class="dk-hero-sub">Deskovi runs entirely inside your WordPress database — no SaaS account, no third-party server, no monthly per-agent bill. Tickets, files, and replies stay exactly where your store already lives.</p>
+      <div class="dk-hero-cta">
+        <a class="dk-btn dk-btn-primary" href="https://wordpress.org/plugins/deskovi/" target="_blank" rel="noopener">
+          Get it free on WordPress.org →
+        </a>
+        <a class="dk-btn dk-btn-ghost" href="#dk-features">See what's included</a>
+      </div>
+      <div class="dk-hero-facts">
+        <div><strong>$0 / forever</strong>no per-agent fee</div>
+        <div><strong>0 external accounts</strong>self-contained, always</div>
+        <div><strong>Guest tickets</strong>order # + email, no login</div>
+      </div>
+    </div>
+
+    <div class="dk-boundary-wrap">
+      <div class="dk-boundary">
+        <div class="dk-boundary-label">yourstore.com — everything stays here</div>
+        <div class="dk-boundary-rows">
+          <div class="dk-brow">
+            <div class="dk-ic"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M4 4h16v16H4z"/><path d="M4 9h16"/></svg></div>
+            <span>Tickets &amp; messages<small>Custom database tables</small></span>
+          </div>
+          <div class="dk-brow">
+            <div class="dk-ic"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M12 3v12"/><path d="M7 10l5 5 5-5"/><path d="M5 21h14"/></svg></div>
+            <span>Attachments<small>Signed, ownership-checked downloads</small></span>
+          </div>
+          <div class="dk-brow">
+            <div class="dk-ic"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/></svg></div>
+            <span>Agents &amp; assignment<small>A dedicated WordPress role</small></span>
+          </div>
+        </div>
+        <div class="dk-outside">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M3 3l18 18"/><path d="M18 10h-1.26A8 8 0 1 0 9 20h9a5 5 0 0 0 0-10"/></svg>
+          no external SaaS, ever
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ================================================
+  DESKOVI LANDING — SECTION 2: USP CARDS
+  ================================================ -->
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@500&display=swap');
+
+  #dk-usp{
+    --dk-navy:#1E4750; --dk-teal:#0F766E; --dk-mint:#2DD4BF;
+    --dk-mint-bg:#E6F4F1; --dk-paper:#F6F8F7; --dk-line:#DCE6E4;
+    --dk-ink:#12262A; --dk-muted:#5B7278;
+    box-sizing:border-box;
+    font-family:'IBM Plex Sans',sans-serif;
+    background:var(--dk-paper);
+    padding:72px 6vw;
+  }
+  #dk-usp *{box-sizing:border-box;}
+  .dk-usp-inner{max-width:1180px;margin:0 auto;}
+  .dk-usp-head{max-width:560px;margin-bottom:38px;}
+  .dk-usp-eyebrow{
+    font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--dk-teal);
+    letter-spacing:.06em;text-transform:uppercase;margin-bottom:10px;display:block;
+  }
+  #dk-usp h2{
+    font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:clamp(24px,3vw,32px);
+    letter-spacing:-.01em;color:var(--dk-navy);margin:0 0 10px;
+  }
+  .dk-usp-head p{margin:0;color:var(--dk-muted);font-size:15px;line-height:1.55;}
+  .dk-usp-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;}
+  .dk-usp-card{
+    background:#fff;border:1px solid var(--dk-line);border-radius:16px;
+    padding:26px 24px 24px;position:relative;overflow:hidden;
+  }
+  .dk-usp-card::before{
+    content:"";position:absolute;top:0;left:0;right:0;height:3px;
+    background:linear-gradient(90deg,var(--dk-teal),var(--dk-mint));
+  }
+  .dk-usp-ic{
+    width:38px;height:38px;border-radius:10px;background:var(--dk-mint-bg);
+    display:flex;align-items:center;justify-content:center;margin-bottom:16px;
+  }
+  .dk-usp-ic svg{width:19px;height:19px;stroke:var(--dk-teal);}
+  .dk-usp-card h3{font-family:'Space Grotesk',sans-serif;font-weight:600;font-size:16.5px;color:var(--dk-ink);margin:0 0 9px;}
+  .dk-usp-card p{font-size:13.8px;line-height:1.6;color:var(--dk-muted);margin:0;}
+  .dk-usp-tag{
+    display:inline-block;margin-top:14px;font-family:'IBM Plex Mono',monospace;
+    font-size:11px;color:var(--dk-teal);background:var(--dk-mint-bg);
+    padding:3px 9px;border-radius:999px;
+  }
+  @media (max-width:860px){
+    .dk-usp-grid{grid-template-columns:1fr;}
+  }
+</style>
+
+<div id="dk-usp">
+  <div class="dk-usp-inner">
+    <div class="dk-usp-head">
+      <span class="dk-usp-eyebrow">Why teams switch</span>
+      <h2>Three things most helpdesk plugins won't tell you</h2>
+      <p>We used to run Deskovi through a hosted backend too — then we removed it. Here's what that decision actually changes for you.</p>
+    </div>
+    <div class="dk-usp-grid">
+      <div class="dk-usp-card">
+        <div class="dk-usp-ic"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><rect x="4" y="10" width="16" height="10" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg></div>
+        <h3>Zero external account, ever</h3>
+        <p>No SaaS signup, no vendor lock-in, no data quietly leaving your server. Every ticket, message, and attachment lives in your own WordPress database — nowhere else.</p>
+        <span class="dk-usp-tag">Self-contained by design</span>
+      </div>
+      <div class="dk-usp-card">
+        <div class="dk-usp-ic"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-7 8-7s8 2.6 8 7"/><path d="M17 5l1.5 1.5L21 4"/></svg></div>
+        <h3>Guest-friendly by default</h3>
+        <p>Customers open a ticket with their order number and billing email — no WordPress account required. Nobody has to create yet another password to get help.</p>
+        <span class="dk-usp-tag">No forced signups</span>
+      </div>
+      <div class="dk-usp-card">
+        <div class="dk-usp-ic"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M12 2l2.6 6.6L21 11l-6.4 2.4L12 20l-2.6-6.6L3 11l6.4-2.4z"/></svg></div>
+        <h3>Free tier, without the asterisk</h3>
+        <p>Agent assignment and canned replies are free in Deskovi. Other WooCommerce helpdesks lock both behind their paid plans — ours ship in core.</p>
+        <span class="dk-usp-tag">No feature gate</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ================================================
+  DESKOVI LANDING — SECTION 3: DASHBOARD ILLUSTRATION
+  Note: this is a drawn mock, not a real screenshot.
+  Swap the #dk-mock-frame content for an actual
+  screenshot <img> once you have one.
+  ================================================ -->
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@500&display=swap');
+
+  #dk-mock{
+    --dk-navy:#1E4750; --dk-navy-deep:#122F35; --dk-teal:#0F766E; --dk-mint:#2DD4BF;
+    --dk-mint-bg:#E6F4F1; --dk-paper:#F6F8F7; --dk-line:#DCE6E4;
+    --dk-ink:#12262A; --dk-muted:#5B7278;
+    box-sizing:border-box;
+    font-family:'IBM Plex Sans',sans-serif;
+    background:#fff;
+    padding:76px 6vw 88px;
+  }
+  #dk-mock *{box-sizing:border-box;}
+  .dk-mock-inner{max-width:1180px;margin:0 auto;text-align:center;}
+  .dk-mock-eyebrow{
+    font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--dk-teal);
+    letter-spacing:.06em;text-transform:uppercase;margin-bottom:10px;display:block;
+  }
+  #dk-mock h2{
+    font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:clamp(24px,3vw,32px);
+    letter-spacing:-.01em;color:var(--dk-navy);margin:0 0 12px;
+  }
+  .dk-mock-sub{color:var(--dk-muted);font-size:15px;max-width:520px;margin:0 auto 40px;line-height:1.55;}
+
+  #dk-mock-frame{
+    max-width:920px;margin:0 auto;border-radius:16px;overflow:hidden;
+    border:1px solid var(--dk-line);box-shadow:0 30px 60px -30px rgba(18,47,53,.35);
+    text-align:left;
+  }
+  .dk-mock-chrome{
+    background:#EDF2F1;padding:10px 14px;display:flex;align-items:center;gap:8px;
+    border-bottom:1px solid var(--dk-line);
+  }
+  .dk-mock-dot{width:9px;height:9px;border-radius:50%;background:#D7DFDD;}
+  .dk-mock-url{
+    margin-left:8px;font-family:'IBM Plex Mono',monospace;font-size:11.5px;color:var(--dk-muted);
+    background:#fff;border-radius:6px;padding:3px 10px;border:1px solid var(--dk-line);
+  }
+  .dk-mock-body{display:grid;grid-template-columns:210px 1fr;background:var(--dk-paper);min-height:360px;}
+  .dk-mock-side{
+    background:var(--dk-navy-deep);padding:20px 14px;display:flex;flex-direction:column;gap:4px;
+  }
+  .dk-mock-brand{
+    display:flex;align-items:center;gap:8px;color:#fff;font-weight:600;font-size:13.5px;
+    font-family:'Space Grotesk',sans-serif;margin-bottom:18px;
+  }
+  .dk-mock-brand .dot{width:9px;height:9px;border-radius:3px;background:var(--dk-mint);}
+  .dk-mock-navitem{
+    font-size:12.5px;color:#B9D2CE;padding:9px 10px;border-radius:8px;
+  }
+  .dk-mock-navitem.active{background:rgba(45,212,191,.16);color:#fff;font-weight:500;}
+  .dk-mock-main{padding:20px 24px;}
+  .dk-mock-toprow{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;}
+  .dk-mock-toprow h4{font-family:'Space Grotesk',sans-serif;font-size:16px;margin:0;color:var(--dk-ink);}
+  .dk-mock-search{
+    font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--dk-muted);
+    background:#fff;border:1px solid var(--dk-line);border-radius:7px;padding:6px 12px;width:150px;
+  }
+  .dk-mock-row{
+    display:grid;grid-template-columns:auto 1fr auto auto;gap:14px;align-items:center;
+    background:#fff;border:1px solid var(--dk-line);border-radius:10px;
+    padding:11px 14px;margin-bottom:8px;
+  }
+  .dk-mock-avatar{
+    width:26px;height:26px;border-radius:50%;background:var(--dk-mint-bg);
+    color:var(--dk-teal);font-family:'IBM Plex Mono',monospace;font-size:10.5px;font-weight:600;
+    display:flex;align-items:center;justify-content:center;
+  }
+  .dk-mock-row-title{font-size:12.8px;color:var(--dk-ink);font-weight:500;}
+  .dk-mock-row-sub{font-size:11px;color:var(--dk-muted);margin-top:2px;}
+  .dk-mock-badge{
+    font-family:'IBM Plex Mono',monospace;font-size:10px;padding:3px 9px;border-radius:999px;
+    white-space:nowrap;
+  }
+  .dk-mock-badge.open{background:#FFF4D6;color:#8A6100;}
+  .dk-mock-badge.replied{background:var(--dk-mint-bg);color:var(--dk-teal);}
+  .dk-mock-badge.closed{background:#EEF1F3;color:var(--dk-muted);}
+  .dk-mock-order{
+    font-family:'IBM Plex Mono',monospace;font-size:10.5px;color:var(--dk-muted);
+  }
+
+  .dk-mock-note{
+    max-width:920px;margin:16px auto 0;text-align:left;
+    display:flex;align-items:center;gap:8px;
+    font-family:'IBM Plex Mono',monospace;font-size:11.5px;color:var(--dk-muted);
+  }
+  .dk-mock-note svg{width:14px;height:14px;stroke:var(--dk-muted);flex-shrink:0;}
+
+  @media (max-width:720px){
+    .dk-mock-body{grid-template-columns:1fr;}
+    .dk-mock-side{display:none;}
+  }
+</style>
+
+<div id="dk-mock">
+  <div class="dk-mock-inner">
+    <span class="dk-mock-eyebrow">Inside the dashboard</span>
+    <h2>Every ticket, with the order right next to it</h2>
+    <p class="dk-mock-sub">No separate tab, no manual lookup. Deskovi pulls the WooCommerce order into the ticket automatically the moment it's opened.</p>
+
+    <div id="dk-mock-frame">
+      <div class="dk-mock-chrome">
+        <div class="dk-mock-dot"></div><div class="dk-mock-dot"></div><div class="dk-mock-dot"></div>
+        <span class="dk-mock-url">yourstore.com/wp-admin/admin.php?page=deskovi</span>
+      </div>
+      <div class="dk-mock-body">
+        <div class="dk-mock-side">
+          <div class="dk-mock-brand"><span class="dot"></span>Deskovi</div>
+          <div class="dk-mock-navitem active">Tickets</div>
+          <div class="dk-mock-navitem">Agents</div>
+          <div class="dk-mock-navitem">Canned replies</div>
+          <div class="dk-mock-navitem">Settings</div>
+        </div>
+        <div class="dk-mock-main">
+          <div class="dk-mock-toprow">
+            <h4>Tickets</h4>
+            <div class="dk-mock-search">Search tickets…</div>
+          </div>
+
+          <div class="dk-mock-row">
+            <div class="dk-mock-avatar">RS</div>
+            <div>
+              <div class="dk-mock-row-title">Wrong size delivered</div>
+              <div class="dk-mock-row-sub">Rima S. · <span class="dk-mock-order">Order #10482</span></div>
+            </div>
+            <span class="dk-mock-badge open">Open</span>
+            <span class="dk-mock-order">2m ago</span>
+          </div>
+
+          <div class="dk-mock-row">
+            <div class="dk-mock-avatar">KH</div>
+            <div>
+              <div class="dk-mock-row-title">Refund status?</div>
+              <div class="dk-mock-row-sub">Karim H. · <span class="dk-mock-order">Order #10479</span></div>
+            </div>
+            <span class="dk-mock-badge replied">Replied</span>
+            <span class="dk-mock-order">1h ago</span>
+          </div>
+
+          <div class="dk-mock-row">
+            <div class="dk-mock-avatar">FA</div>
+            <div>
+              <div class="dk-mock-row-title">Damaged packaging, photo attached</div>
+              <div class="dk-mock-row-sub">Fahim A. · <span class="dk-mock-order">Order #10471</span></div>
+            </div>
+            <span class="dk-mock-badge closed">Closed</span>
+            <span class="dk-mock-order">Yesterday</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="dk-mock-note">
+      <svg viewBox="0 0 24 24" fill="none" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>
+      Illustrative mock of the admin screen — swap for a real screenshot when ready.
+    </div>
+  </div>
+</div>
+
+<!-- ================================================
+  DESKOVI LANDING — SECTION 4: FEATURE GRID
+  ================================================ -->
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@500&display=swap');
+
+  #dk-features{
+    --dk-navy:#1E4750; --dk-teal:#0F766E; --dk-mint:#2DD4BF;
+    --dk-mint-bg:#E6F4F1; --dk-paper:#F6F8F7; --dk-line:#DCE6E4;
+    --dk-ink:#12262A; --dk-muted:#5B7278;
+    box-sizing:border-box;
+    font-family:'IBM Plex Sans',sans-serif;
+    background:var(--dk-paper);
+    padding:76px 6vw;
+  }
+  #dk-features *{box-sizing:border-box;}
+  .dk-feat-inner{max-width:1180px;margin:0 auto;}
+  .dk-feat-head{max-width:560px;margin-bottom:38px;}
+  .dk-feat-eyebrow{
+    font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--dk-teal);
+    letter-spacing:.06em;text-transform:uppercase;margin-bottom:10px;display:block;
+  }
+  #dk-features h2{
+    font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:clamp(24px,3vw,32px);
+    letter-spacing:-.01em;color:var(--dk-navy);margin:0 0 10px;
+  }
+  .dk-feat-head p{margin:0;color:var(--dk-muted);font-size:15px;line-height:1.55;}
+
+  .dk-feat-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--dk-line);border:1px solid var(--dk-line);border-radius:16px;overflow:hidden;}
+  .dk-feat-item{background:#fff;padding:24px 20px;}
+  .dk-feat-ic{
+    width:34px;height:34px;border-radius:9px;background:var(--dk-mint-bg);
+    display:flex;align-items:center;justify-content:center;margin-bottom:14px;
+  }
+  .dk-feat-ic svg{width:17px;height:17px;stroke:var(--dk-teal);}
+  .dk-feat-item h3{font-family:'Space Grotesk',sans-serif;font-weight:600;font-size:14.5px;color:var(--dk-ink);margin:0 0 6px;}
+  .dk-feat-item p{font-size:12.8px;line-height:1.55;color:var(--dk-muted);margin:0;}
+
+  @media (max-width:920px){ .dk-feat-grid{grid-template-columns:repeat(2,1fr);} }
+  @media (max-width:520px){ .dk-feat-grid{grid-template-columns:1fr;} }
+</style>
+
+<div id="dk-features">
+  <div class="dk-feat-inner">
+    <div class="dk-feat-head">
+      <span class="dk-feat-eyebrow">What's included</span>
+      <h2>Everything a WooCommerce store needs, in the free version</h2>
+      <p>No trial, no "upgrade to unlock." These ship in Deskovi core.</p>
+    </div>
+
+    <div class="dk-feat-grid">
+      <div class="dk-feat-item">
+        <div class="dk-feat-ic"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M6 2h9l5 5v15H6z"/><path d="M15 2v5h5"/></svg></div>
+        <h3>Order-aware tickets</h3>
+        <p>Every ticket auto-links to the WooCommerce order it's about — no manual lookup.</p>
+      </div>
+      <div class="dk-feat-item">
+        <div class="dk-feat-ic"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-7 8-7s8 2.6 8 7"/></svg></div>
+        <h3>Guest ticket access</h3>
+        <p>Customers verify with order number + billing email. No account, no extra password.</p>
+      </div>
+      <div class="dk-feat-item">
+        <div class="dk-feat-ic"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M12 3v12"/><path d="M7 10l5 5 5-5"/><path d="M5 21h14"/></svg></div>
+        <h3>Secure attachments</h3>
+        <p>Uploads are locked outside direct access, served through signed, ownership-checked links.</p>
+      </div>
+      <div class="dk-feat-item">
+        <div class="dk-feat-ic"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 9h18"/><path d="M8 4v5"/></svg></div>
+        <h3>Agent roles &amp; assignment</h3>
+        <p>A dedicated agent role with just enough capability — assign tickets by name, free.</p>
+      </div>
+      <div class="dk-feat-item">
+        <div class="dk-feat-ic"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M4 4h16v14H7l-3 3z"/><path d="M8 9h8"/><path d="M8 13h5"/></svg></div>
+        <h3>Canned replies</h3>
+        <p>Save common answers once, drop them in with one click. Placeholders fill in the customer's name, order, and agent automatically.</p>
+      </div>
+      <div class="dk-feat-item">
+        <div class="dk-feat-ic"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M3 6h18v13H3z"/><path d="M3 6l9 7 9-7"/></svg></div>
+        <h3>Email notifications</h3>
+        <p>Agents and customers get notified on new tickets and replies — each one toggleable.</p>
+      </div>
+      <div class="dk-feat-item">
+        <div class="dk-feat-ic"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><rect x="4" y="9" width="16" height="11" rx="2"/><path d="M8 9V6a4 4 0 0 1 8 0v3"/></svg></div>
+        <h3>On-site widget</h3>
+        <p>A launcher on your storefront lets shoppers start a ticket without leaving the page.</p>
+      </div>
+      <div class="dk-feat-item">
+        <div class="dk-feat-ic"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><rect x="4" y="4" width="16" height="16" rx="3" stroke-dasharray="3 3"/><circle cx="12" cy="12" r="3"/></svg></div>
+        <h3>100% local data</h3>
+        <p>Custom database tables in your own WordPress install. No external service ever sees a ticket.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ================================================
+  DESKOVI LANDING — SECTION 5: COMPARISON TABLE
+  ================================================ -->
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@500&display=swap');
+
+  #dk-compare{
+    --dk-navy:#1E4750; --dk-navy-deep:#122F35; --dk-teal:#0F766E; --dk-teal-deep:#0B5850; --dk-mint:#2DD4BF;
+    --dk-mint-bg:#E6F4F1; --dk-paper:#F6F8F7; --dk-line:#DCE6E4;
+    --dk-ink:#12262A; --dk-muted:#5B7278;
+    box-sizing:border-box;
+    font-family:'IBM Plex Sans',sans-serif;
+    background:#fff;
+    padding:76px 6vw;
+  }
+  #dk-compare *{box-sizing:border-box;}
+  .dk-cmp-inner{max-width:1000px;margin:0 auto;}
+  .dk-cmp-head{max-width:560px;margin-bottom:34px;}
+  .dk-cmp-eyebrow{
+    font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--dk-teal);
+    letter-spacing:.06em;text-transform:uppercase;margin-bottom:10px;display:block;
+  }
+  #dk-compare h2{
+    font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:clamp(24px,3vw,32px);
+    letter-spacing:-.01em;color:var(--dk-navy);margin:0 0 10px;
+  }
+  .dk-cmp-head p{margin:0;color:var(--dk-muted);font-size:15px;line-height:1.55;}
+
+  .dk-cmp-scroll{overflow-x:auto;border:1px solid var(--dk-line);border-radius:14px;}
+  table.dk-cmp-table{width:100%;border-collapse:collapse;font-size:13.5px;min-width:600px;}
+  .dk-cmp-table thead th{
+    text-align:left;padding:14px 16px;background:var(--dk-navy-deep);color:#fff;
+    font-family:'IBM Plex Sans',sans-serif;font-weight:600;font-size:12.8px;
+  }
+  .dk-cmp-table thead th.dk-col-deskovi{background:var(--dk-teal-deep);color:#fff;position:relative;}
+  .dk-cmp-table thead th span.tag{
+    display:block;font-family:'IBM Plex Mono',monospace;font-weight:500;font-size:10px;
+    color:var(--dk-mint);letter-spacing:.04em;text-transform:uppercase;margin-top:2px;
+  }
+  .dk-cmp-table tbody td{padding:12px 16px;border-top:1px solid var(--dk-line);font-size:13px;}
+  .dk-cmp-table tbody tr:nth-child(even) td{background:#FAFCFB;}
+  .dk-cmp-table td.feat{font-weight:500;color:var(--dk-ink);}
+  .dk-yes{color:var(--dk-teal);font-weight:700;}
+  .dk-no{color:#B0433E;font-weight:700;}
+  .dk-partial{color:#B45309;font-weight:600;font-size:12px;}
+  td.dk-col-deskovi{background:var(--dk-mint-bg) !important;font-weight:600;}
+
+  .dk-cmp-foot{
+    margin-top:16px;font-size:12px;color:var(--dk-muted);
+    font-family:'IBM Plex Mono',monospace;
+  }
+
+  @media (max-width:640px){ #dk-compare{padding:56px 5vw;} }
+</style>
+
+<div id="dk-compare">
+  <div class="dk-cmp-inner">
+    <div class="dk-cmp-head">
+      <span class="dk-cmp-eyebrow">How it stacks up</span>
+      <h2>What the free plan actually includes</h2>
+      <p>Based on the publicly listed free-tier features of each plugin.</p>
+    </div>
+
+    <div class="dk-cmp-scroll">
+      <table class="dk-cmp-table">
+        <thead>
+          <tr>
+            <th>Free plan includes</th>
+            <th>Fluent Support</th>
+            <th>WSDesk</th>
+            <th class="dk-col-deskovi">Deskovi<span class="tag">this plugin</span></th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="feat">Guest tickets, no account</td>
+            <td><span class="dk-no">✕</span></td>
+            <td><span class="dk-partial">Unclear</span></td>
+            <td class="dk-col-deskovi"><span class="dk-yes">✓</span></td>
+          </tr>
+          <tr>
+            <td class="feat">Multi-file attachments</td>
+            <td><span class="dk-yes">✓</span></td>
+            <td><span class="dk-partial">1 file only</span></td>
+            <td class="dk-col-deskovi"><span class="dk-yes">✓</span></td>
+          </tr>
+          <tr>
+            <td class="feat">Agent assignment</td>
+            <td><span class="dk-partial">Limited</span></td>
+            <td><span class="dk-no">Pro only</span></td>
+            <td class="dk-col-deskovi"><span class="dk-yes">✓</span></td>
+          </tr>
+          <tr>
+            <td class="feat">Canned replies</td>
+            <td><span class="dk-partial">Limited</span></td>
+            <td><span class="dk-no">Pro only</span></td>
+            <td class="dk-col-deskovi"><span class="dk-yes">✓</span></td>
+          </tr>
+          <tr>
+            <td class="feat">Automatic WooCommerce order context</td>
+            <td><span class="dk-partial">Needs setup</span></td>
+            <td><span class="dk-yes">✓</span></td>
+            <td class="dk-col-deskovi"><span class="dk-yes">✓</span></td>
+          </tr>
+          <tr>
+            <td class="feat">Runs with zero external service</td>
+            <td><span class="dk-no">✕</span></td>
+            <td><span class="dk-no">✕</span></td>
+            <td class="dk-col-deskovi"><span class="dk-yes">✓</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="dk-cmp-foot">Comparison based on each plugin's publicly listed free-tier features as of 2026. Re-check before publishing — vendors change their free/paid split over time.</div>
+  </div>
+</div>
+
+<!-- ================================================
+  DESKOVI LANDING — SECTION 6: FINAL CTA
+  ================================================ -->
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@500&display=swap');
+
+  #dk-cta{
+    --dk-navy:#1E4750; --dk-navy-deep:#122F35; --dk-mint:#2DD4BF;
+    box-sizing:border-box;
+    font-family:'IBM Plex Sans',sans-serif;
+    background:linear-gradient(135deg,var(--dk-navy-deep) 0%,var(--dk-navy) 100%);
+    padding:64px 6vw;
+    position:relative;overflow:hidden;
+  }
+  #dk-cta *{box-sizing:border-box;}
+  #dk-cta::before{
+    content:"";position:absolute;inset:0;
+    background-image:linear-gradient(rgba(234,243,241,.045) 1px,transparent 1px),linear-gradient(90deg,rgba(234,243,241,.045) 1px,transparent 1px);
+    background-size:48px 48px;
+    mask-image:radial-gradient(ellipse 60% 100% at 50% 50%,#000 30%,transparent 100%);
+  }
+  .dk-cta-inner{
+    position:relative;z-index:1;max-width:720px;margin:0 auto;text-align:center;
+  }
+  .dk-cta-eyebrow{
+    font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--dk-mint);
+    letter-spacing:.06em;text-transform:uppercase;margin-bottom:14px;display:block;
+  }
+  #dk-cta h2{
+    font-family:'Space Grotesk',sans-serif;font-weight:700;color:#fff;
+    font-size:clamp(24px,3.4vw,34px);letter-spacing:-.01em;line-height:1.18;margin:0 0 14px;
+  }
+  .dk-cta-sub{color:#C7DBD8;font-size:15px;line-height:1.6;max-width:480px;margin:0 auto 30px;}
+  .dk-btn{
+    display:inline-flex;align-items:center;gap:9px;
+    font-family:'IBM Plex Sans',sans-serif;font-weight:600;font-size:15px;
+    padding:14px 26px;border-radius:9px;text-decoration:none;
+    background:var(--dk-mint);color:var(--dk-navy-deep);
+    box-shadow:0 8px 24px -8px rgba(45,212,191,.55);
+    transition:transform .15s ease;
+  }
+  .dk-btn:hover{transform:translateY(-1px);}
+  .dk-cta-meta{
+    margin-top:18px;font-family:'IBM Plex Mono',monospace;font-size:11.5px;color:#7FA29E;
+  }
+</style>
+
+<div id="dk-cta">
+  <div class="dk-cta-inner">
+    <span class="dk-cta-eyebrow">Ready when you are</span>
+    <h2>Install Deskovi, keep every ticket on your own server</h2>
+    <p class="dk-cta-sub">Free, self-contained, and live on WordPress.org today. No credit card, no account to create — including your own.</p>
+    <a class="dk-btn" href="https://wordpress.org/plugins/deskovi/" target="_blank" rel="noopener">
+      Get it free on WordPress.org →
+    </a>
+    <div class="dk-cta-meta">Works with WordPress + WooCommerce · GPL licensed</div>
+  </div>
+</div>
+
+<!-- ================================================
+  DESKOVI LANDING — SECTION 7: FOOTER
+  ================================================ -->
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@600;700&family=IBM+Plex+Sans:wght@400;500&family=IBM+Plex+Mono:wght@500&display=swap');
+
+  #dk-footer{
+    --dk-navy:#1E4750; --dk-teal:#0F766E; --dk-mint:#2DD4BF;
+    --dk-line:#DCE6E4; --dk-ink:#12262A; --dk-muted:#5B7278;
+    box-sizing:border-box;
+    font-family:'IBM Plex Sans',sans-serif;
+    background:#fff;
+    border-top:1px solid var(--dk-line);
+    padding:32px 6vw;
+  }
+  #dk-footer *{box-sizing:border-box;}
+  .dk-foot-inner{
+    max-width:1180px;margin:0 auto;
+    display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:16px;
+  }
+  .dk-foot-brand{display:flex;align-items:center;gap:8px;}
+  .dk-foot-brand .dot{width:9px;height:9px;border-radius:3px;background:var(--dk-teal);}
+  .dk-foot-brand span{font-family:'Space Grotesk',sans-serif;font-weight:600;font-size:14.5px;color:var(--dk-ink);}
+  .dk-foot-links{display:flex;gap:22px;flex-wrap:wrap;}
+  .dk-foot-links a{
+    font-size:13px;color:var(--dk-muted);text-decoration:none;
+  }
+  .dk-foot-links a:hover{color:var(--dk-teal);}
+  .dk-foot-copy{
+    font-family:'IBM Plex Mono',monospace;font-size:11.5px;color:#9BB0AD;
+  }
+  @media (max-width:640px){
+    .dk-foot-inner{flex-direction:column;align-items:flex-start;}
+  }
+</style>
+
+<div id="dk-footer">
+  <div class="dk-foot-inner">
+    <div class="dk-foot-brand"><span class="dot"></span><span>Deskovi</span></div>
+    <div class="dk-foot-links">
+      <a href="https://wordpress.org/plugins/deskovi/" target="_blank" rel="noopener">WordPress.org</a>
+      <a href="#" target="_blank" rel="noopener">Documentation</a>
+      <a href="#" target="_blank" rel="noopener">Support forum</a>
+      <a href="#" target="_blank" rel="noopener">GitHub</a>
+    </div>
+    <div class="dk-foot-copy">© 2026 Deskovi. Self-hosted WooCommerce helpdesk.</div>
+  </div>
+</div>
+
+</body>
+</html>

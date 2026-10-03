@@ -66,6 +66,30 @@ final class TicketController {
 			)
 		);
 
+		// Registered before the /tickets/(?P<id>...) pattern route below so
+		// these literal paths (both READABLE, same as admin_get) match first
+		// instead of being swallowed by the id regex — same reasoning as
+		// why /tickets/categories is registered up front.
+		register_rest_route(
+			self::REST_NAMESPACE,
+			'/tickets/export',
+			array(
+				'methods'             => WP_REST_Server::READABLE,
+				'callback'            => array( $this, 'admin_export' ),
+				'permission_callback' => array( $this, 'can_manage' ),
+			)
+		);
+
+		register_rest_route(
+			self::REST_NAMESPACE,
+			'/tickets/bulk',
+			array(
+				'methods'             => WP_REST_Server::CREATABLE,
+				'callback'            => array( $this, 'admin_bulk' ),
+				'permission_callback' => array( $this, 'can_manage' ),
+			)
+		);
+
 		register_rest_route(
 			self::REST_NAMESPACE,
 			'/tickets/(?P<id>[a-zA-Z0-9_-]+)',
@@ -92,6 +116,16 @@ final class TicketController {
 			array(
 				'methods'             => WP_REST_Server::CREATABLE,
 				'callback'            => array( $this, 'admin_status' ),
+				'permission_callback' => array( $this, 'can_manage' ),
+			)
+		);
+
+		register_rest_route(
+			self::REST_NAMESPACE,
+			'/tickets/(?P<id>[a-zA-Z0-9_-]+)/priority',
+			array(
+				'methods'             => WP_REST_Server::CREATABLE,
+				'callback'            => array( $this, 'admin_priority' ),
 				'permission_callback' => array( $this, 'can_manage' ),
 			)
 		);
@@ -329,6 +363,111 @@ final class TicketController {
 			return $result;
 		}
 		return new WP_REST_Response( $result, 200 );
+	}
+
+	/**
+	 * Admin priority.
+	 *
+	 * @param WP_REST_Request $request Request.
+	 * @return WP_REST_Response|WP_Error
+	 */
+	public function admin_priority( WP_REST_Request $request ) {
+		$body     = $request->get_json_params() ?: array();
+		$priority = isset( $body['priority'] ) ? (string) $body['priority'] : '';
+		$result   = ( new TicketService() )->update_priority( (string) $request['id'], $priority );
+		if ( is_wp_error( $result ) ) {
+			return $result;
+		}
+		return new WP_REST_Response( $result, 200 );
+	}
+
+	/**
+	 * Bulk status-change or delete for the admin list's multi-select.
+	 *
+	 * @param WP_REST_Request $request Request.
+	 * @return WP_REST_Response|WP_Error
+	 */
+	public function admin_bulk( WP_REST_Request $request ) {
+		$body   = $request->get_json_params() ?: array();
+		$ids    = isset( $body['ids'] ) && is_array( $body['ids'] )
+			? array_map( 'strval', $body['ids'] )
+			: array();
+		$action = isset( $body['action'] ) ? (string) $body['action'] : '';
+
+		if ( empty( $ids ) ) {
+			return new WP_Error(
+				'itsdesk_bulk_no_ids',
+				__( 'No tickets selected.', 'deskovi' ),
+				array( 'status' => 400 )
+			);
+		}
+
+		$service = new TicketService();
+
+		if ( 'delete' === $action ) {
+			$removed = $service->bulk_delete( $ids );
+			return new WP_REST_Response( array( 'removed' => $removed ), 200 );
+		}
+
+		if ( 'set_status' === $action ) {
+			$status = isset( $body['status'] ) ? (string) $body['status'] : '';
+			$result = $service->bulk_update_status( $ids, $status );
+			if ( is_wp_error( $result ) ) {
+				return $result;
+			}
+			return new WP_REST_Response( $result, 200 );
+		}
+
+		return new WP_Error(
+			'itsdesk_bulk_action_invalid',
+			__( 'Invalid bulk action.', 'deskovi' ),
+			array( 'status' => 400 )
+		);
+	}
+
+	/**
+	 * Stream a CSV export of tickets matching the current list filters.
+	 * Bypasses the REST JSON envelope deliberately — this is a file
+	 * download, not a JSON response. Mirrors download_attachment()'s
+	 * approach to raw output.
+	 *
+	 * @param WP_REST_Request $request Request.
+	 */
+	public function admin_export( WP_REST_Request $request ): void {
+		$rows = ( new TicketService() )->export_rows(
+			array(
+				'search'   => sanitize_text_field( (string) ( $request->get_param( 'search' ) ?? '' ) ),
+				'assignee' => (string) ( $request->get_param( 'assignee' ) ?? 'all' ),
+			)
+		);
+
+		nocache_headers();
+		header( 'Content-Type: text/csv; charset=utf-8' );
+		header( 'Content-Disposition: attachment; filename="deskovi-tickets-' . gmdate( 'Y-m-d' ) . '.csv"' );
+
+		$out = fopen( 'php://output', 'w' ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fopen
+		fputcsv(
+			$out,
+			array( 'ID', 'Subject', 'Status', 'Priority', 'Customer Name', 'Customer Email', 'Assigned Agent', 'Created At', 'Updated At' )
+		);
+		foreach ( $rows as $row ) {
+			fputcsv(
+				$out,
+				array(
+					$row['id'] ?? '',
+					$row['subject'] ?? '',
+					$row['status'] ?? '',
+					$row['priority'] ?? 'normal',
+					$row['customer_name'] ?? '',
+					$row['customer_email'] ?? '',
+					$row['assigned_agent_name'] ?? '',
+					$row['created_at'] ?? '',
+					$row['updated_at'] ?? '',
+				)
+			);
+		}
+		fclose( $out ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fclose
+		exit;
 	}
 
 	/**

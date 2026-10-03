@@ -55,6 +55,59 @@ final class TicketRepository {
 		$per_page = min( 100, max( 1, (int) ( $args['per_page'] ?? 20 ) ) );
 		$offset   = ( $page - 1 ) * $per_page;
 
+		$where = $this->build_where( $args );
+
+		$count_sql = "SELECT COUNT(*) FROM {$table} {$where['sql']}"; // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name is internal constant, $where['sql'] built from prepared fragments above.
+		$total     = (int) ( $where['params']
+			? $wpdb->get_var( $wpdb->prepare( $count_sql, $where['params'] ) ) // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- custom plugin table, no core caching API applies.
+			: $wpdb->get_var( $count_sql ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- custom plugin table, no core caching API applies; no user input in $count_sql when params is empty.
+
+		$list_params = array_merge( $where['params'], array( $per_page, $offset ) );
+		$rows        = $wpdb->get_results( // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- custom plugin table, no core caching API applies.
+			$wpdb->prepare( "SELECT * FROM {$table} {$where['sql']} ORDER BY updated_at DESC LIMIT %d OFFSET %d", $list_params ), // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name is internal constant, $where['sql'] built from prepared fragments above.
+			ARRAY_A
+		);
+
+		return array(
+			'items' => $this->hydrate_rows( is_array( $rows ) ? $rows : array() ),
+			'total' => $total,
+		);
+	}
+
+	/**
+	 * All tickets matching the given filters, unpaginated, NOT hydrated
+	 * (no messages/attachments — CSV export only needs ticket-level
+	 * fields, hydrating would be wasted work on a potentially large set).
+	 * Capped at 10,000 rows as a safety limit.
+	 *
+	 * @param array{search?: string, assignee?: string} $args
+	 * @return array<int, array<string, mixed>>
+	 */
+	public function matching( array $args ): array {
+		global $wpdb;
+		$table = Schema::tickets_table();
+
+		$where = $this->build_where( $args );
+
+		$sql = "SELECT * FROM {$table} {$where['sql']} ORDER BY updated_at DESC LIMIT 10000"; // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name is internal constant, $where['sql'] built from prepared fragments above.
+
+		$rows = $where['params']
+			? $wpdb->get_results( $wpdb->prepare( $sql, $where['params'] ), ARRAY_A ) // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- custom plugin table, no core caching API applies.
+			: $wpdb->get_results( $sql, ARRAY_A ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- custom plugin table, no core caching API applies, no user input when params empty.
+
+		return is_array( $rows ) ? $rows : array();
+	}
+
+	/**
+	 * Build a WHERE clause + bound params for the given list filters.
+	 * Shared by paginated() and matching() so filter logic can't drift
+	 * between the two.
+	 *
+	 * @param array{search?: string, assignee?: string} $args
+	 * @return array{sql: string, params: array<int, mixed>}
+	 */
+	private function build_where( array $args ): array {
+		global $wpdb;
 		$where  = array();
 		$params = array();
 
@@ -75,22 +128,9 @@ final class TicketRepository {
 			$params[] = (int) $assignee;
 		}
 
-		$where_sql = $where ? ( 'WHERE ' . implode( ' AND ', $where ) ) : '';
-
-		$count_sql = "SELECT COUNT(*) FROM {$table} {$where_sql}"; // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name is internal constant, $where_sql built from prepared fragments above.
-		$total     = (int) ( $params
-			? $wpdb->get_var( $wpdb->prepare( $count_sql, $params ) ) // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- custom plugin table, no core caching API applies.
-			: $wpdb->get_var( $count_sql ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- custom plugin table, no core caching API applies; no user input in $count_sql when $params is empty.
-
-		$list_params = array_merge( $params, array( $per_page, $offset ) );
-		$rows        = $wpdb->get_results( // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- custom plugin table, no core caching API applies.
-			$wpdb->prepare( "SELECT * FROM {$table} {$where_sql} ORDER BY updated_at DESC LIMIT %d OFFSET %d", $list_params ), // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name is internal constant, $where_sql built from prepared fragments above.
-			ARRAY_A
-		);
-
 		return array(
-			'items' => $this->hydrate_rows( is_array( $rows ) ? $rows : array() ),
-			'total' => $total,
+			'sql'    => $where ? ( 'WHERE ' . implode( ' AND ', $where ) ) : '',
+			'params' => $params,
 		);
 	}
 
@@ -227,6 +267,7 @@ final class TicketRepository {
 		$data = array(
 			'id'                    => $id,
 			'status'                => (string) ( $ticket['status'] ?? 'open' ),
+			'priority'              => (string) ( $ticket['priority'] ?? 'normal' ),
 			'category'              => isset( $ticket['category'] ) ? (string) $ticket['category'] : null,
 			'subject'               => (string) ( $ticket['subject'] ?? '' ),
 			'order_id'              => ! empty( $ticket['order_id'] ) ? (int) $ticket['order_id'] : null,
@@ -335,6 +376,7 @@ final class TicketRepository {
 			$tickets[] = array(
 				'id'                     => $id,
 				'status'                 => $row['status'] ?? 'open',
+				'priority'               => $row['priority'] ?? 'normal',
 				'category'               => $row['category'] ?? null,
 				'subject'                => $row['subject'] ?? '',
 				'order_id'               => null !== $row['order_id'] ? (int) $row['order_id'] : null,

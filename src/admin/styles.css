@@ -297,6 +297,16 @@
 	border-top: 1px solid var(--dk-line);
 }
 
+.itsdesk-bulk-bar {
+	display: flex;
+	align-items: center;
+	gap: 10px;
+	padding: 8px 12px;
+	background: var(--dk-accent-soft);
+	border: 1px solid var(--dk-accent);
+	border-radius: 10px;
+}
+
 /* —— Badges —— */
 .itsdesk-badge {
 	display: inline-flex;
@@ -1193,17 +1203,29 @@
 }
 
 .itsdesk-ticket-row {
-	display: block;
+	display: flex;
+	align-items: flex-start;
+	gap: 10px;
 	width: 100%;
 	text-align: left;
 	border: 1px solid var(--dk-line);
 	border-radius: 10px;
 	padding: 12px 14px;
 	background: var(--dk-canvas);
-	cursor: pointer;
 	font: inherit;
 	color: inherit;
 	transition: border-color 0.15s ease, background 0.15s ease;
+}
+
+.itsdesk-ticket-row input[type="checkbox"] {
+	margin-top: 3px;
+	flex-shrink: 0;
+}
+
+.itsdesk-ticket-row__content {
+	flex: 1;
+	min-width: 0;
+	cursor: pointer;
 }
 
 .itsdesk-ticket-row:hover {

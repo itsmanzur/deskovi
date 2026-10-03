@@ -4,7 +4,7 @@ Tags: woocommerce, helpdesk, support, tickets, customer-service
 Requires at least: 6.0
 Tested up to: 7.0
 Requires PHP: 7.4
-Stable tag: 1.2.0
+Stable tag: 1.3.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -16,9 +16,12 @@ Deskovi adds a self-contained support ticket system to your WooCommerce store. C
 
 **Features**
 
-* Ticket system with replies, status (open/pending/resolved/closed), and file attachments
+* Ticket system with replies, status, priority, and file attachments
 * WooCommerce order context for agents (HPOS-compatible)
+* Issue refunds or resend the order invoice email directly from a ticket
 * Agent assignment, with per-agent ticket filtering
+* Bulk status changes and bulk delete on the admin ticket list
+* CSV export of tickets (respects the current search/filter)
 * Canned replies (macros): reusable reply templates with one-click insert and placeholder substitution
 * Configurable email notifications for ticket events
 * Optional customer chat widget on the storefront
@@ -77,6 +80,12 @@ https://github.com/itsmanzur/deskovi
 
 == Changelog ==
 
+= 1.3.0 =
+* Add ticket priority (Low/Normal/High/Urgent)
+* Add bulk actions on the admin ticket list: multi-select status change and delete
+* Add CSV export of tickets, respecting the current search/assignee filter
+* Add issue-refund and resend-invoice actions directly from a ticket's linked order
+
 = 1.2.0 =
 * Add server-side pagination to the admin tickets list
 * Add ticket search by subject, customer name, or email
@@ -97,6 +106,9 @@ https://github.com/itsmanzur/deskovi
 * Admin diagnostics
 
 == Upgrade Notice ==
+
+= 1.3.0 =
+Adds ticket priority, bulk status/delete actions, CSV export, and order refund/resend-invoice actions from a ticket.
 
 = 1.0.0 =
 Initial public release.

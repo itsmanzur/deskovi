@@ -16,7 +16,7 @@ defined( 'ABSPATH' ) || exit;
 final class Schema {
 
 	public const DB_VERSION_OPTION = 'itsdesk_tickets_db_version';
-	public const DB_VERSION        = '1.3.0';
+	public const DB_VERSION        = '1.3.1';
 
 	/**
 	 * Create tables if missing, or upgrade if the schema version changed.
@@ -45,6 +45,7 @@ final class Schema {
 		$sql = "CREATE TABLE {$tickets_table} (
 			id VARCHAR(40) NOT NULL,
 			status VARCHAR(20) NOT NULL DEFAULT 'open',
+			priority VARCHAR(20) NOT NULL DEFAULT 'normal',
 			category VARCHAR(60) DEFAULT NULL,
 			subject VARCHAR(255) NOT NULL DEFAULT '',
 			order_id BIGINT UNSIGNED DEFAULT NULL,

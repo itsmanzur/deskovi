@@ -180,6 +180,42 @@ export function updateTicketStatus( id: string, status: string ): Promise< Ticke
 	} );
 }
 
+export function updateTicketPriority( id: string, priority: string ): Promise< Ticket > {
+	return apiFetch( {
+		path: `${ base }/tickets/${ id }/priority`,
+		method: 'POST',
+		data: { priority },
+	} );
+}
+
+export function bulkDeleteTickets( ids: string[] ): Promise< { removed: number } > {
+	return apiFetch( {
+		path: `${ base }/tickets/bulk`,
+		method: 'POST',
+		data: { ids, action: 'delete' },
+	} );
+}
+
+export function bulkSetTicketStatus(
+	ids: string[],
+	status: string
+): Promise< { updated: number } > {
+	return apiFetch( {
+		path: `${ base }/tickets/bulk`,
+		method: 'POST',
+		data: { ids, action: 'set_status', status },
+	} );
+}
+
+export function ticketsExportUrl( params: { search?: string; assignee?: string } = {} ): string {
+	const query = new URLSearchParams();
+	if ( params.search ) query.set( 'search', params.search );
+	if ( params.assignee && params.assignee !== 'all' ) query.set( 'assignee', params.assignee );
+	query.set( '_wpnonce', config?.nonce ?? '' );
+	const qs = query.toString();
+	return `${ ( config?.restRoot ?? '' ).replace( /\/$/, '' ) }${ base }/tickets/export${ qs ? `?${ qs }` : '' }`;
+}
+
 export function fetchAgents(): Promise< { agents: Agent[] } > {
 	return apiFetch( { path: `${ base }/agents` } );
 }
@@ -224,6 +260,25 @@ export function linkTicketOrder(
 		path: `${ base }/tickets/${ ticketId }/order`,
 		method: 'POST',
 		data: { order_id: orderId },
+	} );
+}
+
+export function refundOrder(
+	ticketId: string,
+	amount: number | null,
+	reason: string
+): Promise< Ticket > {
+	return apiFetch( {
+		path: `${ base }/tickets/${ ticketId }/order/refund`,
+		method: 'POST',
+		data: { amount, reason },
+	} );
+}
+
+export function resendOrderInvoice( ticketId: string ): Promise< Ticket > {
+	return apiFetch( {
+		path: `${ base }/tickets/${ ticketId }/order/resend-invoice`,
+		method: 'POST',
 	} );
 }
 
