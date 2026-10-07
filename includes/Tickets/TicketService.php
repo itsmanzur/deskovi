@@ -189,7 +189,8 @@ final class TicketService {
 			$idempotency = 'idem_' . wp_generate_uuid4();
 		}
 
-		$subject  = isset( $input['subject'] ) ? sanitize_text_field( (string) $input['subject'] ) : '';
+		// Column widths: subject VARCHAR(255). Cut instead of letting the insert fail.
+		$subject  = isset( $input['subject'] ) ? mb_substr( sanitize_text_field( (string) $input['subject'] ), 0, 255 ) : '';
 		$body     = isset( $input['body'] ) ? sanitize_textarea_field( (string) $input['body'] ) : '';
 		$category = isset( $input['category'] ) ? sanitize_key( (string) $input['category'] ) : 'other';
 
@@ -211,7 +212,15 @@ final class TicketService {
 
 		$user_id = isset( $input['customer_user_id'] ) ? (int) $input['customer_user_id'] : 0;
 		$email   = isset( $input['customer_email'] ) ? sanitize_email( (string) $input['customer_email'] ) : '';
-		$name    = isset( $input['customer_name'] ) ? sanitize_text_field( (string) $input['customer_name'] ) : '';
+		$name    = isset( $input['customer_name'] ) ? mb_substr( sanitize_text_field( (string) $input['customer_name'] ), 0, 190 ) : '';
+
+		if ( strlen( $email ) > 190 ) {
+			return new \WP_Error(
+				'itsdesk_ticket_invalid',
+				__( 'The email address is too long.', 'deskovi' ),
+				array( 'status' => 400 )
+			);
+		}
 
 		$guest_order_id = null;
 		if ( ! $is_admin && $user_id <= 0 ) {
@@ -301,6 +310,17 @@ final class TicketService {
 		}
 
 		$this->repo->save( $ticket );
+
+		// save() returns nothing; confirm the row exists so callers (including
+		// add-ons creating tickets from email) never act on a ticket that was not stored.
+		if ( null === $this->repo->find( (string) $ticket['id'] ) ) {
+			return new \WP_Error(
+				'itsdesk_ticket_save',
+				__( 'The ticket could not be saved.', 'deskovi' ),
+				array( 'status' => 500 )
+			);
+		}
+
 		$this->logger->log(
 			'Ticket',
 			sprintf(

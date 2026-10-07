@@ -34,12 +34,25 @@ Use your own prefix for options, cron events and tables. Never reuse names start
 | `itsdesk_admin_config` `( array $config )` | filter | The `window.itsdeskAdmin` object. Append your own keys (for example capability flags). |
 | `itsdesk_notification_channels` `( array $channels, string $event, array $ticket )` | filter | Add a channel: id => callable receiving `array{event, ticket, recipients, subject, body}`. The built-in `email` channel (wp_mail) is always present. A throwing channel is logged and never affects the ticket operation. |
 | `itsdesk_notification_recipients` `( array $emails, string $event, array $ticket )` | filter | Recipient addresses of one notification. |
-| `itsdesk_notification_email` `( array $mail, string $event, array $ticket )` | filter | One outgoing email: `to`, `subject`, `body`, `headers`. |
+| `itsdesk_notification_email` `( array $mail, string $event, array $ticket, array $context )` | filter | One outgoing email: `to`, `subject`, `body`, `headers`, `attachments` (absolute file paths, passed to `wp_mail`). `$context` = `{ audience: customer\|agent, message: the message that triggered it }`. Return an empty `to` to skip this recipient (for example when the add-on sends the mail itself). Since 1.5.0. |
 | `itsdesk_notification_settings_defaults` `( array $defaults )` | filter | Add notification toggles; only keys listed here are storable. Events: `agent_new_ticket`, `agent_new_reply`, `customer_reply`, `agent_assigned`. |
 | `itsdesk_inbound_sources` `( array $sources )` | filter | Registry of inbound ticket sources (read with `Itsdesk\Extensions\Registry::inbound_sources()`). |
 | `itsdesk_diagnostics_report` `( array $report )` | filter | Append rows to `checks` (`name`, `value`, `status` = `pass`/`ok`/`fail`/`info`) and `errors` (`time`, `code`, `message`). |
 | `itsdesk_ticket_data` `( array $ticket, array $input )` | filter | A new ticket just before it is saved. Return the same array (the `id` must be unchanged). |
 | `itsdesk_tickets_deleted` `( array $ids )` | action | After tickets (with messages and attachment files) were deleted, including by the GDPR eraser. Remove your per-ticket data here. |
+
+### Creating tickets and replies from an add-on (trusted ingest)
+
+An add-on that receives messages outside the web UI (for example email) calls Deskovi's services directly. Authorization is the caller's job — the services trust their arguments:
+
+- `( new TicketService() )->create( $input, true )` — `$is_admin = true` skips the guest-session requirement **and** the order-ownership check (only "the order exists" is verified), so verify the order belongs to the sender yourself. `$input` keys: `subject` (cut to 255), `body`, `category` (must be one of Free's six), `customer_email` (≤190), `customer_name` (cut to 190), `customer_user_id`, `order_id`, `idempotency_key` (≤100; an existing key returns the existing ticket). Returns the ticket or a `WP_Error`; since 1.5.0 a ticket that could not be stored is an error, not a silent success.
+- `->reply( $id, [ 'body' => … ], null, false, [ 'email' => $ticket_email, 'order_id' => 0 ] )` appends a **customer** message; `->reply( $id, [ 'body' => … ], null, true, null )` appends an **agent** message (visible, status moves open → pending). A `closed` ticket stays closed; call `update_status()` to reopen it. The new message is the last entry of the returned ticket's `messages`.
+- Bodies are stored as **plain text** (all tags are stripped, including `<…>` in "On … wrote:" lines), so convert HTML and strip quoted text first.
+- Extra data (message ids, source, participants) is not persisted by Deskovi; keep it in your own tables, keyed by ticket id (`itsdesk_tickets_deleted` tells you when to remove it).
+
+### Attachments
+
+`( new AttachmentService() )->store_from_string( $bytes, $name, $ticket_id, $message_id, 'customer' )` and `->store_from_path( $path, $name, … )` (the source file is copied, never moved) apply the same validation as web uploads: extension allow-list, content sniffing, size limit (measured on disk), per-ticket maximum. They return the attachment array or a `WP_Error`. Since 1.5.0. Files attached to an internal note are never exposed to customers (ticket attachment list and download).
 
 Existing hooks (unchanged): `itsdesk_ticket_created`, `itsdesk_ticket_replied`, `itsdesk_ticket_assigned`, `itsdesk_attachment_allowed_types`, `itsdesk_attachment_max_size`, `itsdesk_attachment_max_per_ticket`.
 
@@ -87,4 +100,4 @@ Adds a button to the bulk bar (shown when tickets are selected). `run` executes 
 
 ## Not part of v1
 
-Automation/SLA event hooks (status, priority, order-link, refund), ticket query and category/status filters, widget config filter, an order-action registry and a path-based attachment ingest are not provided yet and will be added (non-breaking) when an add-on needs them.
+Automation/SLA event hooks (status, priority, order-link, refund), ticket query and category/status filters, widget config filter and an order-action registry are not provided yet and will be added (non-breaking) when an add-on needs them.

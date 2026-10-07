@@ -581,14 +581,46 @@ final class TicketController {
 		if ( ! is_wp_error( $marked ) ) {
 			$result = $marked;
 		}
-		$messages = array();
+		$internal_ids = $this->internal_message_ids( $result );
+		$messages     = array();
 		foreach ( $result['messages'] ?? array() as $msg ) {
 			if ( is_array( $msg ) && empty( $msg['internal'] ) ) {
 				$messages[] = $msg;
 			}
 		}
 		$result['messages'] = $messages;
+
+		// The ticket-level attachment list must not reveal files that were attached
+		// to internal notes (ids and file names would leak through it).
+		if ( ! empty( $result['attachments'] ) && is_array( $result['attachments'] ) ) {
+			$result['attachments'] = array_values(
+				array_filter(
+					$result['attachments'],
+					static function ( $attachment ) use ( $internal_ids ) {
+						return ! is_array( $attachment ) || ! in_array( (string) ( $attachment['message_id'] ?? '' ), $internal_ids, true );
+					}
+				)
+			);
+		}
+
 		return new WP_REST_Response( $result, 200 );
+	}
+
+	/**
+	 * Ids of the internal (agent-only) messages of a ticket.
+	 *
+	 * @param array<string, mixed> $ticket Ticket with its messages.
+	 * @return array<int, string>
+	 */
+	private function internal_message_ids( array $ticket ): array {
+		$ids = array();
+		foreach ( (array) ( $ticket['messages'] ?? array() ) as $message ) {
+			if ( is_array( $message ) && ! empty( $message['internal'] ) && ! empty( $message['id'] ) ) {
+				$ids[] = (string) $message['id'];
+			}
+		}
+
+		return $ids;
 	}
 
 	/**
@@ -701,6 +733,11 @@ final class TicketController {
 
 		$ticket = ( new TicketService() )->get( (string) $attachment['ticket_id'], $user_id, $is_admin, $guest );
 		if ( is_wp_error( $ticket ) ) {
+			return new WP_Error( 'itsdesk_attachment_forbidden', __( 'You cannot access this file.', 'deskovi' ), array( 'status' => 403 ) );
+		}
+
+		// Files attached to an internal note are for agents only.
+		if ( ! $is_admin && in_array( (string) ( $attachment['message_id'] ?? '' ), $this->internal_message_ids( $ticket ), true ) ) {
 			return new WP_Error( 'itsdesk_attachment_forbidden', __( 'You cannot access this file.', 'deskovi' ), array( 'status' => 403 ) );
 		}
 

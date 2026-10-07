@@ -81,17 +81,144 @@ final class AttachmentService {
 			return new \WP_Error( 'itsdesk_attachment_upload_error', __( 'The file failed to upload.', 'deskovi' ), array( 'status' => 400 ) );
 		}
 
-		$size = (int) ( $file['size'] ?? 0 );
+		return $this->ingest(
+			(string) $file['tmp_name'],
+			isset( $file['name'] ) ? (string) $file['name'] : '',
+			$ticket_id,
+			$message_id,
+			$uploaded_by
+		);
+	}
+
+	/**
+	 * Store a file that already exists on disk (not an HTTP upload), for example
+	 * an attachment an add-on extracted from an email. The source file is copied,
+	 * never moved or deleted. Same validation as store().
+	 *
+	 * @param string      $path        Readable file path.
+	 * @param string      $name        Original file name (extension decides the type).
+	 * @param string      $ticket_id   Ticket this belongs to.
+	 * @param string|null $message_id  Message this belongs to, if any.
+	 * @param string      $uploaded_by 'customer' or 'agent'.
+	 * @return array<string, mixed>|\WP_Error
+	 */
+	public function store_from_path( string $path, string $name, string $ticket_id, ?string $message_id, string $uploaded_by ) {
+		if ( '' === $path || ! is_file( $path ) || ! is_readable( $path ) ) {
+			return new \WP_Error( 'itsdesk_attachment_invalid', __( 'No file was provided.', 'deskovi' ), array( 'status' => 400 ) );
+		}
+
+		$tmp = $this->temp_file( $name );
+		if ( is_wp_error( $tmp ) ) {
+			return $tmp;
+		}
+
+		if ( ! copy( $path, $tmp ) ) {
+			wp_delete_file( $tmp );
+			return new \WP_Error( 'itsdesk_attachment_write_failed', __( 'Could not save the file.', 'deskovi' ), array( 'status' => 500 ) );
+		}
+
+		return $this->ingest_temp( $tmp, $name, $ticket_id, $message_id, $uploaded_by );
+	}
+
+	/**
+	 * Store file contents held in memory (for example a decoded email part).
+	 * Same validation as store().
+	 *
+	 * @param string      $bytes       File contents.
+	 * @param string      $name        Original file name (extension decides the type).
+	 * @param string      $ticket_id   Ticket this belongs to.
+	 * @param string|null $message_id  Message this belongs to, if any.
+	 * @param string      $uploaded_by 'customer' or 'agent'.
+	 * @return array<string, mixed>|\WP_Error
+	 */
+	public function store_from_string( string $bytes, string $name, string $ticket_id, ?string $message_id, string $uploaded_by ) {
+		if ( '' === $bytes || strlen( $bytes ) > self::max_size() ) {
+			return $this->too_large_error();
+		}
+
+		$tmp = $this->temp_file( $name );
+		if ( is_wp_error( $tmp ) ) {
+			return $tmp;
+		}
+
+		if ( false === file_put_contents( $tmp, $bytes ) ) { // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_file_put_contents -- private temp file, moved into place by ingest().
+			wp_delete_file( $tmp );
+			return new \WP_Error( 'itsdesk_attachment_write_failed', __( 'Could not save the file.', 'deskovi' ), array( 'status' => 500 ) );
+		}
+
+		return $this->ingest_temp( $tmp, $name, $ticket_id, $message_id, $uploaded_by );
+	}
+
+	/**
+	 * Create a private temp file for an incoming attachment.
+	 *
+	 * @param string $name Original file name.
+	 * @return string|\WP_Error
+	 */
+	private function temp_file( string $name ) {
+		if ( ! function_exists( 'wp_tempnam' ) ) {
+			require_once ABSPATH . 'wp-admin/includes/file.php';
+		}
+
+		$tmp = wp_tempnam( '' !== $name ? $name : 'file' );
+		if ( ! $tmp ) {
+			return new \WP_Error( 'itsdesk_attachment_write_failed', __( 'Could not save the file.', 'deskovi' ), array( 'status' => 500 ) );
+		}
+
+		return $tmp;
+	}
+
+	/**
+	 * Run ingest() on one of our own temp files and make sure it never lingers
+	 * after a validation failure (a successful ingest moves it away).
+	 *
+	 * @param string      $tmp         Temp file created by temp_file().
+	 * @param string      $name        Original file name.
+	 * @param string      $ticket_id   Ticket id.
+	 * @param string|null $message_id  Message id.
+	 * @param string      $uploaded_by Uploader.
+	 * @return array<string, mixed>|\WP_Error
+	 */
+	private function ingest_temp( string $tmp, string $name, string $ticket_id, ?string $message_id, string $uploaded_by ) {
+		$result = $this->ingest( $tmp, $name, $ticket_id, $message_id, $uploaded_by );
+		if ( is_wp_error( $result ) && file_exists( $tmp ) ) {
+			wp_delete_file( $tmp );
+		}
+
+		return $result;
+	}
+
+	/**
+	 * Size-limit error shared by every entry point.
+	 */
+	private function too_large_error(): \WP_Error {
+		return new \WP_Error(
+			'itsdesk_attachment_too_large',
+			sprintf(
+				/* translators: %s: human-readable max size */
+				__( 'File exceeds the %s upload limit.', 'deskovi' ),
+				size_format( self::max_size() )
+			),
+			array( 'status' => 400 )
+		);
+	}
+
+	/**
+	 * Shared validation + storage. The size is measured on disk, never taken
+	 * from a client-supplied value. Moves $path into the locked folder on success.
+	 *
+	 * @param string      $path        Existing file to move into place.
+	 * @param string      $name        Original file name.
+	 * @param string      $ticket_id   Ticket id.
+	 * @param string|null $message_id  Message id.
+	 * @param string      $uploaded_by Uploader.
+	 * @return array<string, mixed>|\WP_Error
+	 */
+	private function ingest( string $path, string $name, string $ticket_id, ?string $message_id, string $uploaded_by ) {
+		clearstatcache( true, $path );
+		$size = (int) filesize( $path );
 		if ( $size <= 0 || $size > self::max_size() ) {
-			return new \WP_Error(
-				'itsdesk_attachment_too_large',
-				sprintf(
-					/* translators: %s: human-readable max size */
-					__( 'File exceeds the %s upload limit.', 'deskovi' ),
-					size_format( self::max_size() )
-				),
-				array( 'status' => 400 )
-			);
+			return $this->too_large_error();
 		}
 
 		global $wpdb;
@@ -103,7 +230,7 @@ final class AttachmentService {
 			return new \WP_Error( 'itsdesk_attachment_limit', __( 'This ticket has reached its attachment limit.', 'deskovi' ), array( 'status' => 400 ) );
 		}
 
-		$original_name = isset( $file['name'] ) ? sanitize_file_name( (string) $file['name'] ) : 'file';
+		$original_name = '' !== $name ? sanitize_file_name( $name ) : 'file';
 		$ext           = strtolower( (string) pathinfo( $original_name, PATHINFO_EXTENSION ) );
 
 		$allowed = self::allowed_types();
@@ -112,7 +239,7 @@ final class AttachmentService {
 		}
 
 		// Verify the real file content matches an allowed type — don't trust the extension alone.
-		$filetype = wp_check_filetype_and_ext( (string) $file['tmp_name'], $original_name );
+		$filetype = wp_check_filetype_and_ext( $path, $original_name );
 		$real_ext = $filetype['ext'] ? strtolower( (string) $filetype['ext'] ) : '';
 		if ( '' === $real_ext || ! isset( $allowed[ $real_ext ] ) || $real_ext !== $ext ) {
 			return new \WP_Error( 'itsdesk_attachment_type', __( 'This file type is not allowed.', 'deskovi' ), array( 'status' => 400 ) );
@@ -132,7 +259,7 @@ final class AttachmentService {
 		WP_Filesystem();
 		global $wp_filesystem;
 
-		if ( ! $wp_filesystem || ! $wp_filesystem->move( (string) $file['tmp_name'], $destination, true ) ) {
+		if ( ! $wp_filesystem || ! $wp_filesystem->move( $path, $destination, true ) ) {
 			return new \WP_Error( 'itsdesk_attachment_write_failed', __( 'Could not save the uploaded file.', 'deskovi' ), array( 'status' => 500 ) );
 		}
 		$wp_filesystem->chmod( $destination, 0640 );

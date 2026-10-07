@@ -295,33 +295,50 @@ final class Notifications {
 	 */
 	private function deliver_email( array $data ): void {
 		$ticket_subject = (string) ( $data['ticket']['subject'] ?? '' );
+		$messages       = (array) ( $data['ticket']['messages'] ?? array() );
+		$last_message   = array() === $messages ? array() : end( $messages );
+
+		$context = array(
+			'audience' => 'customer_reply' === $data['event'] ? 'customer' : 'agent',
+			'message'  => is_array( $last_message ) ? $last_message : array(),
+		);
 
 		foreach ( (array) $data['recipients'] as $to ) {
 			/**
 			 * Filters one outgoing notification email.
 			 *
-			 * @param array<string, mixed> $mail   Keys: to, subject, body, headers.
-			 * @param string               $event  Event id.
-			 * @param array<string, mixed> $ticket Ticket.
+			 * @param array<string, mixed> $mail    Keys: to, subject, body, headers, attachments (absolute file paths).
+			 * @param string               $event   Event id.
+			 * @param array<string, mixed> $ticket  Ticket.
+			 * @param array<string, mixed> $context Keys: audience (customer|agent), message (the message that triggered it).
 			 */
 			$mail = (array) apply_filters(
 				'itsdesk_notification_email',
 				array(
-					'to'      => (string) $to,
-					'subject' => (string) $data['subject'],
-					'body'    => (string) $data['body'],
-					'headers' => array(),
+					'to'          => (string) $to,
+					'subject'     => (string) $data['subject'],
+					'body'        => (string) $data['body'],
+					'headers'     => array(),
+					'attachments' => array(),
 				),
 				(string) $data['event'],
-				(array) $data['ticket']
+				(array) $data['ticket'],
+				$context
 			);
 
+			$recipient = (string) ( $mail['to'] ?? '' );
+			if ( '' === trim( $recipient ) ) {
+				// An add-on removed the recipient on purpose (for example it sends this mail itself).
+				continue;
+			}
+
 			$this->send(
-				(string) ( $mail['to'] ?? '' ),
+				$recipient,
 				(string) ( $mail['subject'] ?? '' ),
 				(string) ( $mail['body'] ?? '' ),
 				$ticket_subject,
-				(array) ( $mail['headers'] ?? array() )
+				(array) ( $mail['headers'] ?? array() ),
+				(array) ( $mail['attachments'] ?? array() )
 			);
 		}
 	}
@@ -354,9 +371,9 @@ final class Notifications {
 	 * Send one email, logging the outcome. Never throws — a failed send must
 	 * not affect the ticket operation that triggered it.
 	 */
-	private function send( string $to, string $subject, string $body, string $ticket_subject, array $headers = array() ): void {
+	private function send( string $to, string $subject, string $body, string $ticket_subject, array $headers = array(), array $attachments = array() ): void {
 		try {
-			$sent = wp_mail( $to, $subject, $body, $headers );
+			$sent = wp_mail( $to, $subject, $body, $headers, $attachments );
 		} catch ( \Throwable $e ) {
 			$sent = false;
 		}
