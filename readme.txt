@@ -84,6 +84,7 @@ https://github.com/itsmanzur/deskovi
 * Add `store_from_path()` / `store_from_string()` to the attachment service so add-ons can save files that did not come from a web upload (same validation; the size is now measured on disk)
 * Fix: attachments belonging to internal notes are no longer listed in, or downloadable through, the customer ticket view
 * Fix: creating a ticket now fails with a clear error if it could not be stored, and over-long subjects/names are cut instead of breaking the insert
+* Fix: two messages stored within the same second could appear in the wrong order (message ids now sort in creation order)
 * Improve: notification emails skip an empty recipient and can carry attachments; the email filter receives the audience and triggering message
 
 = 1.4.0 =

@@ -33,6 +33,16 @@ final class TicketService {
 	}
 
 	/**
+	 * Message id body (after "msg_"): millisecond timestamp in fixed-width hex, then random
+	 * hex. Same 36 characters as the UUID it replaces (the column is 40 wide), but ids sort
+	 * in creation order, so two messages stored in the same second (created_at has second
+	 * resolution) keep their order instead of being shuffled by a random tie-break.
+	 */
+	private static function new_message_id(): string {
+		return sprintf( '%012x', (int) floor( microtime( true ) * 1000 ) ) . '-' . substr( wp_generate_uuid4(), 0, 23 );
+	}
+
+	/**
 	 * List all (admin), paginated + filtered.
 	 *
 	 * @param array{page?: int, per_page?: int, search?: string, assignee?: string} $args
@@ -260,7 +270,7 @@ final class TicketService {
 		}
 
 		$now        = gmdate( 'c' );
-		$message_id = 'msg_' . wp_generate_uuid4();
+		$message_id = 'msg_' . self::new_message_id();
 		$ticket_id  = 'tkt_' . wp_generate_uuid4();
 
 		$order_snapshot = null;
@@ -361,7 +371,7 @@ final class TicketService {
 		$internal = $is_admin && ! empty( $input['internal'] );
 		$author   = $is_admin ? 'agent' : 'customer';
 		$now      = gmdate( 'c' );
-		$msg_id   = 'msg_' . wp_generate_uuid4();
+		$msg_id   = 'msg_' . self::new_message_id();
 
 		$message = array(
 			'id'         => $msg_id,
@@ -715,7 +725,7 @@ final class TicketService {
 				$order_id
 			);
 		$ticket['messages'][] = array(
-			'id'         => 'msg_' . wp_generate_uuid4(),
+			'id'         => 'msg_' . self::new_message_id(),
 			'author'     => 'system',
 			'body'       => $body,
 			'internal'   => false,
@@ -769,7 +779,7 @@ final class TicketService {
 
 		$now = gmdate( 'c' );
 		$ticket['messages'][] = array(
-			'id'         => 'msg_' . wp_generate_uuid4(),
+			'id'         => 'msg_' . self::new_message_id(),
 			'author'     => 'system',
 			'body'       => sprintf(
 				/* translators: %s: customer email */
