@@ -44,29 +44,55 @@ final class AdminAssets {
 		$style_path  = ITSDESK_PATH . 'assets/admin/index.css';
 
 		if ( is_readable( $script_path ) ) {
+			/**
+			 * Filters the script dependencies of the Deskovi admin bundle.
+			 *
+			 * @param array<int, string> $dependencies Script handles.
+			 */
+			$dependencies = (array) apply_filters( 'itsdesk_admin_script_deps', $asset['dependencies'] );
+
 			wp_enqueue_script(
 				'itsdesk-admin',
 				ITSDESK_URL . 'assets/admin/index.js',
-				$asset['dependencies'],
+				$dependencies,
 				$asset['version'],
 				true
 			);
 
-			wp_localize_script(
-				'itsdesk-admin',
-				'itsdeskAdmin',
-				array(
-					'restRoot'        => esc_url_raw( rest_url() ),
-					'nonce'           => wp_create_nonce( 'wp_rest' ),
-					'version'         => ITSDESK_VERSION,
-					'pluginUrl'       => ITSDESK_URL,
-					'currentUserId'   => get_current_user_id(),
-					'currentUserName' => wp_get_current_user()->display_name,
-					'canManageOrders' => current_user_can( 'manage_itsdesk' ) && current_user_can( 'edit_shop_orders' ),
-				)
+			$config = array(
+				'restRoot'        => esc_url_raw( rest_url() ),
+				'nonce'           => wp_create_nonce( 'wp_rest' ),
+				'version'         => ITSDESK_VERSION,
+				'apiVersion'      => ITSDESK_API_VERSION,
+				'pluginUrl'       => ITSDESK_URL,
+				'currentUserId'   => get_current_user_id(),
+				'currentUserName' => wp_get_current_user()->display_name,
+				'canManageOrders' => Capabilities::can( Capabilities::ABILITY_REFUND ),
+				'capabilities'    => array(
+					'manage' => Capabilities::can( Capabilities::ABILITY_MANAGE ),
+					'refund' => Capabilities::can( Capabilities::ABILITY_REFUND ),
+				),
 			);
 
+			/**
+			 * Filters the itsdeskAdmin object passed to the admin bundle.
+			 * Add-ons append their own keys (e.g. extra capability flags).
+			 *
+			 * @param array<string, mixed> $config Localized config.
+			 */
+			$config = (array) apply_filters( 'itsdesk_admin_config', $config );
+
+			wp_localize_script( 'itsdesk-admin', 'itsdeskAdmin', $config );
+
 			wp_set_script_translations( 'itsdesk-admin', 'deskovi', ITSDESK_PATH . 'languages' );
+
+			/**
+			 * Fires right after the Deskovi admin bundle is enqueued. Add-ons
+			 * enqueue their own bundle here, depending on the 'itsdesk-admin' handle.
+			 *
+			 * @param string $hook_suffix Current admin page hook.
+			 */
+			do_action( 'itsdesk_admin_enqueue_scripts', $hook_suffix );
 		}
 
 		if ( is_readable( $style_path ) ) {

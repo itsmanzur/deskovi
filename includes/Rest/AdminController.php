@@ -10,6 +10,7 @@ namespace Itsdesk\Rest;
 
 defined( 'ABSPATH' ) || exit;
 
+use Itsdesk\Admin\Capabilities;
 use Itsdesk\Diagnostics\ActivityLogger;
 use Itsdesk\Diagnostics\EnvironmentReport;
 use Itsdesk\Privacy\Settings as PrivacySettings;
@@ -160,7 +161,7 @@ final class AdminController {
 	 * Capability gate.
 	 */
 	public function can_manage(): bool {
-		return current_user_can( 'manage_itsdesk' );
+		return Capabilities::can( Capabilities::ABILITY_MANAGE );
 	}
 
 	/**

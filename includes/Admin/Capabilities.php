@@ -21,6 +21,47 @@ final class Capabilities {
 	public const AGENT_ROLE = 'itsdesk_agent';
 
 	/**
+	 * Ability ids understood by can().
+	 */
+	public const ABILITY_MANAGE = 'manage';
+
+	public const ABILITY_REFUND = 'refund';
+
+	/**
+	 * Central permission check for Deskovi abilities.
+	 *
+	 * Defaults match the long-standing behaviour exactly; add-ons may widen or
+	 * narrow them (or define their own ability ids) through the
+	 * itsdesk_user_can filter.
+	 *
+	 * @param string   $ability Ability id (ABILITY_MANAGE, ABILITY_REFUND, or an add-on id).
+	 * @param int|null $user_id User id; defaults to the current user.
+	 */
+	public static function can( string $ability, ?int $user_id = null ): bool {
+		$user_id = $user_id ?? get_current_user_id();
+
+		switch ( $ability ) {
+			case self::ABILITY_MANAGE:
+				$allowed = user_can( $user_id, self::CAP );
+				break;
+			case self::ABILITY_REFUND:
+				$allowed = user_can( $user_id, self::CAP ) && user_can( $user_id, 'edit_shop_orders' );
+				break;
+			default:
+				$allowed = false;
+		}
+
+		/**
+		 * Filters whether a user has a Deskovi ability.
+		 *
+		 * @param bool   $allowed Default decision.
+		 * @param string $ability Ability id.
+		 * @param int    $user_id User id.
+		 */
+		return (bool) apply_filters( 'itsdesk_user_can', $allowed, $ability, $user_id );
+	}
+
+	/**
 	 * Register hooks.
 	 */
 	public function register(): void {

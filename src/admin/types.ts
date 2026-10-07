@@ -1,4 +1,4 @@
-export type Screen =
+export type BuiltInScreen =
 	| 'overview'
 	| 'tickets'
 	| 'widget'
@@ -8,6 +8,9 @@ export type Screen =
 	| 'docs'
 	| 'diagnostics'
 	| 'activity';
+
+/** Built-in screen ids, or the id of a screen registered by an add-on. */
+export type Screen = BuiltInScreen | ( string & {} );
 
 export type TicketAttachment = {
 	id: string;
@@ -158,10 +161,14 @@ declare global {
 			restRoot: string;
 			nonce: string;
 			version: string;
+			apiVersion: number;
 			pluginUrl: string;
 			currentUserId: number;
 			currentUserName: string;
 			canManageOrders: boolean;
+			capabilities: Record< string, boolean >;
+			/** Add-ons append their own keys through the itsdesk_admin_config filter. */
+			[ key: string ]: unknown;
 		};
 	}
 }

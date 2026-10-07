@@ -88,9 +88,7 @@ final class Notifications {
 			admin_url( 'admin.php?page=' . AdminMenu::PAGE_SLUG )
 		);
 
-		foreach ( $recipients as $email ) {
-			$this->send( $email, $subject, $body, $subject_line );
-		}
+		$this->dispatch( 'agent_new_ticket', $ticket, $recipients, $subject, $body );
 	}
 
 	/**
@@ -133,7 +131,7 @@ final class Notifications {
 				$excerpt
 			);
 
-			$this->send( $customer_email, $subject, $body, $subject_line );
+			$this->dispatch( 'customer_reply', $ticket, array( $customer_email ), $subject, $body );
 			return;
 		}
 
@@ -174,9 +172,7 @@ final class Notifications {
 				admin_url( 'admin.php?page=' . AdminMenu::PAGE_SLUG )
 			);
 
-			foreach ( $recipients as $email ) {
-				$this->send( $email, $subject, $body, $subject_line );
-			}
+			$this->dispatch( 'agent_new_reply', $ticket, $recipients, $subject, $body );
 		}
 	}
 
@@ -220,7 +216,114 @@ final class Notifications {
 			admin_url( 'admin.php?page=' . AdminMenu::PAGE_SLUG )
 		);
 
-		$this->send( $agent->user_email, $subject, $body, $subject_line );
+		$this->dispatch( 'agent_assigned', $ticket, array( $agent->user_email ), $subject, $body );
+	}
+
+	/**
+	 * Hand a notification to every registered channel. The built-in "email"
+	 * channel (wp_mail) is always present; add-ons append their own through
+	 * the itsdesk_notification_channels filter. A failing channel never
+	 * affects the ticket operation or the other channels.
+	 *
+	 * @param string               $event      Settings-key style event id (agent_new_ticket, customer_reply, agent_new_reply, agent_assigned).
+	 * @param array<string, mixed> $ticket     Ticket.
+	 * @param array<int, string>   $recipients Email addresses.
+	 * @param string               $subject    Email subject.
+	 * @param string               $body       Plain-text body.
+	 */
+	private function dispatch( string $event, array $ticket, array $recipients, string $subject, string $body ): void {
+		/**
+		 * Filters the recipient email addresses of a notification.
+		 *
+		 * @param array<int, string>   $recipients Email addresses.
+		 * @param string               $event      Event id.
+		 * @param array<string, mixed> $ticket     Ticket.
+		 */
+		$recipients = (array) apply_filters( 'itsdesk_notification_recipients', $recipients, $event, $ticket );
+
+		$payload = array(
+			'event'      => $event,
+			'ticket'     => $ticket,
+			'recipients' => $recipients,
+			'subject'    => $subject,
+			'body'       => $body,
+		);
+
+		/**
+		 * Filters the notification channels. Each channel is a callable that
+		 * receives the payload array (event, ticket, recipients, subject, body).
+		 *
+		 * @param array<string, callable> $channels Channel id => callable.
+		 * @param string                  $event    Event id.
+		 * @param array<string, mixed>    $ticket   Ticket.
+		 */
+		$channels = (array) apply_filters(
+			'itsdesk_notification_channels',
+			array(
+				'email' => function ( array $data ): void {
+					$this->deliver_email( $data );
+				},
+			),
+			$event,
+			$ticket
+		);
+
+		foreach ( $channels as $channel_id => $channel ) {
+			if ( ! is_callable( $channel ) ) {
+				continue;
+			}
+			try {
+				call_user_func( $channel, $payload );
+			} catch ( \Throwable $e ) {
+				$this->logger->log(
+					'Notification',
+					sprintf(
+						/* translators: %s: notification channel id */
+						__( 'Notification channel "%s" failed', 'deskovi' ),
+						(string) $channel_id
+					),
+					'Fail'
+				);
+			}
+		}
+	}
+
+	/**
+	 * Built-in email channel: one wp_mail() per recipient.
+	 *
+	 * @param array<string, mixed> $data Channel payload.
+	 */
+	private function deliver_email( array $data ): void {
+		$ticket_subject = (string) ( $data['ticket']['subject'] ?? '' );
+
+		foreach ( (array) $data['recipients'] as $to ) {
+			/**
+			 * Filters one outgoing notification email.
+			 *
+			 * @param array<string, mixed> $mail   Keys: to, subject, body, headers.
+			 * @param string               $event  Event id.
+			 * @param array<string, mixed> $ticket Ticket.
+			 */
+			$mail = (array) apply_filters(
+				'itsdesk_notification_email',
+				array(
+					'to'      => (string) $to,
+					'subject' => (string) $data['subject'],
+					'body'    => (string) $data['body'],
+					'headers' => array(),
+				),
+				(string) $data['event'],
+				(array) $data['ticket']
+			);
+
+			$this->send(
+				(string) ( $mail['to'] ?? '' ),
+				(string) ( $mail['subject'] ?? '' ),
+				(string) ( $mail['body'] ?? '' ),
+				$ticket_subject,
+				(array) ( $mail['headers'] ?? array() )
+			);
+		}
 	}
 
 	/**
@@ -251,9 +354,9 @@ final class Notifications {
 	 * Send one email, logging the outcome. Never throws — a failed send must
 	 * not affect the ticket operation that triggered it.
 	 */
-	private function send( string $to, string $subject, string $body, string $ticket_subject ): void {
+	private function send( string $to, string $subject, string $body, string $ticket_subject, array $headers = array() ): void {
 		try {
-			$sent = wp_mail( $to, $subject, $body );
+			$sent = wp_mail( $to, $subject, $body, $headers );
 		} catch ( \Throwable $e ) {
 			$sent = false;
 		}

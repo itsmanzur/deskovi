@@ -246,6 +246,14 @@ final class TicketRepository {
 		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- table name is internal constant, IN(...) placeholders built via array_fill()+prepare().
 		$removed = $wpdb->query( $wpdb->prepare( "DELETE FROM {$tickets_table} WHERE id IN ({$placeholders})", $ids ) );
 
+		/**
+		 * Fires after tickets (and their messages/attachments) were deleted,
+		 * so add-ons can remove data they keep per ticket.
+		 *
+		 * @param array<int, string> $ids Deleted ticket ids.
+		 */
+		do_action( 'itsdesk_tickets_deleted', $ids );
+
 		return is_int( $removed ) ? $removed : 0;
 	}
 

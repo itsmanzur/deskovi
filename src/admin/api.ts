@@ -300,4 +300,20 @@ export function formatBytes( bytes: number ): string {
 	return `${ ( bytes / ( 1024 * 1024 ) ).toFixed( 1 ) } MB`;
 }
 
+/**
+ * Generic helpers for add-ons (exposed through window.itsdesk.admin.ctx.api).
+ * `path` is relative to the REST root, e.g. `/my-addon/v1/things`.
+ */
+export function apiGet< T >( path: string ): Promise< T > {
+	return apiFetch( { path } );
+}
+
+export function apiPost< T >( path: string, data?: unknown ): Promise< T > {
+	return apiFetch( { path, method: 'POST', data } );
+}
+
+export function apiDelete< T >( path: string ): Promise< T > {
+	return apiFetch( { path, method: 'DELETE' } );
+}
+
 export { apiErrorMessage };

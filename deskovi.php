@@ -2,8 +2,8 @@
 /**
  * Plugin Name:       Deskovi
  * Description:       A local WooCommerce helpdesk: support tickets, order context for agents, and an optional customer chat widget.
- * Version:           1.3.0
- * Requires at least: 6.0
+ * Version:           1.4.0
+ * Requires at least: 6.6
  * Requires PHP:      7.4
  * Author:            Deskovi
  * Author URI:        https://profiles.wordpress.org/getwpkit/
@@ -20,7 +20,14 @@
 
 defined( 'ABSPATH' ) || exit;
 
-define( 'ITSDESK_VERSION', '1.3.0' );
+define( 'ITSDESK_VERSION', '1.4.0' );
+
+/**
+ * Version of the public extension API (hooks, filters, admin JS registry)
+ * documented in contracts/extensions-v1.md. Add-ons gate on this, not on
+ * ITSDESK_VERSION. Bumped only on a breaking change to that contract.
+ */
+define( 'ITSDESK_API_VERSION', 1 );
 define( 'ITSDESK_FILE', __FILE__ );
 define( 'ITSDESK_PATH', plugin_dir_path( __FILE__ ) );
 define( 'ITSDESK_URL', plugin_dir_url( __FILE__ ) );

@@ -1,10 +1,10 @@
 === Deskovi ===
 Contributors: getwpkit
 Tags: woocommerce, helpdesk, support, tickets, customer-service
-Requires at least: 6.0
+Requires at least: 6.6
 Tested up to: 7.0
 Requires PHP: 7.4
-Stable tag: 1.3.0
+Stable tag: 1.4.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -79,6 +79,14 @@ https://github.com/itsmanzur/deskovi
 2. Customer widget — optional storefront chat for shoppers
 
 == Changelog ==
+
+= 1.4.0 =
+* Add a documented extension API (hooks, filters and an admin JavaScript registry) so add-on plugins can attach without modifying Deskovi
+* Add a central permission check (`itsdesk_user_can` filter); default behaviour is unchanged
+* Fix: the WordPress personal-data eraser now actually deletes a customer's tickets, messages and attachment files
+* Improve: the personal-data export now includes customer-visible messages and attachment file names
+* Fix: uninstall now also removes notification settings, canned replies, uploaded attachments and the capability from the Shop Manager role
+* Raise the minimum WordPress version to 6.6 (required by the admin app's JavaScript runtime)
 
 = 1.3.0 =
 * Add ticket priority (Low/Normal/High/Urgent)

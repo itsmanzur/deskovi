@@ -289,6 +289,17 @@ final class TicketService {
 			),
 		);
 
+		/**
+		 * Filters a new ticket just before it is saved.
+		 *
+		 * @param array<string, mixed> $ticket Ticket (id, status, category, subject, customer_*, messages, ...).
+		 * @param array<string, mixed> $input  Raw create() input.
+		 */
+		$filtered = apply_filters( 'itsdesk_ticket_data', $ticket, $input );
+		if ( is_array( $filtered ) && ( $filtered['id'] ?? null ) === $ticket['id'] ) {
+			$ticket = $filtered;
+		}
+
 		$this->repo->save( $ticket );
 		$this->logger->log(
 			'Ticket',

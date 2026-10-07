@@ -75,6 +75,30 @@ final class Plugin {
 		( new GuestController() )->register();
 		( new WidgetFrontend() )->register();
 		( new PersonalData() )->register();
+
+		// Single place add-ons register REST routes, after all of Free's own
+		// controllers have registered theirs (same rest_api_init priority, later
+		// add order). Use a dedicated sub-path such as /pro/... — Free's
+		// GET /tickets/{id} pattern would shadow a later literal /tickets/... route.
+		add_action(
+			'rest_api_init',
+			static function (): void {
+				/**
+				 * Fires so add-ons can register REST routes in the Deskovi namespace.
+				 *
+				 * @param string $namespace REST namespace (itsdesk/v1).
+				 */
+				do_action( 'itsdesk_register_rest_routes', 'itsdesk/v1' );
+			}
+		);
+
+		/**
+		 * Fires once Deskovi has finished wiring itself (WooCommerce active).
+		 * Add-ons attach here and gate on ITSDESK_API_VERSION.
+		 *
+		 * @param Plugin $plugin Plugin instance.
+		 */
+		do_action( 'itsdesk_loaded', $this );
 	}
 
 	/**

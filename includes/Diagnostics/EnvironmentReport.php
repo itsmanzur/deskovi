@@ -29,7 +29,7 @@ final class EnvironmentReport {
 		$theme   = wp_get_theme();
 		$privacy = ( new PrivacySettings() )->get();
 
-		return array(
+		$report = array(
 			'wordpress'   => (string) $wp_version,
 			'woocommerce' => defined( 'WC_VERSION' ) ? (string) WC_VERSION : '',
 			'php'         => PHP_VERSION,
@@ -64,6 +64,16 @@ final class EnvironmentReport {
 			),
 			'errors'      => $this->recent_errors(),
 		);
+
+		/**
+		 * Filters the diagnostics report. Add-ons append rows to 'checks'
+		 * ({name, value, status: pass|ok|fail|info}) and 'errors' ({time, code, message}).
+		 *
+		 * @param array<string, mixed> $report Report.
+		 */
+		$filtered = apply_filters( 'itsdesk_diagnostics_report', $report );
+
+		return is_array( $filtered ) ? $filtered : $report;
 	}
 
 	/**

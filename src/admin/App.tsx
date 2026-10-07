@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
+import type { ReactNode } from 'react';
 import { fetchOverview } from './api';
 import { SkeletonPanel } from './components/Skeleton';
 import { Toast } from './components/Toast';
@@ -24,13 +25,21 @@ import { OverviewScreen } from './screens/OverviewScreen';
 import { PrivacyScreen } from './screens/PrivacyScreen';
 import { TicketsScreen } from './screens/TicketsScreen';
 import { WidgetScreen } from './screens/WidgetScreen';
+import {
+	ExtensionScreen,
+	getExtensionScreen,
+	getExtensionScreens,
+	useExtensions,
+} from './extensions';
 import type { OverviewData, Screen } from './types';
 
-const NAV: Array< {
+type NavItem = {
 	id: Screen;
 	label: string;
-	icon: ReturnType< typeof IconOverview >;
-} > = [
+	icon: ReactNode;
+};
+
+const BUILT_IN_NAV: NavItem[] = [
 	{
 		id: 'overview',
 		label: __( 'Overview', 'deskovi' ),
@@ -79,6 +88,15 @@ const NAV: Array< {
 ];
 
 export function App() {
+	useExtensions();
+	const nav: NavItem[] = [
+		...BUILT_IN_NAV,
+		...getExtensionScreens().map( ( item ) => ( {
+			id: item.id,
+			label: item.label,
+			icon: item.icon ?? <IconFileGeneric size={ 17 } />,
+		} ) ),
+	];
 	const [ screen, setScreen ] = useState< Screen >( 'overview' );
 	const [ overview, setOverview ] = useState< OverviewData | null >( null );
 	const [ error, setError ] = useState< string | null >( null );
@@ -161,7 +179,9 @@ export function App() {
 				body = <DocsScreen />;
 				break;
 			default:
-				body = (
+				body = getExtensionScreen( screen ) ? (
+					<ExtensionScreen id={ screen } onToast={ showToast } />
+				) : (
 					<OverviewScreen
 						data={ overview }
 						onNavigate={ setScreen }
@@ -194,7 +214,7 @@ export function App() {
 				className="itsdesk-admin__nav"
 				aria-label={ __( 'Deskovi sections', 'deskovi' ) }
 			>
-				{ NAV.map( ( item ) => (
+				{ nav.map( ( item ) => (
 					<button
 						key={ item.id }
 						type="button"

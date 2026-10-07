@@ -10,6 +10,7 @@ namespace Itsdesk\Rest;
 
 defined( 'ABSPATH' ) || exit;
 
+use Itsdesk\Admin\Capabilities;
 use Itsdesk\Auth\GuestSession;
 use Itsdesk\Orders\OrderContext;
 use Itsdesk\Tickets\TicketService;
@@ -108,7 +109,7 @@ final class OrderController {
 	 * Permission: manage Deskovi.
 	 */
 	public function can_manage(): bool {
-		return current_user_can( 'manage_itsdesk' );
+		return Capabilities::can( Capabilities::ABILITY_MANAGE );
 	}
 
 	/**
@@ -125,7 +126,7 @@ final class OrderController {
 	 * cap, since the itsdesk_agent role has no WooCommerce capability at all.
 	 */
 	public function can_manage_orders(): bool {
-		return current_user_can( 'manage_itsdesk' ) && current_user_can( 'edit_shop_orders' );
+		return Capabilities::can( Capabilities::ABILITY_REFUND );
 	}
 
 	/**

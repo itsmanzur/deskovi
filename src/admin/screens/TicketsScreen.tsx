@@ -24,6 +24,14 @@ import {
 } from '../api';
 import { IconFileGeneric, IconPaperclip } from '../components/Icons';
 import { SkeletonPanel } from '../components/Skeleton';
+import {
+	adminContext,
+	getBulkActions,
+	Slot,
+	useExtensions,
+	type BulkActionRegistration,
+	type TicketDetailContext,
+} from '../extensions';
 import type {
 	Agent,
 	CannedReply,
@@ -120,6 +128,7 @@ function labelStatus( value: string ): string {
 }
 
 export function TicketsScreen( { onToast }: Props ) {
+	useExtensions();
 	const [ tickets, setTickets ] = useState< Ticket[] >( [] );
 	const [ totalTickets, setTotalTickets ] = useState( 0 );
 	const [ page, setPage ] = useState( 1 );
@@ -562,6 +571,40 @@ export function TicketsScreen( { onToast }: Props ) {
 			.catch( ( err: unknown ) => onToast( apiErrorMessage( err ), 'danger' ) );
 	};
 
+	const runBulkAction = async ( action: BulkActionRegistration ) => {
+		try {
+			await action.run( {
+				selectedIds,
+				tickets: tickets.filter( ( t ) => selectedIds.includes( t.id ) ),
+				onToast,
+				reload: loadTickets,
+				clearSelection: () => setSelectedIds( [] ),
+				ctx: adminContext,
+			} );
+		} catch ( err: unknown ) {
+			onToast( apiErrorMessage( err ), 'danger' );
+		}
+	};
+
+	// Context handed to add-on slots on the open ticket's detail card.
+	const detailContext: TicketDetailContext | null = selected
+		? {
+				ticket: selected,
+				order: orderContext,
+				currentUser: {
+					id: currentUserId,
+					name: currentUserName,
+					canManageOrders,
+				},
+				busy,
+				onToast,
+				reload: loadTickets,
+				refreshTicket: () => openTicket( selected.id ),
+				replyBody,
+				setReplyBody,
+		  }
+		: null;
+
 	if ( loading && tickets.length === 0 ) {
 		return <SkeletonPanel />;
 	}
@@ -711,6 +754,19 @@ export function TicketsScreen( { onToast }: Props ) {
 							>
 								{ __( 'Delete', 'deskovi' ) }
 							</button>
+							{ getBulkActions().map( ( action ) => (
+								<button
+									key={ action.id }
+									type="button"
+									className={
+										'itsdesk-btn itsdesk-btn--' +
+										( action.tone === 'danger' ? 'danger' : 'secondary' )
+									}
+									onClick={ () => runBulkAction( action ) }
+								>
+									{ action.label }
+								</button>
+							) ) }
 						</div>
 					) }
 
@@ -770,6 +826,10 @@ export function TicketsScreen( { onToast }: Props ) {
 											{ t.assigned_agent_name ||
 												__( 'Unassigned', 'deskovi' ) }
 										</span>
+										<Slot
+											name="ticket.list.rowExtra"
+											context={ { ticket: t, isOpen: selectedId === t.id } }
+										/>
 									</div>
 								</div>
 							</div>
@@ -926,6 +986,9 @@ export function TicketsScreen( { onToast }: Props ) {
 								{ ' · ' }
 								{ labelStatus( selected.category ) }
 							</p>
+							{ detailContext && (
+								<Slot name="ticket.detail.header" context={ detailContext } />
+							) }
 
 							<div className="itsdesk-card" style={ { marginTop: 14 } }>
 								<div className="itsdesk-card__head">
@@ -1040,6 +1103,9 @@ export function TicketsScreen( { onToast }: Props ) {
 													) }
 												</>
 											) }
+										{ detailContext && (
+											<Slot name="ticket.detail.order" context={ detailContext } />
+										) }
 										{ canManageOrders && (
 											<div className="itsdesk-card" style={ { marginTop: 14 } }>
 												<div className="itsdesk-card__head">
@@ -1216,6 +1282,10 @@ export function TicketsScreen( { onToast }: Props ) {
 								) }
 							</div>
 
+							{ detailContext && (
+								<Slot name="ticket.detail.meta" context={ detailContext } />
+							) }
+
 							<div className="itsdesk-thread">
 								{ selected.messages.map( ( m ) => (
 									<div
@@ -1390,6 +1460,9 @@ export function TicketsScreen( { onToast }: Props ) {
 										</option>
 									) ) }
 								</select>
+								{ detailContext && (
+									<Slot name="ticket.reply.toolbar" context={ detailContext } />
+								) }
 							</div>
 						</div>
 					) }

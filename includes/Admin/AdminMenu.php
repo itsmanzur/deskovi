@@ -37,13 +37,20 @@ final class AdminMenu {
 			'dashicons-format-chat',
 			56
 		);
+
+		/**
+		 * Fires after the Deskovi top-level menu is registered.
+		 *
+		 * @param string $page_slug Menu page slug.
+		 */
+		do_action( 'itsdesk_admin_menu', self::PAGE_SLUG );
 	}
 
 	/**
 	 * Root mount for React admin.
 	 */
 	public function render(): void {
-		if ( ! current_user_can( 'manage_itsdesk' ) ) {
+		if ( ! Capabilities::can( Capabilities::ABILITY_MANAGE ) ) {
 			wp_die( esc_html__( 'You do not have permission to access Deskovi.', 'deskovi' ) );
 		}
 

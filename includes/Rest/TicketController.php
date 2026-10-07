@@ -232,7 +232,7 @@ final class TicketController {
 	 * Admin capability.
 	 */
 	public function can_manage(): bool {
-		return current_user_can( Capabilities::CAP );
+		return Capabilities::can( Capabilities::ABILITY_MANAGE );
 	}
 
 	/**
@@ -695,7 +695,7 @@ final class TicketController {
 			return new WP_Error( 'itsdesk_attachment_not_found', __( 'Attachment not found.', 'deskovi' ), array( 'status' => 404 ) );
 		}
 
-		$is_admin = current_user_can( Capabilities::CAP );
+		$is_admin = Capabilities::can( Capabilities::ABILITY_MANAGE );
 		$user_id  = is_user_logged_in() ? get_current_user_id() : null;
 		$guest    = is_user_logged_in() ? null : $this->guest_context();
 

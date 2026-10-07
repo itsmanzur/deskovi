@@ -23,12 +23,20 @@ final class NotificationSettings {
 	 * @return array<string, bool>
 	 */
 	public static function defaults(): array {
-		return array(
+		$defaults = array(
 			'agent_new_ticket' => true,
 			'agent_new_reply'  => true,
 			'customer_reply'   => true,
 			'agent_assigned'   => true,
 		);
+
+		/**
+		 * Filters the notification toggles and their defaults. Keys added here
+		 * become storable through update() (it accepts only keys listed in defaults()).
+		 *
+		 * @param array<string, bool> $defaults Toggle id => default.
+		 */
+		return (array) apply_filters( 'itsdesk_notification_settings_defaults', $defaults );
 	}
 
 	/**
