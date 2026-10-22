@@ -189,6 +189,21 @@ final class TicketRepository {
 	}
 
 	/**
+	 * Tickets linked to an order.
+	 *
+	 * @return array<int, array<string, mixed>>
+	 */
+	public function for_order( int $order_id ): array {
+		global $wpdb;
+		$table = Schema::tickets_table();
+		$rows  = $wpdb->get_results( // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- custom plugin table, no core caching API applies.
+			$wpdb->prepare( "SELECT * FROM {$table} WHERE order_id = %d ORDER BY updated_at DESC", $order_id ), // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+			ARRAY_A
+		);
+		return $this->hydrate_rows( is_array( $rows ) ? $rows : array() );
+	}
+
+	/**
 	 * Tickets for guest email (and optional order scope).
 	 *
 	 * @return array<int, array<string, mixed>>

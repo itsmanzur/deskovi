@@ -97,6 +97,16 @@ final class TicketService {
 	}
 
 	/**
+	 * Tickets linked to a WooCommerce order (used by add-ons for order-event automation).
+	 *
+	 * @param int $order_id Order id.
+	 * @return array<int, array<string, mixed>>
+	 */
+	public function list_for_order( int $order_id ): array {
+		return $order_id > 0 ? $this->repo->for_order( $order_id ) : array();
+	}
+
+	/**
 	 * Unread count for current customer context.
 	 */
 	public function unread_count_for_user( int $user_id ): int {
@@ -372,6 +382,7 @@ final class TicketService {
 		$author   = $is_admin ? 'agent' : 'customer';
 		$now      = gmdate( 'c' );
 		$msg_id   = 'msg_' . self::new_message_id();
+		$previous = (string) ( $ticket['status'] ?? '' );
 
 		$message = array(
 			'id'         => $msg_id,
@@ -401,6 +412,10 @@ final class TicketService {
 
 		do_action( 'itsdesk_ticket_replied', $ticket, $message );
 
+		if ( ( $ticket['status'] ?? '' ) !== $previous ) {
+			do_action( 'itsdesk_ticket_status_changed', $ticket, $previous, (string) $ticket['status'] );
+		}
+
 		return $this->decorate_ticket( $ticket );
 	}
 
@@ -429,6 +444,7 @@ final class TicketService {
 			);
 		}
 
+		$previous             = (string) ( $ticket['status'] ?? '' );
 		$ticket['status']     = $status;
 		$ticket['updated_at'] = gmdate( 'c' );
 		$this->repo->save( $ticket );
@@ -442,6 +458,10 @@ final class TicketService {
 			),
 			'OK'
 		);
+
+		if ( $previous !== $status ) {
+			do_action( 'itsdesk_ticket_status_changed', $ticket, $previous, $status );
+		}
 
 		return $ticket;
 	}
@@ -471,6 +491,7 @@ final class TicketService {
 			);
 		}
 
+		$previous             = (string) ( $ticket['priority'] ?? 'normal' );
 		$ticket['priority']   = $priority;
 		$ticket['updated_at'] = gmdate( 'c' );
 		$this->repo->save( $ticket );
@@ -484,6 +505,10 @@ final class TicketService {
 			),
 			'OK'
 		);
+
+		if ( $previous !== $priority ) {
+			do_action( 'itsdesk_ticket_priority_changed', $ticket, $previous, $priority );
+		}
 
 		return $ticket;
 	}
@@ -532,10 +557,15 @@ final class TicketService {
 			if ( null === $ticket ) {
 				continue;
 			}
+			$previous             = (string) ( $ticket['status'] ?? '' );
 			$ticket['status']     = $status;
 			$ticket['updated_at'] = gmdate( 'c' );
 			$this->repo->save( $ticket );
 			++$updated;
+
+			if ( $previous !== $status ) {
+				do_action( 'itsdesk_ticket_status_changed', $ticket, $previous, $status );
+			}
 		}
 
 		if ( $updated > 0 ) {

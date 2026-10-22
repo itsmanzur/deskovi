@@ -39,6 +39,8 @@ Use your own prefix for options, cron events and tables. Never reuse names start
 | `itsdesk_inbound_sources` `( array $sources )` | filter | Registry of inbound ticket sources (read with `Itsdesk\Extensions\Registry::inbound_sources()`). |
 | `itsdesk_diagnostics_report` `( array $report )` | filter | Append rows to `checks` (`name`, `value`, `status` = `pass`/`ok`/`fail`/`info`) and `errors` (`time`, `code`, `message`). |
 | `itsdesk_ticket_data` `( array $ticket, array $input )` | filter | A new ticket just before it is saved. Return the same array (the `id` must be unchanged). |
+| `itsdesk_ticket_status_changed` `( array $ticket, string $old, string $new )` | action | After a ticket's status really changed: agent action, bulk update, or Deskovi's own transition (an agent reply moves open → pending, a customer reply reopens a resolved ticket). Not fired when the status is set to the value it already had. Since 1.6.0. |
+| `itsdesk_ticket_priority_changed` `( array $ticket, string $old, string $new )` | action | After a ticket's priority really changed. Since 1.6.0. |
 | `itsdesk_tickets_deleted` `( array $ids )` | action | After tickets (with messages and attachment files) were deleted, including by the GDPR eraser. Remove your per-ticket data here. |
 
 ### Creating tickets and replies from an add-on (trusted ingest)
@@ -98,6 +100,10 @@ The ticket list is a narrow card list, not a table: "columns" are row extras.
 
 Adds a button to the bulk bar (shown when tickets are selected). `run` executes in the browser — call your own REST route. A rejected promise is shown as an error toast. `tone`: `secondary` (default) or `danger`.
 
+### Looking up tickets by order
+
+`( new TicketService() )->list_for_order( $order_id )` returns the tickets linked to a WooCommerce order (hydrated, newest first). Since 1.6.0.
+
 ## Not part of v1
 
-Automation/SLA event hooks (status, priority, order-link, refund), ticket query and category/status filters, widget config filter and an order-action registry are not provided yet and will be added (non-breaking) when an add-on needs them.
+Order-link and refund event hooks, ticket query and category/status filters, a widget config filter and an order-action registry are not provided yet and will be added (non-breaking) when an add-on needs them.
