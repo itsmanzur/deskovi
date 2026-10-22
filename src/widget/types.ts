@@ -10,6 +10,8 @@ export type WidgetConfig = {
 	launcherLabel: string;
 	assetUrl: string;
 	i18n: Record< string, string >;
+	/** Keys added by add-ons through the `itsdesk_widget_config` filter. */
+	pro?: Record< string, unknown >;
 };
 
 export type TicketMessage = {

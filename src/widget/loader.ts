@@ -1,5 +1,6 @@
 import type { WidgetConfig } from './types';
 import { fetchUnread, isAuthed } from './api';
+import { exposeWidgetApi } from './extensions';
 
 declare const __webpack_public_path__: string;
 
@@ -213,6 +214,9 @@ class DeskoviSupport extends HTMLElement {
 		}
 	}
 }
+
+// Available to add-on scripts as soon as the loader runs (before boot and before the panel).
+exposeWidgetApi();
 
 function boot(): void {
 	const cfg = getConfig();

@@ -11,6 +11,8 @@ import {
 	replyTicket,
 } from './api';
 import type { Category, OrderDetail, OrderSummary, Ticket, WidgetConfig } from './types';
+import { getSlots, slotApi } from './extensions';
+import type { CreateForm } from './extensions';
 import { panelStyles } from './panel-styles';
 
 type View = 'list' | 'create' | 'thread' | 'welcome' | 'guest' | 'orders' | 'order';
@@ -119,6 +121,87 @@ export function mountPanel(
 	}
 
 	shadow.appendChild( panel );
+
+	// ---- Add-on slots in the new-ticket form (window.itsdesk.widget.registerSlot) ----
+	const slotHosts = new Map< string, { host: HTMLElement; cleanup?: () => void } >();
+	const formListeners = new Set< ( form: CreateForm ) => void >();
+
+	const currentForm = (): CreateForm => ( {
+		subject: state.subject,
+		body: state.body,
+		category: state.category,
+		order_id: state.orderId ? parseInt( state.orderId, 10 ) || null : null,
+	} );
+
+	const notifyForm = () => {
+		if ( state.view !== 'create' ) {
+			return;
+		}
+		formListeners.forEach( ( cb ) => {
+			try {
+				cb( currentForm() );
+			} catch ( e ) {
+				// eslint-disable-next-line no-console
+				console.error( '[Deskovi] slot listener failed', e );
+			}
+		} );
+	};
+
+	const teardownSlots = () => {
+		slotHosts.forEach( ( entry ) => {
+			try {
+				entry.cleanup?.();
+			} catch ( e ) {
+				// eslint-disable-next-line no-console
+				console.error( '[Deskovi] slot cleanup failed', e );
+			}
+			entry.host.remove();
+		} );
+		slotHosts.clear();
+		formListeners.clear();
+	};
+
+	// A slot is mounted once per visit to the form; render() only moves its element into the fresh markup.
+	const attachSlots = () => {
+		if ( state.view !== 'create' ) {
+			teardownSlots();
+			return;
+		}
+		const holder = panel.querySelector( '[data-slot="ticket.create.aside"]' );
+		if ( ! holder ) {
+			return;
+		}
+		for ( const reg of getSlots( 'ticket.create.aside' ) ) {
+			let entry = slotHosts.get( reg.id );
+			if ( ! entry ) {
+				const host = document.createElement( 'div' );
+				host.className = 'dk-slot-host';
+				entry = { host };
+				slotHosts.set( reg.id, entry );
+				try {
+					const cleanup = reg.mount( host, {
+						config: cfg,
+						form: currentForm,
+						onChange: ( cb ) => {
+							formListeners.add( cb );
+							return () => formListeners.delete( cb );
+						},
+						api: slotApi,
+						dismiss: () => {
+							void loadList();
+						},
+					} );
+					if ( typeof cleanup === 'function' ) {
+						entry.cleanup = cleanup;
+					}
+				} catch ( e ) {
+					// eslint-disable-next-line no-console
+					console.error( '[Deskovi] slot failed', reg.id, e );
+				}
+			}
+			holder.appendChild( entry.host );
+		}
+	};
 
 	const withBusy = async ( fn: () => Promise< void > ) => {
 		state.busy = true;
@@ -506,6 +589,7 @@ export function mountPanel(
 					<label>${ esc( t( cfg, 'message' ) ) }</label>
 					<textarea data-field="body">${ esc( state.body ) }</textarea>
 				</div>
+				<div class="dk-slots" data-slot="ticket.create.aside"></div>
 			</div>
 			<div class="dk-foot">
 				<button type="button" class="dk-btn dk-btn-primary" data-act="submit-create" ${
@@ -579,6 +663,7 @@ export function mountPanel(
 		} else {
 			panel.innerHTML = renderList();
 		}
+		attachSlots();
 	}
 
 	panel.addEventListener( 'click', ( ev ) => {
@@ -592,6 +677,7 @@ export function mountPanel(
 		}
 		const act = actEl.getAttribute( 'data-act' );
 		if ( act === 'close' ) {
+			teardownSlots();
 			panel.remove();
 			onClose();
 			return;
@@ -701,6 +787,7 @@ export function mountPanel(
 		const key = map[ field ];
 		if ( key ) {
 			( state as unknown as Record< string, string > )[ key ] = target.value;
+			notifyForm();
 		}
 	} );
 
@@ -715,6 +802,7 @@ export function mountPanel(
 		} else if ( field === 'orderId' ) {
 			state.orderId = target.value;
 		}
+		notifyForm();
 	} );
 
 	host.setAttribute( 'data-theme', resolveTheme( cfg.theme ) );

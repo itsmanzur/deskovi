@@ -2,7 +2,7 @@
 /**
  * Plugin Name:       Deskovi
  * Description:       A local WooCommerce helpdesk: support tickets, order context for agents, and an optional customer chat widget.
- * Version:           1.6.0
+ * Version:           1.7.0
  * Requires at least: 6.6
  * Requires PHP:      7.4
  * Author:            Deskovi
@@ -20,7 +20,7 @@
 
 defined( 'ABSPATH' ) || exit;
 
-define( 'ITSDESK_VERSION', '1.6.0' );
+define( 'ITSDESK_VERSION', '1.7.0' );
 
 /**
  * Version of the public extension API (hooks, filters, admin JS registry)

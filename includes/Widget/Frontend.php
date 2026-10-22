@@ -85,59 +85,73 @@ final class Frontend {
 		$logged_in = is_user_logged_in();
 		$guest     = ( new \Itsdesk\Auth\GuestSession() )->current();
 
-		wp_localize_script(
-			self::SCRIPT_HANDLE,
-			'itsdeskWidget',
-			array(
-				'restRoot'            => esc_url_raw( rest_url() ),
-				'nonce'               => $logged_in ? wp_create_nonce( 'wp_rest' ) : '',
-				'loggedIn'            => $logged_in,
-				'guestAuthenticated'  => null !== $guest,
-				'guestOrderId'        => $guest ? (int) $guest['order_id'] : 0,
-				'loginUrl'            => wp_login_url(),
-				'placement'           => (string) ( $settings['placement'] ?? 'bottom-right' ),
-				'theme'               => (string) ( $settings['theme'] ?? 'system' ),
-				'launcherLabel'       => (string) ( $settings['launcher_label'] ?? '' ),
-				'assetUrl'            => esc_url_raw( ITSDESK_URL . 'assets/widget/' ),
-				'i18n'                => array(
-					'support'         => __( 'Support', 'deskovi' ),
-					'close'           => __( 'Close', 'deskovi' ),
-					'tickets'         => __( 'Your tickets', 'deskovi' ),
-					'newTicket'       => __( 'New ticket', 'deskovi' ),
-					'subject'         => __( 'Subject', 'deskovi' ),
-					'message'         => __( 'Message', 'deskovi' ),
-					'category'        => __( 'Category', 'deskovi' ),
-					'order'           => __( 'Related order', 'deskovi' ),
-					'orderNone'       => __( 'No order', 'deskovi' ),
-					'send'            => __( 'Send', 'deskovi' ),
-					'reply'           => __( 'Reply', 'deskovi' ),
-					'back'            => __( 'Back', 'deskovi' ),
-					'loading'         => __( 'Loading…', 'deskovi' ),
-					'empty'           => __( 'No tickets yet.', 'deskovi' ),
-					'loginTitle'      => __( 'Get support', 'deskovi' ),
-					'loginBody'       => __( 'Log in, or continue with your order number and billing email.', 'deskovi' ),
-					'loginAction'     => __( 'Log in', 'deskovi' ),
-					'guestAction'     => __( 'Continue with order', 'deskovi' ),
-					'guestOrder'      => __( 'Order number', 'deskovi' ),
-					'guestEmail'      => __( 'Billing email', 'deskovi' ),
-					'guestCode'       => __( 'Verification code', 'deskovi' ),
-					'guestSendCode'   => __( 'Send code', 'deskovi' ),
-					'guestConfirm'    => __( 'Verify', 'deskovi' ),
-					'guestSent'       => __( 'Check your email for a one-time code.', 'deskovi' ),
-					'error'           => __( 'Something went wrong. Please try again.', 'deskovi' ),
-					'create'          => __( 'Create ticket', 'deskovi' ),
-					'open'            => __( 'Open', 'deskovi' ),
-					'unread'          => __( 'Unread', 'deskovi' ),
-					'orders'          => __( 'Your orders', 'deskovi' ),
-					'orderDetail'     => __( 'Order details', 'deskovi' ),
-					'tracking'        => __( 'Tracking', 'deskovi' ),
-					'noTracking'      => __( 'No tracking number yet.', 'deskovi' ),
-					'viewOrder'       => __( 'View order / invoice', 'deskovi' ),
-					'requestReturn'   => __( 'Request return', 'deskovi' ),
-					'requestCancel'   => __( 'Request cancel', 'deskovi' ),
-					'emptyOrders'     => __( 'No recent orders.', 'deskovi' ),
-				),
-			)
+		$config = array(
+			'restRoot'            => esc_url_raw( rest_url() ),
+			'nonce'               => $logged_in ? wp_create_nonce( 'wp_rest' ) : '',
+			'loggedIn'            => $logged_in,
+			'guestAuthenticated'  => null !== $guest,
+			'guestOrderId'        => $guest ? (int) $guest['order_id'] : 0,
+			'loginUrl'            => wp_login_url(),
+			'placement'           => (string) ( $settings['placement'] ?? 'bottom-right' ),
+			'theme'               => (string) ( $settings['theme'] ?? 'system' ),
+			'launcherLabel'       => (string) ( $settings['launcher_label'] ?? '' ),
+			'assetUrl'            => esc_url_raw( ITSDESK_URL . 'assets/widget/' ),
+			'i18n'                => array(
+				'support'         => __( 'Support', 'deskovi' ),
+				'close'           => __( 'Close', 'deskovi' ),
+				'tickets'         => __( 'Your tickets', 'deskovi' ),
+				'newTicket'       => __( 'New ticket', 'deskovi' ),
+				'subject'         => __( 'Subject', 'deskovi' ),
+				'message'         => __( 'Message', 'deskovi' ),
+				'category'        => __( 'Category', 'deskovi' ),
+				'order'           => __( 'Related order', 'deskovi' ),
+				'orderNone'       => __( 'No order', 'deskovi' ),
+				'send'            => __( 'Send', 'deskovi' ),
+				'reply'           => __( 'Reply', 'deskovi' ),
+				'back'            => __( 'Back', 'deskovi' ),
+				'loading'         => __( 'Loading…', 'deskovi' ),
+				'empty'           => __( 'No tickets yet.', 'deskovi' ),
+				'loginTitle'      => __( 'Get support', 'deskovi' ),
+				'loginBody'       => __( 'Log in, or continue with your order number and billing email.', 'deskovi' ),
+				'loginAction'     => __( 'Log in', 'deskovi' ),
+				'guestAction'     => __( 'Continue with order', 'deskovi' ),
+				'guestOrder'      => __( 'Order number', 'deskovi' ),
+				'guestEmail'      => __( 'Billing email', 'deskovi' ),
+				'guestCode'       => __( 'Verification code', 'deskovi' ),
+				'guestSendCode'   => __( 'Send code', 'deskovi' ),
+				'guestConfirm'    => __( 'Verify', 'deskovi' ),
+				'guestSent'       => __( 'Check your email for a one-time code.', 'deskovi' ),
+				'error'           => __( 'Something went wrong. Please try again.', 'deskovi' ),
+				'create'          => __( 'Create ticket', 'deskovi' ),
+				'open'            => __( 'Open', 'deskovi' ),
+				'unread'          => __( 'Unread', 'deskovi' ),
+				'orders'          => __( 'Your orders', 'deskovi' ),
+				'orderDetail'     => __( 'Order details', 'deskovi' ),
+				'tracking'        => __( 'Tracking', 'deskovi' ),
+				'noTracking'      => __( 'No tracking number yet.', 'deskovi' ),
+				'viewOrder'       => __( 'View order / invoice', 'deskovi' ),
+				'requestReturn'   => __( 'Request return', 'deskovi' ),
+				'requestCancel'   => __( 'Request cancel', 'deskovi' ),
+				'emptyOrders'     => __( 'No recent orders.', 'deskovi' ),
+			),
 		);
+
+		/**
+		 * Filters the storefront widget bootstrap (window.itsdeskWidget). Add-ons add their own
+		 * keys (for example a `pro` array); keep values plain data and never secrets.
+		 *
+		 * @param array<string, mixed> $config Bootstrap config.
+		 */
+		$config = (array) apply_filters( 'itsdesk_widget_config', $config );
+
+		wp_localize_script( self::SCRIPT_HANDLE, 'itsdeskWidget', $config );
+
+		/**
+		 * The widget loader and its config are enqueued. Add-ons enqueue their storefront script
+		 * here with the `itsdesk-widget` handle as a dependency.
+		 *
+		 * @param string $handle Script handle of the widget loader.
+		 */
+		do_action( 'itsdesk_widget_enqueue_scripts', self::SCRIPT_HANDLE );
 	}
 }

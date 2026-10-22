@@ -39,6 +39,8 @@ Use your own prefix for options, cron events and tables. Never reuse names start
 | `itsdesk_inbound_sources` `( array $sources )` | filter | Registry of inbound ticket sources (read with `Itsdesk\Extensions\Registry::inbound_sources()`). |
 | `itsdesk_diagnostics_report` `( array $report )` | filter | Append rows to `checks` (`name`, `value`, `status` = `pass`/`ok`/`fail`/`info`) and `errors` (`time`, `code`, `message`). |
 | `itsdesk_ticket_data` `( array $ticket, array $input )` | filter | A new ticket just before it is saved. Return the same array (the `id` must be unchanged). |
+| `itsdesk_widget_config` `( array $config )` | filter | The storefront widget bootstrap (`window.itsdeskWidget`). Add keys of your own (for example `pro`); plain data only, never secrets. Since 1.7.0. |
+| `itsdesk_widget_enqueue_scripts` `( string $handle )` | action | The widget loader (`itsdesk-widget`) and its config are enqueued; enqueue your storefront script here with that handle as a dependency. Fires only where the widget loads (not on cart or checkout, and not when the widget is off). Since 1.7.0. |
 | `itsdesk_ticket_status_changed` `( array $ticket, string $old, string $new )` | action | After a ticket's status really changed: agent action, bulk update, or Deskovi's own transition (an agent reply moves open → pending, a customer reply reopens a resolved ticket). Not fired when the status is set to the value it already had. Since 1.6.0. |
 | `itsdesk_ticket_priority_changed` `( array $ticket, string $old, string $new )` | action | After a ticket's priority really changed. Since 1.6.0. |
 | `itsdesk_tickets_deleted` `( array $ids )` | action | After tickets (with messages and attachment files) were deleted, including by the GDPR eraser. Remove your per-ticket data here. |
@@ -103,6 +105,30 @@ Adds a button to the bulk bar (shown when tickets are selected). `run` executes 
 ### Looking up tickets by order
 
 `( new TicketService() )->list_for_order( $order_id )` returns the tickets linked to a WooCommerce order (hydrated, newest first). Since 1.6.0.
+
+## Storefront widget JavaScript
+
+Enqueue your script from `itsdesk_widget_enqueue_scripts` with the `itsdesk-widget` dependency. `window.itsdesk.widget` exists as soon as the loader has run (before the panel is opened):
+
+```js
+const widget = window.itsdesk.widget;
+widget.apiVersion; // 1
+widget.registerSlot( 'ticket.create.aside', { id, order?, mount( host, ctx ) { /* fill host */ return () => { /* cleanup */ }; } } );
+```
+
+### `registerSlot( 'ticket.create.aside', { id, order?, mount( host, ctx ) } )`
+
+`mount` runs once each time the customer opens the new-ticket form and receives an element that Deskovi places under the message field (it survives Deskovi's re-renders). The form is inside a shadow root: ship your own `<style>` inside `host`, and do not use `data-act` or `data-field` attributes (Deskovi reads those). Return a cleanup function if you need one. A throwing slot is isolated and logged to the console. Re-registering the same `id` replaces the earlier registration.
+
+`ctx`:
+
+- `config` — `window.itsdeskWidget` (including keys you added through `itsdesk_widget_config`).
+- `form()` — `{ subject, body, category, order_id | null }`, the current values.
+- `onChange( cb )` — called after the customer edits a field; returns an unsubscribe function.
+- `api.get( path )` / `api.post( path, data )` — REST calls with the nonce and cookies attached; `path` is relative to the REST root (`itsdesk/v1/customer/orders/12`). Your own routes must do their own permission checks: Deskovi treats "a customer" as `is_user_logged_in()` or `Itsdesk\Auth\GuestSession::is_authenticated()` (a verified guest).
+- `dismiss()` — leave the form without creating a ticket.
+
+Since 1.7.0.
 
 ## Not part of v1
 

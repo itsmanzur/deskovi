@@ -47,6 +47,18 @@ async function request< T >(
 	return data as T;
 }
 
+/** Generic calls for add-on slots. */
+export function apiGet< T >( path: string ): Promise< T > {
+	return request< T >( path );
+}
+
+export function apiPost< T >( path: string, data?: unknown ): Promise< T > {
+	return request< T >( path, {
+		method: 'POST',
+		body: data === undefined ? undefined : JSON.stringify( data ),
+	} );
+}
+
 export function isAuthed( c: WidgetConfig = cfg() ): boolean {
 	return !! c.loggedIn || !! c.guestAuthenticated;
 }
