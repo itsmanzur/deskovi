@@ -1,4 +1,5 @@
 import { useEffect } from '@wordpress/element';
+import { __ } from '@wordpress/i18n';
 
 type Props = {
 	message: string | null;
@@ -20,9 +21,9 @@ export function Toast( { message, tone = 'ok', onDismiss }: Props ) {
 	}
 
 	return (
-		<div className={ `itsdesk-toast itsdesk-toast--${ tone }` } role="status">
+		<div className={ `itsdesk-toast itsdesk-toast--${ tone }` } role={ tone === 'danger' ? 'alert' : 'status' }>
 			{ message }
-			<button type="button" className="itsdesk-toast__close" onClick={ onDismiss }>
+			<button type="button" className="itsdesk-toast__close" aria-label={ __( 'Dismiss', 'deskovi' ) } onClick={ onDismiss }>
 				×
 			</button>
 		</div>

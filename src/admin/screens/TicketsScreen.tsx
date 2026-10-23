@@ -724,6 +724,7 @@ export function TicketsScreen( { onToast }: Props ) {
 					<input
 						type="search"
 						className="itsdesk-input"
+						aria-label={ __( 'Search tickets', 'deskovi' ) }
 						placeholder={ __( 'Search subject, name, or email…', 'deskovi' ) }
 						value={ searchInput }
 						onChange={ ( e ) =>
@@ -912,12 +913,22 @@ export function TicketsScreen( { onToast }: Props ) {
 							>
 								<input
 									type="checkbox"
+									aria-label={ sprintf( /* translators: %s: ticket subject */ __( 'Select ticket: %s', 'deskovi' ), t.subject ) }
 									checked={ selectedIds.includes( t.id ) }
 									onClick={ ( e ) => e.stopPropagation() }
 									onChange={ () => toggleSelected( t.id ) }
 								/>
 								<div
 									className="itsdesk-ticket-row__content"
+									role="button"
+									tabIndex={ 0 }
+									aria-pressed={ selectedId === t.id }
+									onKeyDown={ ( e ) => {
+										if ( e.key === 'Enter' || e.key === ' ' ) {
+											e.preventDefault();
+											openTicket( t.id );
+										}
+									}}
 									onClick={ () => openTicket( t.id ) }
 								>
 									<div className="itsdesk-ticket-row__top">

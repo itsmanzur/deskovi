@@ -52,7 +52,7 @@ final class GuestSession {
 			return null;
 		}
 
-		$json = base64_decode( strtr( $payload_b64, '-_', '+/' ), true );
+		$json = base64_decode( strtr( $payload_b64, '-_', '+/' ), true ); // phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.obfuscation_base64_decode -- decoding our own signed, URL-safe session token; the signature is checked first.
 		if ( false === $json ) {
 			return null;
 		}
@@ -211,7 +211,7 @@ final class GuestSession {
 			'order_id' => $order_id,
 			'exp'      => $exp,
 		);
-		$b64 = rtrim( strtr( base64_encode( wp_json_encode( $payload ) ), '+/', '-_' ), '=' );
+		$b64 = rtrim( strtr( base64_encode( wp_json_encode( $payload ) ), '+/', '-_' ), '=' ); // phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.obfuscation_base64_encode -- URL-safe encoding of our own signed session token.
 		$token = $b64 . '.' . $this->sign( $b64 );
 
 		$secure = is_ssl();

@@ -5,7 +5,7 @@
 	--dk-accent: #0f766e;
 	--dk-accent-hover: #0d5f59;
 	--dk-accent-soft: #e6f4f2;
-	--dk-warn: #9a6700;
+	--dk-warn: #8a5a00;
 	--dk-warn-soft: #fcf4e3;
 	--dk-danger: #b42318;
 	--dk-danger-soft: #fef3f2;
@@ -1931,4 +1931,11 @@
 
 .itsdesk-views__new .itsdesk-input {
 	width: 220px;
+}
+
+/* Keyboard focus on a ticket row (the row is a button for keyboard and screen reader users). */
+.itsdesk-ticket-row__content:focus-visible {
+	outline: 2px solid var(--dk-accent);
+	outline-offset: 2px;
+	border-radius: 6px;
 }

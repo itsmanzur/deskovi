@@ -760,7 +760,7 @@ final class TicketController {
 		header( 'Content-Type: ' . (string) $attachment['mime_type'] );
 		header( 'Content-Disposition: attachment; filename="' . sanitize_file_name( (string) $attachment['filename'] ) . '"' );
 		header( 'Content-Length: ' . (string) filesize( $path ) );
-		readfile( $path ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_read_readfile
+		readfile( $path ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_readfile -- streams a private attachment after the permission check, WP_Filesystem has no streaming read.
 		exit;
 	}
 }

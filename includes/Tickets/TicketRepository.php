@@ -59,12 +59,12 @@ final class TicketRepository {
 
 		$count_sql = "SELECT COUNT(*) FROM {$table} {$where['sql']}"; // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name is internal constant, $where['sql'] built from prepared fragments above.
 		$total     = (int) ( $where['params']
-			? $wpdb->get_var( $wpdb->prepare( $count_sql, $where['params'] ) ) // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- custom plugin table, no core caching API applies.
-			: $wpdb->get_var( $count_sql ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- custom plugin table, no core caching API applies; no user input in $count_sql when params is empty.
+			? $wpdb->get_var( $wpdb->prepare( $count_sql, $where['params'] ) ) // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber -- custom plugin table; $count_sql is the table name plus fragments with placeholders, bound from $where['params'].
+			: $wpdb->get_var( $count_sql ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.NotPrepared -- custom plugin table; no user input in $count_sql when params is empty.
 
 		$list_params = array_merge( $where['params'], array( $per_page, $offset ) );
 		$rows        = $wpdb->get_results( // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- custom plugin table, no core caching API applies.
-			$wpdb->prepare( "SELECT * FROM {$table} {$where['sql']} ORDER BY updated_at DESC LIMIT %d OFFSET %d", $list_params ), // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name is internal constant, $where['sql'] built from prepared fragments above.
+			$wpdb->prepare( "SELECT * FROM {$table} {$where['sql']} ORDER BY updated_at DESC LIMIT %d OFFSET %d", $list_params ), // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber -- table name is internal constant, $where['sql'] built from prepared fragments above.
 			ARRAY_A
 		);
 
@@ -92,8 +92,8 @@ final class TicketRepository {
 		$sql = "SELECT * FROM {$table} {$where['sql']} ORDER BY updated_at DESC LIMIT 10000"; // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name is internal constant, $where['sql'] built from prepared fragments above.
 
 		$rows = $where['params']
-			? $wpdb->get_results( $wpdb->prepare( $sql, $where['params'] ), ARRAY_A ) // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- custom plugin table, no core caching API applies.
-			: $wpdb->get_results( $sql, ARRAY_A ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- custom plugin table, no core caching API applies, no user input when params empty.
+			? $wpdb->get_results( $wpdb->prepare( $sql, $where['params'] ), ARRAY_A ) // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber -- custom plugin table; $sql is the table name plus fragments with placeholders, bound from $where['params'].
+			: $wpdb->get_results( $sql, ARRAY_A ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.NotPrepared -- custom plugin table; no user input when params is empty.
 
 		return is_array( $rows ) ? $rows : array();
 	}
@@ -231,6 +231,7 @@ final class TicketRepository {
 		global $wpdb;
 		$tickets  = Schema::tickets_table();
 		$messages = Schema::messages_table();
+		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- the only interpolated values are Deskovi's own table names.
 		$rows     = $wpdb->get_results( // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- custom plugin tables, no core caching API applies.
 			$wpdb->prepare(
 				"SELECT t.id, t.status, t.priority, t.category, t.order_id, t.assigned_agent_id, t.created_at, t.updated_at,
@@ -242,6 +243,7 @@ final class TicketRepository {
 			),
 			ARRAY_A
 		);
+		// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 
 		return is_array( $rows ) ? $rows : array();
 	}
@@ -281,7 +283,7 @@ final class TicketRepository {
 		$table        = Schema::tickets_table();
 		$placeholders = implode( ', ', array_fill( 0, count( $statuses ), '%s' ) );
 		$ids          = $wpdb->get_col( // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- custom plugin table, no core caching API applies.
-			$wpdb->prepare( "SELECT id FROM {$table} WHERE updated_at < %s AND status IN ({$placeholders}) ORDER BY updated_at ASC LIMIT %d", array_merge( array( $before ), $statuses, array( max( 1, min( 1000, $limit ) ) ) ) ), // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQL.UnfinishedPrepare -- table name is an internal constant; placeholders built from a validated list.
+			$wpdb->prepare( "SELECT id FROM {$table} WHERE updated_at < %s AND status IN ({$placeholders}) ORDER BY updated_at ASC LIMIT %d", array_merge( array( $before ), $statuses, array( max( 1, min( 1000, $limit ) ) ) ) ), // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQL.UnfinishedPrepare, WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare -- table name is an internal constant; placeholders built from a validated list.
 		);
 
 		return is_array( $ids ) ? array_map( 'strval', $ids ) : array();

@@ -186,6 +186,7 @@ class DeskoviSupport extends HTMLElement {
 		panel?.remove();
 		this.#open = false;
 		this.#btn?.setAttribute( 'aria-expanded', 'false' );
+		this.#btn?.focus();
 		this.stopPoll();
 		void this.refreshUnread();
 	}
@@ -205,6 +206,7 @@ class DeskoviSupport extends HTMLElement {
 			mod.mountPanel( this, this.#shadow, this.#cfg, () => {
 				this.#open = false;
 				this.#btn?.setAttribute( 'aria-expanded', 'false' );
+				this.#btn?.focus();
 				this.stopPoll();
 				void this.refreshUnread();
 			} );

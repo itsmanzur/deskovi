@@ -647,6 +647,28 @@ export function mountPanel(
 		`;
 	}
 
+	/**
+	 * The markup is built as strings, so tie each label to its control, announce errors and name the
+	 * reply box here, once per render, instead of repeating it in every template.
+	 */
+	function improveAccessibility(): void {
+		panel.querySelectorAll( '.dk-field' ).forEach( ( field, index ) => {
+			const label = field.querySelector( 'label' );
+			const control = field.querySelector( 'input, select, textarea' );
+			if ( label && control && ! label.hasAttribute( 'for' ) ) {
+				const id = 'dk-field-' + ( control.getAttribute( 'data-field' ) || String( index ) );
+				control.setAttribute( 'id', id );
+				label.setAttribute( 'for', id );
+			}
+		} );
+		panel.querySelectorAll( '.dk-error' ).forEach( ( el ) => el.setAttribute( 'role', 'alert' ) );
+		panel.querySelectorAll( 'textarea[data-field="reply"]' ).forEach( ( el ) => {
+			if ( ! el.hasAttribute( 'aria-label' ) ) {
+				el.setAttribute( 'aria-label', el.getAttribute( 'placeholder' ) || t( cfg, 'reply' ) );
+			}
+		} );
+	}
+
 	function render(): void {
 		if ( state.view === 'welcome' ) {
 			panel.innerHTML = renderWelcome();
@@ -663,6 +685,7 @@ export function mountPanel(
 		} else {
 			panel.innerHTML = renderList();
 		}
+		improveAccessibility();
 		attachSlots();
 	}
 
@@ -807,6 +830,8 @@ export function mountPanel(
 
 	host.setAttribute( 'data-theme', resolveTheme( cfg.theme ) );
 	render();
+	panel.setAttribute( 'tabindex', '-1' );
+	panel.focus( { preventScroll: true } );
 	if ( isAuthed( cfg ) ) {
 		void loadList();
 	}
