@@ -44,6 +44,13 @@ function freeFeatures(): Card[] {
 			description: __( 'Issue a full or partial refund, or resend the order invoice email, without opening the order.', 'deskovi' ),
 		},
 		{
+			id: 'filters',
+			icon: i( Icons.IconQueue ),
+			title: __( 'Filters and saved views', 'deskovi' ),
+			description: __( 'Narrow the ticket list by status, priority, category, assignee or search, and save a combination as a view you can open with one click.', 'deskovi' ),
+			screen: 'tickets',
+		},
+		{
 			id: 'priority',
 			icon: i( Icons.IconFlag ),
 			title: __( 'Priority and assignment', 'deskovi' ),
@@ -143,6 +150,17 @@ function freeDocs(): DocsSection[] {
 				__( 'Write your answer in the reply box. Insert a canned reply from the menu above it if you have one.', 'deskovi' ),
 				__( 'Tick “Internal note (not visible to customer)” for a message only your team should see.', 'deskovi' ),
 				__( 'Click “Send reply”. The customer is emailed if the “Agent reply” notification is on. When an agent replies to an open ticket it moves to Pending; when a customer replies to a resolved ticket it opens again.', 'deskovi' ),
+			],
+		},
+		{
+			id: 'filters-views',
+			title: __( 'Filters and saved views', 'deskovi' ),
+			intro: __( 'Above the ticket list, choose a status (including “Open or pending”, which is what still needs work), a priority and a category, use the Unassigned and Assigned to me buttons, or search by subject, name or email. They combine, and the list, the count and Export CSV all follow them.', 'deskovi' ),
+			steps: [
+				__( 'Set the filters you use often, for example status “Open or pending” and priority “Urgent”.', 'deskovi' ),
+				__( 'Click “Save this view”, give it a name and press Enter. It appears as a button above the list.', 'deskovi' ),
+				__( 'Click a view to apply it again. The × on a view deletes it. Views belong to you: other agents never see or change them, and each agent can keep up to 20.', 'deskovi' ),
+				__( 'Add-ons can add their own filters beside the built-in ones (Deskovi Pro adds a tag filter).', 'deskovi' ),
 			],
 		},
 		{

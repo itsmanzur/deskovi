@@ -114,12 +114,33 @@ export function fetchActivity(): Promise< ActivityData > {
 	return apiFetch( { path: `${ base }/activity` } );
 }
 
-export type TicketListParams = {
-	page?: number;
-	per_page?: number;
+/** What the ticket list can be narrowed by. `x` carries add-on filters (for example a tag). */
+export type TicketFilters = {
 	search?: string;
 	assignee?: string; // 'all' | 'unassigned' | numeric string
+	status?: string; // '' | 'active' | 'open' | 'pending' | 'resolved' | 'closed'
+	priority?: string; // '' | 'low' | 'normal' | 'high' | 'urgent'
+	category?: string;
+	x?: Record< string, string >;
 };
+
+export type TicketListParams = TicketFilters & {
+	page?: number;
+	per_page?: number;
+};
+
+export type SavedView = { id: string; name: string; filters: Required< Omit< TicketFilters, 'x' > > & { extra: Record< string, string > } };
+
+function addFilters( query: URLSearchParams, params: TicketFilters ): void {
+	if ( params.search ) query.set( 'search', params.search );
+	if ( params.assignee && params.assignee !== 'all' ) query.set( 'assignee', params.assignee );
+	if ( params.status ) query.set( 'status', params.status );
+	if ( params.priority ) query.set( 'priority', params.priority );
+	if ( params.category ) query.set( 'category', params.category );
+	Object.entries( params.x ?? {} ).forEach( ( [ key, value ] ) => {
+		if ( value ) query.set( `x[${ key }]`, value );
+	} );
+}
 
 export type TicketListResponse = {
 	tickets: Ticket[];
@@ -133,8 +154,7 @@ export function fetchTickets( params: TicketListParams = {} ): Promise< TicketLi
 	const query = new URLSearchParams();
 	if ( params.page ) query.set( 'page', String( params.page ) );
 	if ( params.per_page ) query.set( 'per_page', String( params.per_page ) );
-	if ( params.search ) query.set( 'search', params.search );
-	if ( params.assignee && params.assignee !== 'all' ) query.set( 'assignee', params.assignee );
+	addFilters( query, params );
 	const qs = query.toString();
 	return apiFetch( { path: `${ base }/tickets${ qs ? `?${ qs }` : '' }` } );
 }
@@ -207,13 +227,24 @@ export function bulkSetTicketStatus(
 	} );
 }
 
-export function ticketsExportUrl( params: { search?: string; assignee?: string } = {} ): string {
+export function ticketsExportUrl( params: TicketFilters = {} ): string {
 	const query = new URLSearchParams();
-	if ( params.search ) query.set( 'search', params.search );
-	if ( params.assignee && params.assignee !== 'all' ) query.set( 'assignee', params.assignee );
+	addFilters( query, params );
 	query.set( '_wpnonce', config?.nonce ?? '' );
 	const qs = query.toString();
 	return `${ ( config?.restRoot ?? '' ).replace( /\/$/, '' ) }${ base }/tickets/export${ qs ? `?${ qs }` : '' }`;
+}
+
+export function fetchViews(): Promise< { views: SavedView[] } > {
+	return apiFetch( { path: `${ base }/views` } );
+}
+
+export function saveView( name: string, filters: TicketFilters ): Promise< { views: SavedView[] } > {
+	return apiFetch( { path: `${ base }/views`, method: 'POST', data: { name, filters } } );
+}
+
+export function deleteView( id: string ): Promise< { views: SavedView[] } > {
+	return apiFetch( { path: `${ base }/views/${ id }`, method: 'DELETE' } );
 }
 
 export function fetchAgents(): Promise< { agents: Agent[] } > {

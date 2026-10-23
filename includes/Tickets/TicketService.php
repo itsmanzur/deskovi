@@ -51,19 +51,24 @@ final class TicketService {
 	public function list_all( array $args = array() ): array {
 		$page     = max( 1, (int) ( $args['page'] ?? 1 ) );
 		$per_page = min( 100, max( 1, (int) ( $args['per_page'] ?? 20 ) ) );
-		$search   = isset( $args['search'] ) ? trim( (string) $args['search'] ) : '';
-		$assignee = isset( $args['assignee'] ) ? (string) $args['assignee'] : 'all';
+		$filters  = ListFilters::normalize( $args );
 
 		$result = $this->repo->paginated(
 			array(
 				'page'     => $page,
 				'per_page' => $per_page,
-				'search'   => $search,
-				'assignee' => $assignee,
-			)
+			) + $this->repo_filters( $filters )
 		);
 
 		$items = array_map( array( $this, 'add_agent_name' ), $result['items'] );
+
+		/**
+		 * Filters the tickets of one page of the admin list, so an add-on can add data to each (for example tags).
+		 *
+		 * @param array<int, array<string, mixed>> $items   Tickets of the page.
+		 * @param array<string, mixed>             $filters The list filters.
+		 */
+		$items = (array) apply_filters( 'itsdesk_ticket_list_items', $items, $filters );
 
 		return array(
 			'items'    => $items,
@@ -619,17 +624,43 @@ final class TicketService {
 	/**
 	 * Rows for CSV export — same filters as list_all(), unpaginated.
 	 *
-	 * @param array{search?: string, assignee?: string} $args
+	 * @param array<string, mixed> $args Filters.
 	 * @return array<int, array<string, mixed>>
 	 */
 	public function export_rows( array $args = array() ): array {
-		$rows = $this->repo->matching(
-			array(
-				'search'   => isset( $args['search'] ) ? trim( (string) $args['search'] ) : '',
-				'assignee' => isset( $args['assignee'] ) ? (string) $args['assignee'] : 'all',
-			)
-		);
+		$rows = $this->repo->matching( $this->repo_filters( ListFilters::normalize( $args ) ) );
 		return array_map( array( $this, 'add_agent_name' ), $rows );
+	}
+
+	/**
+	 * The repository's version of a filter set, after add-ons had a chance to narrow it by id.
+	 *
+	 * @param array<string, mixed> $filters A normalised filter set.
+	 * @return array<string, mixed>
+	 */
+	private function repo_filters( array $filters ): array {
+		$out = array(
+			'search'   => $filters['search'],
+			'assignee' => $filters['assignee'],
+			'status'   => $filters['status'],
+			'priority' => $filters['priority'],
+			'category' => $filters['category'],
+		);
+
+		/**
+		 * Lets an add-on narrow the admin ticket list to a set of ticket ids, using its own filters
+		 * (the `x` entries of $filters['extra']). Return null to leave the list as it is, an array of ids
+		 * to keep only those tickets (an empty array matches nothing).
+		 *
+		 * @param array<int, string>|null $ids     Ticket ids, or null for no narrowing.
+		 * @param array<string, mixed>    $filters The normalised list filters.
+		 */
+		$ids = apply_filters( 'itsdesk_ticket_filter_ids', null, $filters );
+		if ( is_array( $ids ) ) {
+			$out['ids'] = $ids;
+		}
+
+		return $out;
 	}
 
 	/**

@@ -264,6 +264,23 @@ final class TicketController {
 	}
 
 	/**
+	 * The list filters of a request (search, assignee, status, priority, category and the add-on entries `x[name]=value`).
+	 *
+	 * @param WP_REST_Request $request Request.
+	 * @return array<string, mixed>
+	 */
+	private function list_filters( WP_REST_Request $request ): array {
+		return array(
+			'search'   => (string) ( $request->get_param( 'search' ) ?? '' ),
+			'assignee' => (string) ( $request->get_param( 'assignee' ) ?? 'all' ),
+			'status'   => (string) ( $request->get_param( 'status' ) ?? '' ),
+			'priority' => (string) ( $request->get_param( 'priority' ) ?? '' ),
+			'category' => (string) ( $request->get_param( 'category' ) ?? '' ),
+			'x'        => is_array( $request->get_param( 'x' ) ) ? $request->get_param( 'x' ) : array(),
+		);
+	}
+
+	/**
 	 * Admin list.
 	 *
 	 * @param WP_REST_Request $request Request.
@@ -273,9 +290,7 @@ final class TicketController {
 			array(
 				'page'     => (int) $request->get_param( 'page' ),
 				'per_page' => (int) ( $request->get_param( 'per_page' ) ?: 20 ),
-				'search'   => sanitize_text_field( (string) ( $request->get_param( 'search' ) ?? '' ) ),
-				'assignee' => (string) ( $request->get_param( 'assignee' ) ?? 'all' ),
-			)
+			) + $this->list_filters( $request )
 		);
 
 		return new WP_REST_Response(
@@ -434,12 +449,7 @@ final class TicketController {
 	 * @param WP_REST_Request $request Request.
 	 */
 	public function admin_export( WP_REST_Request $request ): void {
-		$rows = ( new TicketService() )->export_rows(
-			array(
-				'search'   => sanitize_text_field( (string) ( $request->get_param( 'search' ) ?? '' ) ),
-				'assignee' => (string) ( $request->get_param( 'assignee' ) ?? 'all' ),
-			)
-		);
+		$rows = ( new TicketService() )->export_rows( $this->list_filters( $request ) );
 
 		nocache_headers();
 		header( 'Content-Type: text/csv; charset=utf-8' );

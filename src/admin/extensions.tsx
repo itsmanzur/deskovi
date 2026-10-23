@@ -90,8 +90,16 @@ export type OverviewContext = {
 	navigate: ( screen: string ) => void;
 };
 
+export type ListFiltersContext = {
+	/** Add-on filter values (the `x` entries of the list request). */
+	extra: Record< string, string >;
+	/** Set one add-on filter; an empty value removes it. */
+	setExtra: ( key: string, value: string ) => void;
+};
+
 export type SlotContextMap = {
 	'overview.top': OverviewContext;
+	'ticket.list.filters': ListFiltersContext;
 	'ticket.detail.header': TicketDetailContext;
 	'ticket.detail.order': TicketDetailContext;
 	'ticket.detail.meta': TicketDetailContext;

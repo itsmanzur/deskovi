@@ -6,7 +6,7 @@ export type ProFeatureInfo = {
 	title: string;
 	description: string;
 	bullets: string[];
-	icon: 'IconMail' | 'IconBolt' | 'IconClock' | 'IconBook' | 'IconSparkle' | 'IconChart';
+	icon: 'IconMail' | 'IconBolt' | 'IconClock' | 'IconBook' | 'IconSparkle' | 'IconChart' | 'IconQueue';
 };
 
 /**
@@ -36,6 +36,16 @@ export function getProCatalog(): ProFeatureInfo[] {
 				__( 'Assign to one agent, in turn, or to whoever has the fewest open tickets', 'deskovi' ),
 				__( 'Practice mode shows what a rule would do before it changes anything', 'deskovi' ),
 				__( 'Rules never email customers, refund or delete anything', 'deskovi' ),
+			],
+		},
+		{
+			id: 'pro-tags',
+			icon: 'IconQueue',
+			title: __( 'Tags', 'deskovi' ),
+			description: __( 'Put your own labels on tickets and find them again.', 'deskovi' ),
+			bullets: [
+				__( 'Labels such as “vip” or “damaged-item”, shown in the ticket list', 'deskovi' ),
+				__( 'Filter the list by tag, save it as a view, and let automation rules add tags', 'deskovi' ),
 			],
 		},
 		{

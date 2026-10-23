@@ -42,6 +42,8 @@ Use your own prefix for options, cron events and tables. Never reuse names start
 | `itsdesk_widget_config` `( array $config )` | filter | The storefront widget bootstrap (`window.itsdeskWidget`). Add keys of your own (for example `pro`); plain data only, never secrets. Since 1.4.0. |
 | `itsdesk_widget_enqueue_scripts` `( string $handle )` | action | The widget loader (`itsdesk-widget`) and its config are enqueued; enqueue your storefront script here with that handle as a dependency. Fires only where the widget loads (not on cart or checkout, and not when the widget is off). Since 1.4.0. |
 | `itsdesk_ticket_status_changed` `( array $ticket, string $old, string $new )` | action | After a ticket's status really changed: agent action, bulk update, or Deskovi's own transition (an agent reply moves open → pending, a customer reply reopens a resolved ticket). Not fired when the status is set to the value it already had. Since 1.4.0. |
+| `itsdesk_ticket_filter_ids` `( ?array $ids, array $filters )` | filter | Lets an add-on narrow the admin ticket list (and CSV export) to a set of ticket ids using its own filters, which arrive as `$filters['extra']` (the `x[name]=value` request entries, at most 5, plain text). Return `null` to leave the list as it is, an array of ids to keep only those (empty = nothing). Since 1.4.0. |
+| `itsdesk_ticket_list_items` `( array $items, array $filters )` | filter | The tickets of one admin list page, so an add-on can add data to each row (for example `tags`). Since 1.4.0. |
 | `itsdesk_ticket_priority_changed` `( array $ticket, string $old, string $new )` | action | After a ticket's priority really changed. Since 1.4.0. |
 | `itsdesk_order_refunded` `( array $ticket, int $order_id, float $amount, string $currency, bool $gateway_refunded )` | action | After a refund was issued from a ticket (`$gateway_refunded` false = recorded manually because the gateway cannot refund). Since 1.4.0. |
 | `itsdesk_tickets_deleted` `( array $ids )` | action | After tickets (with messages and attachment files) were deleted, including by the GDPR eraser. Remove your per-ticket data here. |
@@ -94,6 +96,7 @@ Add a card to the Features tab and a guide to the Documentation tab of Docs & Fe
 | Slot | Where | Context |
 |---|---|---|
 | `overview.top` | At the top of the Overview, under its title | `{ navigate( screenId ) }` (since 1.4.0) |
+| `ticket.list.filters` | In the filter row above the ticket list | `{ extra, setExtra( key, value ) }`: add-on filter values (sent as `x[key]`, saved with views) (since 1.4.0) |
 | `ticket.detail.header` | Under the ticket title and customer line | detail |
 | `ticket.detail.order` | Inside the order card, before the refund card | detail |
 | `ticket.detail.meta` | After the status buttons, before the message thread | detail |

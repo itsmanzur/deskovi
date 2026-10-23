@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from '@wordpress/element';
+import { useCallback, useEffect, useMemo, useRef, useState } from '@wordpress/element';
 import { __, sprintf } from '@wordpress/i18n';
 import {
 	apiErrorMessage,
@@ -11,13 +11,18 @@ import {
 	fetchTicket,
 	fetchTicketCategories,
 	fetchTicketOrder,
+	deleteView,
 	fetchTickets,
+	fetchViews,
+	saveView,
 	formatBytes,
 	linkTicketOrder,
 	refundOrder,
 	replyTicket,
 	resendOrderInvoice,
 	ticketsExportUrl,
+	type SavedView,
+	type TicketFilters,
 	uploadTicketAttachment,
 	updateTicketPriority,
 	updateTicketStatus,
@@ -139,6 +144,12 @@ export function TicketsScreen( { onToast }: Props ) {
 	const [ categories, setCategories ] = useState< TicketCategory[] >( [] );
 	const [ agents, setAgents ] = useState< Agent[] >( [] );
 	const [ assigneeFilter, setAssigneeFilter ] = useState< AssigneeFilter >( 'all' );
+	const [ statusFilter, setStatusFilter ] = useState( '' );
+	const [ priorityFilter, setPriorityFilter ] = useState( '' );
+	const [ categoryFilter, setCategoryFilter ] = useState( '' );
+	const [ extra, setExtraState ] = useState< Record< string, string > >( {} );
+	const [ views, setViews ] = useState< SavedView[] >( [] );
+	const [ viewName, setViewName ] = useState< string | null >( null );
 	const [ selectedId, setSelectedId ] = useState< string | null >( null );
 	const [ selected, setSelected ] = useState< Ticket | null >( null );
 	const [ loading, setLoading ] = useState( true );
@@ -171,9 +182,27 @@ export function TicketsScreen( { onToast }: Props ) {
 	const resolvedAssignee =
 		assigneeFilter === 'mine' ? String( currentUserId ) : assigneeFilter;
 
+	const filters: TicketFilters = useMemo(
+		() => ( { search, assignee: resolvedAssignee, status: statusFilter, priority: priorityFilter, category: categoryFilter, x: extra } ),
+		[ search, resolvedAssignee, statusFilter, priorityFilter, categoryFilter, extra ]
+	);
+	const hasFilters = search !== '' || resolvedAssignee !== 'all' || statusFilter !== '' || priorityFilter !== '' || categoryFilter !== '' || Object.keys( extra ).length > 0;
+
+	const setExtra = useCallback( ( key: string, value: string ) => {
+		setExtraState( ( cur ) => {
+			const next = { ...cur };
+			if ( value ) {
+				next[ key ] = value;
+			} else {
+				delete next[ key ];
+			}
+			return next;
+		} );
+	}, [] );
+
 	const loadTickets = useCallback( () => {
 		setLoading( true );
-		fetchTickets( { page, per_page: PER_PAGE, search, assignee: resolvedAssignee } )
+		fetchTickets( { page, per_page: PER_PAGE, ...filters } )
 			.then( ( res ) => {
 				setTickets( res.tickets || [] );
 				setTotalTickets( res.total );
@@ -184,7 +213,7 @@ export function TicketsScreen( { onToast }: Props ) {
 				onToast( apiErrorMessage( err ), 'danger' );
 				setLoading( false );
 			} );
-	}, [ page, search, resolvedAssignee, onToast ] );
+	}, [ page, filters, onToast ] );
 
 	useEffect( () => {
 		loadTickets();
@@ -217,10 +246,57 @@ export function TicketsScreen( { onToast }: Props ) {
 		return () => clearTimeout( t );
 	}, [ searchInput ] );
 
-	// Reset to page 1 whenever the search term or assignee filter changes.
+	// Reset to page 1 whenever a filter changes.
 	useEffect( () => {
 		setPage( 1 );
-	}, [ search, assigneeFilter ] );
+	}, [ filters ] );
+
+	useEffect( () => {
+		fetchViews()
+			.then( ( res ) => setViews( res.views ) )
+			.catch( () => setViews( [] ) );
+	}, [] );
+
+	const clearFilters = () => {
+		setSearchInput( '' );
+		setSearch( '' );
+		setAssigneeFilter( 'all' );
+		setStatusFilter( '' );
+		setPriorityFilter( '' );
+		setCategoryFilter( '' );
+		setExtraState( {} );
+	};
+
+	const applyView = ( view: SavedView ) => {
+		const f = view.filters;
+		setSearchInput( f.search );
+		setSearch( f.search );
+		setAssigneeFilter( f.assignee === 'unassigned' ? 'unassigned' : f.assignee === String( currentUserId ) ? 'mine' : 'all' );
+		setStatusFilter( f.status );
+		setPriorityFilter( f.priority );
+		setCategoryFilter( f.category );
+		setExtraState( f.extra ?? {} );
+	};
+
+	const onSaveView = () => {
+		const name = ( viewName ?? '' ).trim();
+		if ( ! name ) {
+			return;
+		}
+		saveView( name, filters )
+			.then( ( res ) => {
+				setViews( res.views );
+				setViewName( null );
+				onToast( __( 'View saved.', 'deskovi' ) );
+			} )
+			.catch( ( err: unknown ) => onToast( apiErrorMessage( err ), 'danger' ) );
+	};
+
+	const onDeleteView = ( id: string ) => {
+		deleteView( id )
+			.then( ( res ) => setViews( res.views ) )
+			.catch( ( err: unknown ) => onToast( apiErrorMessage( err ), 'danger' ) );
+	};
 
 	// Clear bulk selection whenever the list reloads (new page/search/filter,
 	// or after a bulk action completes) so stale ids from a previous page
@@ -657,7 +733,7 @@ export function TicketsScreen( { onToast }: Props ) {
 				</div>
 				<a
 					className="itsdesk-btn itsdesk-btn--secondary"
-					href={ ticketsExportUrl( { search, assignee: resolvedAssignee } ) }
+					href={ ticketsExportUrl( filters ) }
 					target="_blank"
 					rel="noreferrer"
 				>
@@ -687,6 +763,52 @@ export function TicketsScreen( { onToast }: Props ) {
 						{ label }
 					</button>
 				) ) }
+			</div>
+
+			<div className="itsdesk-filters">
+				<select className="itsdesk-select" aria-label={ __( 'Status', 'deskovi' ) } value={ statusFilter } onChange={ ( e ) => setStatusFilter( ( e.target as HTMLSelectElement ).value ) }>
+					<option value="">{ __( 'Any status', 'deskovi' ) }</option>
+					<option value="active">{ __( 'Open or pending', 'deskovi' ) }</option>
+					<option value="open">{ __( 'Open', 'deskovi' ) }</option>
+					<option value="pending">{ __( 'Pending', 'deskovi' ) }</option>
+					<option value="resolved">{ __( 'Resolved', 'deskovi' ) }</option>
+					<option value="closed">{ __( 'Closed', 'deskovi' ) }</option>
+				</select>
+				<select className="itsdesk-select" aria-label={ __( 'Priority', 'deskovi' ) } value={ priorityFilter } onChange={ ( e ) => setPriorityFilter( ( e.target as HTMLSelectElement ).value ) }>
+					<option value="">{ __( 'Any priority', 'deskovi' ) }</option>
+					<option value="urgent">{ __( 'Urgent', 'deskovi' ) }</option>
+					<option value="high">{ __( 'High', 'deskovi' ) }</option>
+					<option value="normal">{ __( 'Normal', 'deskovi' ) }</option>
+					<option value="low">{ __( 'Low', 'deskovi' ) }</option>
+				</select>
+				<select className="itsdesk-select" aria-label={ __( 'Category', 'deskovi' ) } value={ categoryFilter } onChange={ ( e ) => setCategoryFilter( ( e.target as HTMLSelectElement ).value ) }>
+					<option value="">{ __( 'Any category', 'deskovi' ) }</option>
+					{ categories.map( ( c ) => (
+						<option key={ c.id } value={ c.id }>{ c.label }</option>
+					) ) }
+				</select>
+				<Slot name="ticket.list.filters" context={ { extra, setExtra } } />
+				{ hasFilters && (
+					<button type="button" className="itsdesk-link" onClick={ clearFilters }>{ __( 'Clear filters', 'deskovi' ) }</button>
+				) }
+			</div>
+
+			<div className="itsdesk-views">
+				{ views.map( ( view ) => (
+					<span className="itsdesk-views__chip" key={ view.id }>
+						<button type="button" onClick={ () => applyView( view ) }>{ view.name }</button>
+						<button type="button" className="itsdesk-views__x" aria-label={ sprintf( /* translators: %s: view name */ __( 'Delete the view %s', 'deskovi' ), view.name ) } onClick={ () => onDeleteView( view.id ) }>×</button>
+					</span>
+				) ) }
+				{ viewName === null ? (
+					<button type="button" className="itsdesk-link" disabled={ ! hasFilters } title={ hasFilters ? undefined : __( 'Choose a filter first', 'deskovi' ) } onClick={ () => setViewName( '' ) }>{ __( 'Save this view', 'deskovi' ) }</button>
+				) : (
+					<span className="itsdesk-views__new">
+						<input className="itsdesk-input" type="text" maxLength={ 40 } autoFocus placeholder={ __( 'Name, for example "Urgent refunds"', 'deskovi' ) } value={ viewName } onChange={ ( e ) => setViewName( ( e.target as HTMLInputElement ).value ) } onKeyDown={ ( e ) => { if ( e.key === 'Enter' ) { onSaveView(); } } } />
+						<button type="button" className="itsdesk-btn itsdesk-btn--primary" disabled={ viewName.trim() === '' } onClick={ onSaveView }>{ __( 'Save', 'deskovi' ) }</button>
+						<button type="button" className="itsdesk-btn itsdesk-btn--ghost" onClick={ () => setViewName( null ) }>{ __( 'Cancel', 'deskovi' ) }</button>
+					</span>
+				) }
 			</div>
 
 			<p className="itsdesk-admin__muted" style={ { marginTop: 8 } }>
@@ -775,7 +897,7 @@ export function TicketsScreen( { onToast }: Props ) {
 					) }
 					{ tickets.length === 0 ? (
 						<p className="itsdesk-admin__muted">
-							{ search || assigneeFilter !== 'all'
+							{ hasFilters
 								? __( 'No tickets match this search/filter.', 'deskovi' )
 								: __( 'No tickets yet. Create one to test the bridge.', 'deskovi' ) }
 						</p>

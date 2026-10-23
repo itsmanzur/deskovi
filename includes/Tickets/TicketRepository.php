@@ -80,7 +80,7 @@ final class TicketRepository {
 	 * fields, hydrating would be wasted work on a potentially large set).
 	 * Capped at 10,000 rows as a safety limit.
 	 *
-	 * @param array{search?: string, assignee?: string} $args
+	 * @param array<string, mixed> $args Filters (see build_where()).
 	 * @return array<int, array<string, mixed>>
 	 */
 	public function matching( array $args ): array {
@@ -103,7 +103,7 @@ final class TicketRepository {
 	 * Shared by paginated() and matching() so filter logic can't drift
 	 * between the two.
 	 *
-	 * @param array{search?: string, assignee?: string} $args
+	 * @param array{search?: string, assignee?: string, status?: string, priority?: string, category?: string, ids?: array<int, string>} $args `ids`, when present, limits the result to those tickets (an empty list matches nothing).
 	 * @return array{sql: string, params: array<int, mixed>}
 	 */
 	private function build_where( array $args ): array {
@@ -126,6 +126,36 @@ final class TicketRepository {
 		} elseif ( is_numeric( $assignee ) ) {
 			$where[]  = 'assigned_agent_id = %d';
 			$params[] = (int) $assignee;
+		}
+
+		$status = (string) ( $args['status'] ?? '' );
+		if ( 'active' === $status ) {
+			$where[] = "status IN ('open', 'pending')";
+		} elseif ( in_array( $status, array( 'open', 'pending', 'resolved', 'closed' ), true ) ) {
+			$where[]  = 'status = %s';
+			$params[] = $status;
+		}
+
+		$priority = (string) ( $args['priority'] ?? '' );
+		if ( in_array( $priority, array( 'low', 'normal', 'high', 'urgent' ), true ) ) {
+			$where[]  = 'priority = %s';
+			$params[] = $priority;
+		}
+
+		$category = (string) ( $args['category'] ?? '' );
+		if ( '' !== $category ) {
+			$where[]  = 'category = %s';
+			$params[] = $category;
+		}
+
+		if ( array_key_exists( 'ids', $args ) ) {
+			$ids = array_slice( array_values( array_filter( array_map( 'strval', (array) $args['ids'] ) ) ), 0, 5000 );
+			if ( array() === $ids ) {
+				$where[] = '1 = 0';
+			} else {
+				$where[] = 'id IN (' . implode( ', ', array_fill( 0, count( $ids ), '%s' ) ) . ')';
+				$params  = array_merge( $params, $ids );
+			}
 		}
 
 		return array(
