@@ -19,25 +19,41 @@
 	--dk-radius: 12px;
 	--dk-shadow: 0 1px 2px rgba(16, 42, 51, 0.06);
 	--dk-shadow-hover: 0 8px 24px rgba(16, 42, 51, 0.08);
-	--dk-font: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen-Sans,
-		Ubuntu, Cantarell, "Helvetica Neue", sans-serif;
+	/* Inter for Latin, Hind Siliguri for Bengali (self-hosted, see assets/fonts/fonts.css), then the system fonts. */
+	--dk-font: "Inter", "Hind Siliguri", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+		"Noto Sans Bengali", "Nirmala UI", "Helvetica Neue", sans-serif;
+	--dk-font-mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+	/* One type scale: 12 / 13 / 14 / 16 / 20 / 28. Weights: 400 / 500 / 600. */
 	--dk-text-xs: 12px;
 	--dk-text-sm: 13px;
-	--dk-text-md: 15px;
-	--dk-text-lg: 17px;
-	--dk-text-xl: 24px;
-	--dk-text-hero: 26px;
+	--dk-text-md: 14px;
+	--dk-text-lg: 16px;
+	--dk-text-xl: 20px;
+	--dk-text-hero: 28px;
 	--dk-leading-body: 1.5;
 	--dk-leading-title: 1.25;
 
-	max-width: 1120px;
+	max-width: 1360px;
 	margin: 8px 20px 48px 0;
 	font-family: var(--dk-font);
 	font-size: var(--dk-text-md);
 	line-height: var(--dk-leading-body);
 	color: var(--dk-ink);
 	position: relative;
+	font-optical-sizing: auto;
 	-webkit-font-smoothing: antialiased;
+}
+
+/* Bengali needs more air, and letter-spacing breaks its conjuncts. */
+.itsdesk-admin:lang(bn) {
+	--dk-leading-body: 1.7;
+	--dk-leading-title: 1.4;
+}
+
+.itsdesk-admin:lang(bn) *,
+.itsdesk-admin:lang(bn) *::before,
+.itsdesk-admin:lang(bn) *::after {
+	letter-spacing: normal !important;
 }
 
 .itsdesk-admin *,
@@ -51,25 +67,42 @@
 	display: none;
 }
 
-/* —— Header —— */
-.itsdesk-admin__chrome {
+/* —— Shell: sidebar + content —— */
+.itsdesk-admin__shell {
+	display: grid;
+	grid-template-columns: 224px minmax(0, 1fr);
+	gap: 20px;
+	align-items: start;
+}
+
+.itsdesk-admin__side {
+	position: sticky;
+	top: 48px;
 	display: flex;
-	align-items: flex-start;
-	justify-content: space-between;
-	gap: 16px;
-	margin-bottom: 18px;
+	flex-direction: column;
+	gap: 14px;
+	padding: 14px 10px 16px;
+	background: var(--dk-surface);
+	border: 1px solid var(--dk-line);
+	border-radius: var(--dk-radius);
+	box-shadow: var(--dk-shadow);
+}
+
+.itsdesk-admin__main {
+	min-width: 0;
 }
 
 .itsdesk-admin__brand {
 	display: flex;
-	align-items: flex-start;
-	gap: 12px;
+	align-items: center;
+	gap: 10px;
+	padding: 2px 8px 0;
 }
 
 .itsdesk-admin__logo {
-	width: 48px;
-	height: 48px;
-	border-radius: 12px;
+	width: 34px;
+	height: 34px;
+	border-radius: 9px;
 	background: var(--dk-ink);
 	color: #fff;
 	display: grid;
@@ -79,73 +112,135 @@
 
 .itsdesk-admin__brand h1 {
 	margin: 0;
-	font-size: var(--dk-text-xl);
-	font-weight: 700;
-	letter-spacing: -0.02em;
+	padding: 0;
+	font-size: var(--dk-text-lg);
+	font-weight: 600;
+	letter-spacing: -0.01em;
 	line-height: var(--dk-leading-title);
 	color: var(--dk-ink);
 }
 
-.itsdesk-admin__sub {
-	margin: 6px 0 0;
+.itsdesk-admin__version {
+	display: block;
+	font-size: var(--dk-text-xs);
 	color: var(--dk-muted);
-	font-size: 14px;
-	max-width: 560px;
-	line-height: var(--dk-leading-body);
-}
-
-.itsdesk-admin__chrome-actions {
-	display: flex;
-	align-items: center;
-	gap: 10px;
-	flex-shrink: 0;
+	line-height: 1.2;
 }
 
 /* —— Nav —— */
 .itsdesk-admin__nav {
 	display: flex;
-	flex-wrap: wrap;
-	gap: 6px;
-	padding: 8px;
-	margin-bottom: 18px;
-	background: var(--dk-canvas);
-	border: 1px solid var(--dk-line);
-	border-radius: 16px;
+	flex-direction: column;
+	gap: 14px;
+}
+
+.itsdesk-admin__nav-group {
+	display: flex;
+	flex-direction: column;
+	gap: 2px;
+}
+
+.itsdesk-admin__nav-label {
+	padding: 0 10px 4px;
+	font-size: var(--dk-text-xs);
+	font-weight: 600;
+	letter-spacing: 0.05em;
+	text-transform: uppercase;
+	color: var(--dk-muted);
 }
 
 .itsdesk-admin__nav-btn {
-	display: inline-flex;
+	display: flex;
 	align-items: center;
-	gap: 8px;
-	border: 1px solid transparent;
+	gap: 10px;
+	width: 100%;
+	border: 0;
 	background: transparent;
-	color: var(--dk-muted);
-	border-radius: 10px;
-	padding: 10px 14px;
+	color: var(--dk-label);
+	border-radius: 8px;
+	padding: 7px 10px;
 	cursor: pointer;
-	font-size: 14px;
+	font-family: inherit;
+	font-size: var(--dk-text-md);
 	font-weight: 500;
 	line-height: 1.3;
-	transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+	text-align: start;
+	transition: background 0.15s ease, color 0.15s ease;
 }
 
 .itsdesk-admin__nav-btn:hover {
 	color: var(--dk-ink);
-	background: rgba(255, 255, 255, 0.7);
+	background: var(--dk-canvas);
+}
+
+.itsdesk-admin__nav-btn:focus-visible {
+	outline: 2px solid var(--dk-accent);
+	outline-offset: -2px;
 }
 
 .itsdesk-admin__nav-btn.is-active {
-	background: var(--dk-surface);
-	color: var(--dk-ink);
-	border-color: var(--dk-line);
-	box-shadow: var(--dk-shadow);
+	background: var(--dk-accent-soft);
+	color: var(--dk-accent-hover);
 	font-weight: 600;
 }
 
 .itsdesk-admin__nav-btn svg {
-	opacity: 0.9;
+	flex-shrink: 0;
 	width: 17px;
 	height: 17px;
+	opacity: 0.85;
+}
+
+.itsdesk-admin__nav-btn.is-active svg {
+	opacity: 1;
+}
+
+@media (max-width: 1100px) {
+	.itsdesk-admin__shell {
+		grid-template-columns: minmax(0, 1fr);
+		gap: 14px;
+	}
+
+	.itsdesk-admin__side {
+		position: static;
+		flex-direction: row;
+		align-items: center;
+		gap: 10px;
+		padding: 8px 10px;
+	}
+
+	.itsdesk-admin__brand {
+		display: none;
+	}
+
+	.itsdesk-admin__nav {
+		flex: 1;
+		min-width: 0;
+		flex-direction: row;
+		gap: 4px;
+		overflow-x: auto;
+		scrollbar-width: thin;
+		padding-bottom: 2px;
+	}
+
+	.itsdesk-admin__nav-group {
+		flex-direction: row;
+		align-items: center;
+		gap: 2px;
+		flex-shrink: 0;
+		padding-inline-end: 6px;
+		margin-inline-end: 2px;
+		border-inline-end: 1px solid var(--dk-line);
+	}
+
+	.itsdesk-admin__nav-label {
+		display: none;
+	}
+
+	.itsdesk-admin__nav-btn {
+		width: auto;
+		white-space: nowrap;
+	}
 }
 
 /* —— Panel —— */
@@ -161,6 +256,16 @@
 
 .itsdesk-admin__panel-inner {
 	padding: 24px 28px 28px;
+}
+
+@media (max-width: 600px) {
+	.itsdesk-admin__panel-inner {
+		padding: 16px 14px 20px;
+	}
+
+	.itsdesk-admin {
+		margin-right: 10px;
+	}
 }
 
 @keyframes itsdesk-fade-in {
@@ -188,7 +293,7 @@
 .itsdesk-admin h2 {
 	margin: 0;
 	font-size: var(--dk-text-lg);
-	font-weight: 700;
+	font-weight: 600;
 	letter-spacing: -0.01em;
 	line-height: var(--dk-leading-title);
 }
@@ -196,7 +301,7 @@
 .itsdesk-admin h3.itsdesk-admin__section {
 	margin: 24px 0 12px;
 	font-size: var(--dk-text-xs);
-	font-weight: 700;
+	font-weight: 600;
 	text-transform: uppercase;
 	letter-spacing: 0.04em;
 	color: var(--dk-label);
@@ -204,7 +309,7 @@
 
 .itsdesk-admin__muted {
 	color: var(--dk-muted);
-	font-size: 14px;
+	font-size: var(--dk-text-md);
 	line-height: var(--dk-leading-body);
 	margin: 6px 0 0;
 }
@@ -218,7 +323,7 @@
 	border-radius: 9px;
 	padding: 9px 16px;
 	min-height: 36px;
-	font-size: 14px;
+	font-size: var(--dk-text-md);
 	font-weight: 600;
 	line-height: 1.3;
 	cursor: pointer;
@@ -314,7 +419,7 @@
 	gap: 6px;
 	padding: 5px 11px;
 	border-radius: 999px;
-	font-size: 13px;
+	font-size: var(--dk-text-sm);
 	font-weight: 600;
 	border: 1px solid transparent;
 	line-height: 1.3;
@@ -392,9 +497,9 @@
 .itsdesk-metric {
 	text-align: left;
 	border: 1px solid var(--dk-line);
-	border-radius: 12px;
-	padding: 16px 16px 14px;
-	background: var(--dk-canvas);
+	border-radius: 10px;
+	padding: 14px 16px;
+	background: var(--dk-surface);
 	transition: border-color 0.15s ease, box-shadow 0.15s ease, transform 0.15s ease,
 		background 0.15s ease;
 	font: inherit;
@@ -407,25 +512,32 @@
 }
 
 .itsdesk-metric.is-clickable:hover {
-	background: #fff;
 	border-color: #c5d0d4;
 	box-shadow: var(--dk-shadow-hover);
-	transform: translateY(-1px);
 }
 
 .itsdesk-metric--ok {
-	background: var(--dk-ok-soft);
 	border-color: #abefc6;
 }
 
+.itsdesk-metric--ok .itsdesk-metric__value {
+	color: var(--dk-ok);
+}
+
 .itsdesk-metric--warn {
-	background: var(--dk-warn-soft);
 	border-color: #f5d565;
 }
 
+.itsdesk-metric--warn .itsdesk-metric__value {
+	color: var(--dk-warn);
+}
+
 .itsdesk-metric--danger {
-	background: var(--dk-danger-soft);
 	border-color: #fecdca;
+}
+
+.itsdesk-metric--danger .itsdesk-metric__value {
+	color: var(--dk-danger);
 }
 
 .itsdesk-metric__top {
@@ -438,7 +550,7 @@
 
 .itsdesk-metric__label {
 	font-size: var(--dk-text-xs);
-	font-weight: 700;
+	font-weight: 600;
 	text-transform: uppercase;
 	letter-spacing: 0.04em;
 	color: var(--dk-label);
@@ -455,8 +567,9 @@
 }
 
 .itsdesk-metric__value {
-	font-size: 20px;
-	font-weight: 700;
+	font-size: var(--dk-text-hero);
+	font-variant-numeric: tabular-nums;
+	font-weight: 600;
 	letter-spacing: -0.02em;
 	line-height: var(--dk-leading-title);
 	color: var(--dk-ink);
@@ -508,7 +621,7 @@
 	align-items: center;
 	gap: 6px;
 	font-size: var(--dk-text-xs);
-	font-weight: 700;
+	font-weight: 600;
 	letter-spacing: 0.05em;
 	text-transform: uppercase;
 	opacity: 0.9;
@@ -517,7 +630,7 @@
 
 .itsdesk-hero h2 {
 	font-size: var(--dk-text-hero);
-	font-weight: 700;
+	font-weight: 600;
 	letter-spacing: -0.03em;
 	margin: 0 0 10px;
 	color: #fff;
@@ -571,7 +684,7 @@
 
 .itsdesk-checklist__title {
 	font-size: var(--dk-text-sm);
-	font-weight: 700;
+	font-weight: 600;
 	letter-spacing: 0.04em;
 	text-transform: uppercase;
 	opacity: 0.88;
@@ -602,7 +715,7 @@
 	box-sizing: border-box;
 	font-family: var(--dk-font);
 	font-size: var(--dk-text-xs);
-	font-weight: 700;
+	font-weight: 600;
 	font-style: normal;
 	line-height: 1;
 	letter-spacing: 0;
@@ -628,8 +741,8 @@
 
 .itsdesk-checklist__item strong {
 	display: block;
-	font-size: 14px;
-	font-weight: 650;
+	font-size: var(--dk-text-md);
+	font-weight: 600;
 	margin-bottom: 3px;
 	font-family: var(--dk-font);
 }
@@ -670,14 +783,14 @@
 
 .itsdesk-health strong {
 	display: block;
-	font-size: 14px;
-	font-weight: 700;
+	font-size: var(--dk-text-md);
+	font-weight: 600;
 	margin-bottom: 4px;
 }
 
 .itsdesk-health p {
 	margin: 0;
-	font-size: 14px;
+	font-size: var(--dk-text-md);
 	color: var(--dk-muted);
 	line-height: var(--dk-leading-body);
 }
@@ -697,7 +810,7 @@
 .itsdesk-table td {
 	text-align: left;
 	padding: 12px 16px;
-	font-size: 14px;
+	font-size: var(--dk-text-md);
 	line-height: 1.4;
 	border-bottom: 1px solid var(--dk-line);
 	vertical-align: middle;
@@ -710,7 +823,7 @@
 .itsdesk-table th {
 	background: var(--dk-canvas);
 	color: var(--dk-label);
-	font-weight: 700;
+	font-weight: 600;
 	font-size: var(--dk-text-xs);
 	text-transform: uppercase;
 	letter-spacing: 0.04em;
@@ -746,8 +859,8 @@
 
 .itsdesk-card {
 	border: 1px solid var(--dk-line);
-	border-radius: 12px;
-	padding: 18px;
+	border-radius: 10px;
+	padding: 16px 18px;
 	background: #fff;
 }
 
@@ -762,16 +875,16 @@
 .itsdesk-card h3 {
 	margin: 0;
 	font-size: var(--dk-text-xs);
-	font-weight: 700;
+	font-weight: 600;
 	text-transform: uppercase;
 	letter-spacing: 0.04em;
 	color: var(--dk-label);
 }
 
-.itsdesk-card__title {
+.itsdesk-card h3.itsdesk-card__title {
 	margin: 0;
 	font-size: var(--dk-text-lg);
-	font-weight: 700;
+	font-weight: 600;
 	letter-spacing: -0.01em;
 	text-transform: none;
 	color: var(--dk-ink);
@@ -780,12 +893,12 @@
 
 .itsdesk-card p {
 	margin: 0 0 8px;
-	font-size: 14px;
+	font-size: var(--dk-text-md);
 	line-height: var(--dk-leading-body);
 }
 
 .itsdesk-mono {
-	font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+	font-family: var(--dk-font-mono);
 	font-size: var(--dk-text-xs);
 	background: var(--dk-canvas);
 	border: 1px solid var(--dk-line);
@@ -802,7 +915,7 @@
 .itsdesk-field label {
 	display: block;
 	font-size: var(--dk-text-sm);
-	font-weight: 650;
+	font-weight: 600;
 	color: var(--dk-label);
 	margin-bottom: 6px;
 }
@@ -820,7 +933,7 @@
 	border: 1px solid var(--dk-line);
 	border-radius: 9px;
 	padding: 0 36px 0 12px;
-	font-size: 14px;
+	font-size: var(--dk-text-md);
 	font-weight: 500;
 	line-height: 38px;
 	color: var(--dk-ink);
@@ -882,7 +995,7 @@
 }
 
 .itsdesk-toggle__label {
-	font-size: 14px;
+	font-size: var(--dk-text-md);
 	font-weight: 600;
 	color: var(--dk-ink);
 	cursor: pointer;
@@ -941,8 +1054,8 @@
 	border-radius: 10px;
 	background: var(--dk-ink);
 	color: #fff;
-	font-size: 14px;
-	font-weight: 550;
+	font-size: var(--dk-text-md);
+	font-weight: 500;
 	box-shadow: 0 12px 32px rgba(16, 42, 51, 0.25);
 	animation: itsdesk-fade-in 0.2s ease;
 }
@@ -955,7 +1068,7 @@
 	border: none;
 	background: transparent;
 	color: inherit;
-	font-size: 18px;
+	font-size: var(--dk-text-lg);
 	line-height: 1;
 	cursor: pointer;
 	opacity: 0.88;
@@ -1057,14 +1170,14 @@
 
 .itsdesk-feature strong {
 	display: block;
-	font-size: 14px;
-	font-weight: 650;
+	font-size: var(--dk-text-md);
+	font-weight: 600;
 	margin-bottom: 4px;
 }
 
 .itsdesk-feature p {
 	margin: 0;
-	font-size: 14px;
+	font-size: var(--dk-text-md);
 	color: var(--dk-muted);
 	line-height: var(--dk-leading-body);
 }
@@ -1105,14 +1218,14 @@
 }
 
 .itsdesk-workspace strong {
-	font-size: 14px;
-	font-weight: 650;
+	font-size: var(--dk-text-md);
+	font-weight: 600;
 }
 
 .itsdesk-workspace span {
 	font-size: var(--dk-text-xs);
 	color: var(--dk-muted);
-	font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+	font-family: var(--dk-font-mono);
 }
 
 .itsdesk-checkline {
@@ -1120,7 +1233,7 @@
 	align-items: flex-start;
 	gap: 8px;
 	margin: 8px 0 4px;
-	font-size: 14px;
+	font-size: var(--dk-text-md);
 	color: var(--dk-muted);
 	cursor: pointer;
 	line-height: var(--dk-leading-body);
@@ -1139,7 +1252,7 @@
 .itsdesk-devtools summary {
 	cursor: pointer;
 	font-size: var(--dk-text-xs);
-	font-weight: 700;
+	font-weight: 600;
 	color: var(--dk-label);
 	letter-spacing: 0.04em;
 	text-transform: uppercase;
@@ -1159,7 +1272,7 @@
 	border-radius: 9px;
 	padding: 9px 12px;
 	min-height: 38px;
-	font-size: 14px;
+	font-size: var(--dk-text-md);
 	font-family: inherit;
 	color: var(--dk-ink);
 	background: #fff;
@@ -1181,25 +1294,26 @@
 
 .itsdesk-tickets {
 	display: grid;
-	grid-template-columns: minmax(240px, 320px) 1fr;
-	gap: 14px;
+	grid-template-columns: minmax(min(300px, 100%), 380px) minmax(0, 1fr);
+	gap: 16px;
 	margin-top: 16px;
 	align-items: start;
 }
 
 @media (max-width: 900px) {
 	.itsdesk-tickets {
-		grid-template-columns: 1fr;
+		grid-template-columns: minmax(0, 1fr);
 	}
 }
 
 .itsdesk-tickets__list {
 	display: flex;
 	flex-direction: column;
-	gap: 8px;
-	max-height: 640px;
+	max-height: 720px;
 	overflow: auto;
-	padding-right: 2px;
+	border: 1px solid var(--dk-line);
+	border-radius: 10px;
+	background: var(--dk-surface);
 }
 
 .itsdesk-ticket-row {
@@ -1208,13 +1322,18 @@
 	gap: 10px;
 	width: 100%;
 	text-align: left;
-	border: 1px solid var(--dk-line);
-	border-radius: 10px;
-	padding: 12px 14px;
-	background: var(--dk-canvas);
+	border: 0;
+	border-bottom: 1px solid var(--dk-line);
+	border-inline-start: 3px solid transparent;
+	padding: 12px 14px 12px 12px;
+	background: transparent;
 	font: inherit;
 	color: inherit;
-	transition: border-color 0.15s ease, background 0.15s ease;
+	transition: background 0.15s ease;
+}
+
+.itsdesk-ticket-row:last-child {
+	border-bottom: 0;
 }
 
 .itsdesk-ticket-row input[type="checkbox"] {
@@ -1229,26 +1348,33 @@
 }
 
 .itsdesk-ticket-row:hover {
-	background: #fff;
+	background: var(--dk-canvas);
 }
 
 .itsdesk-ticket-row.is-active {
 	background: var(--dk-accent-soft);
-	border-color: var(--dk-accent);
+	border-inline-start-color: var(--dk-accent);
 }
 
 .itsdesk-ticket-row__top,
 .itsdesk-ticket-row__meta {
 	display: flex;
 	align-items: center;
-	justify-content: space-between;
-	gap: 8px;
+	flex-wrap: wrap;
+	gap: 6px 8px;
 }
 
+.itsdesk-ticket-row__meta {
+	justify-content: space-between;
+}
+
+/* Subject on its own line, status and priority underneath. */
 .itsdesk-ticket-row__top strong {
-	font-size: 14px;
-	font-weight: 650;
+	flex: 1 1 100%;
+	font-size: var(--dk-text-md);
+	font-weight: 600;
 	line-height: 1.35;
+	overflow-wrap: anywhere;
 }
 
 .itsdesk-ticket-row__meta {
@@ -1318,7 +1444,7 @@
 
 .itsdesk-bubble p {
 	margin: 0;
-	font-size: 14px;
+	font-size: var(--dk-text-md);
 	line-height: var(--dk-leading-body);
 	white-space: pre-wrap;
 }
@@ -1361,7 +1487,7 @@
 	border: none;
 	background: transparent;
 	color: var(--dk-muted);
-	font-size: 14px;
+	font-size: var(--dk-text-md);
 	line-height: 1;
 	cursor: pointer;
 	border-radius: 50%;
@@ -1407,7 +1533,7 @@
 /* File size label */
 .itsdesk-attachment-size {
 	color: var(--dk-muted);
-	font-size: 11px;
+	font-size: var(--dk-text-xs);
 	flex-shrink: 0;
 }
 
@@ -1427,3 +1553,318 @@
 	padding-right: 12px;
 }
 
+
+/* —— Overview —— */
+.itsdesk-admin .itsdesk-page-title {
+	font-size: var(--dk-text-xl);
+	letter-spacing: -0.01em;
+}
+
+.itsdesk-callout {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 16px;
+	margin: 16px 0 0;
+	padding: 14px 16px;
+	border: 1px solid #f5d565;
+	border-radius: 10px;
+	background: var(--dk-warn-soft);
+}
+
+.itsdesk-callout p {
+	margin: 2px 0 0;
+	color: var(--dk-label);
+}
+
+.itsdesk-two {
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(min(320px, 100%), 1fr));
+	gap: 14px;
+	margin: 14px 0;
+}
+
+.itsdesk-box {
+	padding: 16px 18px;
+	border: 1px solid var(--dk-line);
+	border-radius: 10px;
+	background: var(--dk-surface);
+}
+
+.itsdesk-box h3 {
+	margin: 0 0 12px;
+	font-size: var(--dk-text-md);
+	font-weight: 600;
+	color: var(--dk-ink);
+}
+
+.itsdesk-box__head {
+	display: flex;
+	align-items: baseline;
+	justify-content: space-between;
+	gap: 10px;
+}
+
+.itsdesk-link {
+	border: 0;
+	background: none;
+	padding: 0;
+	font: inherit;
+	font-size: var(--dk-text-sm);
+	font-weight: 500;
+	color: var(--dk-accent);
+	cursor: pointer;
+	white-space: nowrap;
+}
+
+.itsdesk-link:hover {
+	color: var(--dk-accent-hover);
+	text-decoration: underline;
+}
+
+.itsdesk-week {
+	display: grid;
+	grid-template-columns: repeat(7, 1fr);
+	gap: 8px;
+	align-items: end;
+	height: 150px;
+}
+
+.itsdesk-week__col {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: flex-end;
+	gap: 4px;
+	height: 100%;
+}
+
+.itsdesk-week__n {
+	font-size: var(--dk-text-xs);
+	font-variant-numeric: tabular-nums;
+	color: var(--dk-muted);
+}
+
+.itsdesk-week__bar {
+	display: flex;
+	align-items: flex-end;
+	flex: 1;
+	width: 100%;
+	max-width: 44px;
+}
+
+.itsdesk-week__bar i {
+	display: block;
+	width: 100%;
+	border-radius: 5px 5px 2px 2px;
+	background: var(--dk-accent);
+}
+
+.itsdesk-week__d {
+	font-size: var(--dk-text-xs);
+	color: var(--dk-muted);
+}
+
+.itsdesk-list {
+	list-style: none;
+	margin: 0;
+	padding: 0;
+}
+
+.itsdesk-list li + li {
+	border-top: 1px solid var(--dk-line);
+}
+
+.itsdesk-list button {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 12px;
+	width: 100%;
+	padding: 9px 4px;
+	border: 0;
+	background: none;
+	font: inherit;
+	text-align: start;
+	color: inherit;
+	cursor: pointer;
+	border-radius: 6px;
+}
+
+.itsdesk-list button:hover {
+	background: var(--dk-canvas);
+}
+
+.itsdesk-list__main {
+	display: flex;
+	flex-direction: column;
+	min-width: 0;
+}
+
+.itsdesk-list__main strong,
+.itsdesk-list__main span {
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+.itsdesk-list__main span {
+	font-size: var(--dk-text-sm);
+	color: var(--dk-muted);
+}
+
+.itsdesk-status-list {
+	list-style: none;
+	margin: 0 0 8px;
+	padding: 0;
+}
+
+.itsdesk-status-list li {
+	display: flex;
+	align-items: center;
+	gap: 12px;
+	padding: 10px 0;
+}
+
+.itsdesk-status-list li + li {
+	border-top: 1px solid var(--dk-line);
+}
+
+.itsdesk-status-list__icon {
+	display: grid;
+	place-items: center;
+	flex-shrink: 0;
+	width: 30px;
+	height: 30px;
+	border-radius: 8px;
+	background: var(--dk-canvas);
+	color: var(--dk-ink-soft);
+}
+
+.itsdesk-status-list__text {
+	display: flex;
+	flex: 1;
+	flex-direction: column;
+	min-width: 0;
+}
+
+.itsdesk-status-list__text span {
+	font-size: var(--dk-text-sm);
+	color: var(--dk-muted);
+}
+
+/* —— Ticket detail controls —— */
+.itsdesk-meta-bar {
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+	gap: 0 14px;
+	margin-top: 14px;
+}
+
+.itsdesk-meta-bar .itsdesk-field select.itsdesk-select {
+	max-width: none;
+}
+
+.itsdesk-inline-form {
+	display: flex;
+	align-items: flex-end;
+	gap: 10px;
+}
+
+.itsdesk-inline-form .itsdesk-field {
+	flex: 1;
+	margin-bottom: 0;
+}
+
+.itsdesk-segmented {
+	display: inline-flex;
+	gap: 0;
+	margin-top: 4px;
+	border: 1px solid var(--dk-line);
+	border-radius: 9px;
+	overflow: hidden;
+}
+
+.itsdesk-segmented .itsdesk-btn {
+	border: 0;
+	border-radius: 0;
+	min-height: 34px;
+	padding: 7px 16px;
+}
+
+.itsdesk-segmented .itsdesk-btn + .itsdesk-btn {
+	border-inline-start: 1px solid var(--dk-line);
+}
+
+.itsdesk-segmented .itsdesk-btn--primary:disabled {
+	opacity: 1;
+	cursor: default;
+}
+
+/* —— Sub-tabs inside a screen (shared with add-ons) —— */
+.itsdesk-tabs {
+	display: flex;
+	gap: 4px;
+	margin: 14px 0 16px;
+	border-bottom: 1px solid var(--dk-line);
+	overflow-x: auto;
+}
+
+.itsdesk-tab {
+	margin-bottom: -1px;
+	padding: 8px 12px;
+	border: 0;
+	border-bottom: 2px solid transparent;
+	background: none;
+	font: inherit;
+	font-size: var(--dk-text-md);
+	font-weight: 500;
+	color: var(--dk-muted);
+	cursor: pointer;
+	white-space: nowrap;
+}
+
+.itsdesk-tab:hover {
+	color: var(--dk-ink);
+}
+
+.itsdesk-tab.is-active {
+	border-bottom-color: var(--dk-accent);
+	color: var(--dk-accent-hover);
+	font-weight: 600;
+}
+
+.itsdesk-tab:focus-visible {
+	outline: 2px solid var(--dk-accent);
+	outline-offset: -2px;
+	border-radius: 4px;
+}
+
+/* —— Docs & Features: Pro teasers —— */
+.itsdesk-pro-tag {
+	display: inline-block;
+	margin-inline-start: 8px;
+	padding: 1px 7px;
+	border-radius: 99px;
+	background: var(--dk-accent-soft);
+	color: var(--dk-accent-hover);
+	font-size: var(--dk-text-xs);
+	font-weight: 600;
+	vertical-align: middle;
+}
+
+.itsdesk-feature.is-locked {
+	background: var(--dk-canvas);
+	border-style: dashed;
+}
+
+.itsdesk-feature__list {
+	margin: 8px 0 0;
+	padding-inline-start: 18px;
+	font-size: var(--dk-text-sm);
+	color: var(--dk-muted);
+}
+
+.itsdesk-feature .itsdesk-link {
+	margin-top: 8px;
+}

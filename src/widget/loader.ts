@@ -31,7 +31,7 @@ function resolveTheme( theme: string ): 'light' | 'dark' {
 }
 
 const FAB_CSS = `
-:host{all:initial;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif}
+:host{all:initial;font-family:var(--dk-widget-font,-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Noto Sans Bengali", "Nirmala UI", sans-serif)}
 .dk-fab{position:fixed;z-index:99999;bottom:20px;min-width:52px;max-width:min(240px, calc(100vw - 40px));height:52px;padding:0 14px;border-radius:999px;border:none;cursor:pointer;background:#0f766e;color:#fff;box-shadow:0 8px 24px rgba(16,42,51,.22);display:inline-flex;align-items:center;justify-content:center;gap:6px;font-size:13px;font-weight:700}
 .dk-fab:hover{background:#0d5f59}
 .dk-fab.is-left{left:20px;right:auto}
@@ -71,6 +71,14 @@ class DeskoviSupport extends HTMLElement {
 			return;
 		}
 		applyPublicPath( this.#cfg );
+		const pageFont = document.body ? getComputedStyle( document.body ).fontFamily : '';
+		if ( pageFont ) {
+			// The store's own font, then fallbacks that also cover Bengali.
+			this.style.setProperty(
+				'--dk-widget-font',
+				`${ pageFont }, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Noto Sans Bengali", "Nirmala UI", sans-serif`
+			);
+		}
 		this.setAttribute( 'data-theme', resolveTheme( this.#cfg.theme ) );
 		this.renderFab();
 		this.onKey = this.onKey.bind( this );

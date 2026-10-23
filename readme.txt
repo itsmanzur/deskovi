@@ -4,7 +4,7 @@ Tags: woocommerce, helpdesk, support, tickets, customer-service
 Requires at least: 6.6
 Tested up to: 7.0
 Requires PHP: 7.4
-Stable tag: 1.8.0
+Stable tag: 1.4.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -78,33 +78,27 @@ https://github.com/itsmanzur/deskovi
 1. Tickets — manage tickets and conversation history from wp-admin
 2. Customer widget — optional storefront chat for shoppers
 
+== Fonts ==
+
+The admin screen uses Inter (Latin) and Hind Siliguri (Bengali), both under the SIL Open Font License 1.1. The licence texts are in assets/fonts/.
+
 == Changelog ==
 
-= 1.8.0 =
-* Add read-only reporting helpers for add-ons (ticket rows for a period, open tickets, old ticket ids) and the `itsdesk_order_refunded` action
-* No change for stores that do not use an add-on
-
-= 1.7.0 =
-* Add a documented storefront-widget extension API for add-ons: a slot in the new-ticket form, the `itsdesk_widget_config` filter and the `itsdesk_widget_enqueue_scripts` action
-* No change for stores that do not use an add-on
-
-= 1.6.0 =
-* Add `itsdesk_ticket_status_changed` and `itsdesk_ticket_priority_changed` actions (fired for every change, including bulk and automatic ones) and `TicketService::list_for_order()` so add-ons can automate on ticket and order events
-* No change for stores that do not use an add-on
-
-= 1.5.0 =
-* Add `store_from_path()` / `store_from_string()` to the attachment service so add-ons can save files that did not come from a web upload (same validation; the size is now measured on disk)
+= 1.4.0 =
+* New admin design: a grouped side menu (Work, Insights, Automate, Channels, Settings), a real Overview with what is waiting, new tickets per day and the latest tickets, a calmer ticket list and one set of type sizes
+* New fonts: Inter for English and Hind Siliguri for Bengali, bundled with the plugin and loaded only on Deskovi's own admin screen (nothing comes from an outside server); Bengali text gets more line spacing
+* The chat widget now uses your store's own font
+* Docs & Features is rewritten: every feature and a guide for each, and it shows what the optional Deskovi Pro add-on offers
+* Add a documented extension API (hooks, filters, an admin JavaScript registry and a storefront-widget slot) so add-on plugins can attach without modifying Deskovi; screens can be placed in a menu group, bring icons and add cards and guides to Docs & Features
+* Add a central permission check (`itsdesk_user_can` filter); default behaviour is unchanged
+* Add `itsdesk_ticket_status_changed`, `itsdesk_ticket_priority_changed` and `itsdesk_order_refunded` actions, read-only reporting helpers and `TicketService::list_for_order()` for add-ons
+* Fix: the WordPress personal-data eraser now actually deletes a customer's tickets, messages and attachment files
 * Fix: attachments belonging to internal notes are no longer listed in, or downloadable through, the customer ticket view
 * Fix: creating a ticket now fails with a clear error if it could not be stored, and over-long subjects/names are cut instead of breaking the insert
-* Fix: two messages stored within the same second could appear in the wrong order (message ids now sort in creation order)
-* Improve: notification emails skip an empty recipient and can carry attachments; the email filter receives the audience and triggering message
-
-= 1.4.0 =
-* Add a documented extension API (hooks, filters and an admin JavaScript registry) so add-on plugins can attach without modifying Deskovi
-* Add a central permission check (`itsdesk_user_can` filter); default behaviour is unchanged
-* Fix: the WordPress personal-data eraser now actually deletes a customer's tickets, messages and attachment files
-* Improve: the personal-data export now includes customer-visible messages and attachment file names
+* Fix: two messages stored within the same second could appear in the wrong order
 * Fix: uninstall now also removes notification settings, canned replies, uploaded attachments and the capability from the Shop Manager role
+* Improve: the personal-data export now includes customer-visible messages and attachment file names
+* Improve: notification emails skip an empty recipient and can carry attachments
 * Raise the minimum WordPress version to 6.6 (required by the admin app's JavaScript runtime)
 
 = 1.3.0 =

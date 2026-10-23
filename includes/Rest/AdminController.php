@@ -16,6 +16,7 @@ use Itsdesk\Diagnostics\EnvironmentReport;
 use Itsdesk\Privacy\Settings as PrivacySettings;
 use Itsdesk\Tickets\CannedReplies;
 use Itsdesk\Tickets\NotificationSettings;
+use Itsdesk\Tickets\TicketService;
 use Itsdesk\Widget\Settings as WidgetSettings;
 use WP_Error;
 use WP_REST_Request;
@@ -175,8 +176,68 @@ final class AdminController {
 			array(
 				'widget'  => $widget,
 				'privacy' => $privacy,
+				'desk'    => $this->desk_stats(),
 			),
 			200
+		);
+	}
+
+	/**
+	 * The numbers on the Overview: what is waiting now and how many tickets came in each of the last 7 days.
+	 *
+	 * @return array{open: int, pending: int, unassigned: int, oldest_waiting: int|null, new_7d: int, days: array<int, array{date: string, count: int}>}
+	 */
+	private function desk_stats(): array {
+		$service = new TicketService();
+		$now     = time();
+
+		$open       = 0;
+		$pending    = 0;
+		$unassigned = 0;
+		$oldest     = null;
+		foreach ( $service->open_rows() as $row ) {
+			if ( 'pending' === ( $row['status'] ?? '' ) ) {
+				++$pending;
+			} else {
+				++$open;
+			}
+			if ( empty( $row['assigned_agent_id'] ) ) {
+				++$unassigned;
+			}
+			$created = strtotime( (string) ( $row['created_at'] ?? '' ) );
+			if ( false !== $created && ( null === $oldest || $created < $oldest ) ) {
+				$oldest = $created;
+			}
+		}
+
+		$days = array();
+		for ( $i = 6; $i >= 0; --$i ) {
+			$days[ gmdate( 'Y-m-d', $now - $i * DAY_IN_SECONDS ) ] = 0;
+		}
+		$from = (int) strtotime( (string) array_key_first( $days ) . ' 00:00:00 UTC' );
+		foreach ( $service->report_rows( gmdate( 'c', $from ), gmdate( 'c', $now + 60 ) ) as $row ) {
+			$created = strtotime( (string) ( $row['created_at'] ?? '' ) );
+			$key     = false === $created ? '' : gmdate( 'Y-m-d', $created );
+			if ( isset( $days[ $key ] ) ) {
+				++$days[ $key ];
+			}
+		}
+
+		$series = array();
+		foreach ( $days as $date => $count ) {
+			$series[] = array(
+				'date'  => (string) $date,
+				'count' => $count,
+			);
+		}
+
+		return array(
+			'open'           => $open,
+			'pending'        => $pending,
+			'unassigned'     => $unassigned,
+			'oldest_waiting' => null === $oldest ? null : max( 0, $now - $oldest ),
+			'new_7d'         => array_sum( $days ),
+			'days'           => $series,
 		);
 	}
 

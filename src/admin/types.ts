@@ -139,6 +139,17 @@ export type OverviewData = {
 	hpos_enabled?: boolean;
 	widget: WidgetSettings;
 	privacy: PrivacySettings;
+	desk?: DeskStats;
+};
+
+export type DeskStats = {
+	open: number;
+	pending: number;
+	unassigned: number;
+	/** Seconds the longest-waiting open or pending ticket has been there. */
+	oldest_waiting: number | null;
+	new_7d: number;
+	days: Array< { date: string; count: number } >;
 };
 
 export type DiagnosticsData = {

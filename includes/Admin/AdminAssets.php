@@ -67,6 +67,12 @@ final class AdminAssets {
 				'pluginUrl'       => ITSDESK_URL,
 				'currentUserId'   => get_current_user_id(),
 				'currentUserName' => wp_get_current_user()->display_name,
+				/**
+				 * Filters the address of the page that describes Deskovi Pro. Empty (the default) hides the link.
+				 *
+				 * @param string $url URL.
+				 */
+				'proUrl'          => esc_url_raw( (string) apply_filters( 'itsdesk_pro_url', '' ) ),
 				'canManageOrders' => Capabilities::can( Capabilities::ABILITY_REFUND ),
 				'capabilities'    => array(
 					'manage' => Capabilities::can( Capabilities::ABILITY_MANAGE ),
@@ -96,10 +102,13 @@ final class AdminAssets {
 		}
 
 		if ( is_readable( $style_path ) ) {
+			// Self-hosted Inter and Hind Siliguri (Bengali); nothing is fetched from a third party.
+			wp_register_style( 'itsdesk-admin-fonts', ITSDESK_URL . 'assets/fonts/fonts.css', array(), ITSDESK_VERSION );
+
 			wp_enqueue_style(
 				'itsdesk-admin',
 				ITSDESK_URL . 'assets/admin/index.css',
-				array( 'wp-components' ),
+				array( 'wp-components', 'itsdesk-admin-fonts' ),
 				$asset['version']
 			);
 		}

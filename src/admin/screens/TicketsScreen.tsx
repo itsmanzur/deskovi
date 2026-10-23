@@ -1182,6 +1182,7 @@ export function TicketsScreen( { onToast }: Props ) {
 												'deskovi'
 											) }
 										</p>
+										<div className="itsdesk-inline-form">
 										<div className="itsdesk-field">
 											<label htmlFor="itsdesk-link-order">
 												{ __( 'Order ID', 'deskovi' ) }
@@ -1198,8 +1199,7 @@ export function TicketsScreen( { onToast }: Props ) {
 												placeholder="1234"
 											/>
 										</div>
-										<div className="itsdesk-admin__actions">
-											<button
+										<button
 												type="button"
 												className="itsdesk-btn itsdesk-btn--primary"
 												disabled={
@@ -1216,7 +1216,8 @@ export function TicketsScreen( { onToast }: Props ) {
 								) }
 							</div>
 
-							<div className="itsdesk-field" style={ { marginTop: 14 } }>
+							<div className="itsdesk-meta-bar">
+							<div className="itsdesk-field">
 								<label htmlFor="itsdesk-tkt-assignee">
 									{ __( 'Assigned to', 'deskovi' ) }
 								</label>
@@ -1241,7 +1242,7 @@ export function TicketsScreen( { onToast }: Props ) {
 								</select>
 							</div>
 
-							<div className="itsdesk-field" style={ { marginTop: 14 } }>
+							<div className="itsdesk-field">
 								<label htmlFor="itsdesk-tkt-priority">
 									{ __( 'Priority', 'deskovi' ) }
 								</label>
@@ -1260,8 +1261,9 @@ export function TicketsScreen( { onToast }: Props ) {
 									<option value="urgent">{ __( 'Urgent', 'deskovi' ) }</option>
 								</select>
 							</div>
+							</div>
 
-							<div className="itsdesk-admin__actions">
+							<div className="itsdesk-admin__actions itsdesk-segmented" role="group" aria-label={ __( 'Status', 'deskovi' ) }>
 								{ [ 'open', 'pending', 'resolved', 'closed' ].map(
 									( s ) => (
 										<button

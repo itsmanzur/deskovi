@@ -229,3 +229,84 @@ export function IconFileGeneric( { size = 16, className }: IconProps ) {
 		</svg>
 	);
 }
+
+const svgProps = ( size: number, className?: string ) => ( {
+	width: size,
+	height: size,
+	viewBox: '0 0 24 24',
+	fill: 'none',
+	className,
+	'aria-hidden': true as const,
+} );
+
+const stroke = { stroke: 'currentColor', strokeWidth: 1.75, strokeLinecap: 'round' as const, strokeLinejoin: 'round' as const };
+
+export function IconBolt( { size = 18, className }: IconProps ) {
+	return (
+		<svg { ...svgProps( size, className ) }>
+			<path d="M13 3 5 13.5h6L10 21l8-10.5h-6L13 3Z" { ...stroke } />
+		</svg>
+	);
+}
+
+export function IconClock( { size = 18, className }: IconProps ) {
+	return (
+		<svg { ...svgProps( size, className ) }>
+			<circle cx="12" cy="12" r="8.5" { ...stroke } />
+			<path d="M12 7.5V12l3 2" { ...stroke } />
+		</svg>
+	);
+}
+
+export function IconSparkle( { size = 18, className }: IconProps ) {
+	return (
+		<svg { ...svgProps( size, className ) }>
+			<path d="M11 4c.6 3.6 2.4 5.4 6 6-3.6.6-5.4 2.4-6 6-.6-3.6-2.4-5.4-6-6 3.6-.6 5.4-2.4 6-6Z" { ...stroke } />
+			<path d="M18 15.5c.3 1.6 1 2.3 2.5 2.5-1.5.2-2.2.9-2.5 2.5-.3-1.6-1-2.3-2.5-2.5 1.5-.2 2.2-.9 2.5-2.5Z" { ...stroke } />
+		</svg>
+	);
+}
+
+export function IconBook( { size = 18, className }: IconProps ) {
+	return (
+		<svg { ...svgProps( size, className ) }>
+			<path d="M5 5.5A1.5 1.5 0 0 1 6.5 4H19v13H6.5A1.5 1.5 0 0 0 5 18.5v-13Z" { ...stroke } />
+			<path d="M5 18.5A1.5 1.5 0 0 0 6.5 20H19v-3M9 8h6" { ...stroke } />
+		</svg>
+	);
+}
+
+export function IconChart( { size = 18, className }: IconProps ) {
+	return (
+		<svg { ...svgProps( size, className ) }>
+			<path d="M4 20V4M4 20h16" { ...stroke } />
+			<path d="M8 16v-4M12 16V8M16 16v-6" { ...stroke } />
+		</svg>
+	);
+}
+
+export function IconMail( { size = 18, className }: IconProps ) {
+	return (
+		<svg { ...svgProps( size, className ) }>
+			<rect x="3.5" y="5.5" width="17" height="13" rx="2" { ...stroke } />
+			<path d="m4.5 7.5 7.5 6 7.5-6" { ...stroke } />
+		</svg>
+	);
+}
+
+export function IconStar( { size = 18, className }: IconProps ) {
+	return (
+		<svg { ...svgProps( size, className ) }>
+			<path d="m12 4 2.4 5 5.4.7-4 3.7 1 5.4L12 16.2 7.2 18.8l1-5.4-4-3.7 5.4-.7L12 4Z" { ...stroke } />
+		</svg>
+	);
+}
+
+export function IconGear( { size = 18, className }: IconProps ) {
+	return (
+		<svg { ...svgProps( size, className ) }>
+			<circle cx="12" cy="12" r="3" { ...stroke } />
+			<path d="M12 3.5v2.2M12 18.3v2.2M3.5 12h2.2M18.3 12h2.2M6 6l1.6 1.6M16.4 16.4 18 18M18 6l-1.6 1.6M7.6 16.4 6 18" { ...stroke } />
+		</svg>
+	);
+}

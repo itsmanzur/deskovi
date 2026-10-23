@@ -14,6 +14,7 @@ import { MetricCard } from './components/MetricCard';
 import { SkeletonPanel } from './components/Skeleton';
 import { StatusBadge } from './components/StatusBadge';
 import { Toggle } from './components/Toggle';
+import { ProTeaserScreen } from './screens/ProTeaserScreen';
 import type { OrderSnapshot, Ticket } from './types';
 
 /** Bumped only on a breaking change to this contract. Mirrors ITSDESK_API_VERSION. */
@@ -42,14 +43,17 @@ export type AdminContext = {
 	};
 };
 
-export type ScreenProps = { onToast: ToastFn; ctx: AdminContext };
+export type NavGroup = 'work' | 'insights' | 'automate' | 'channels' | 'settings';
+
+export type ScreenProps ={ onToast: ToastFn; ctx: AdminContext };
 
 export type ScreenRegistration = {
 	id: string;
 	label: string;
 	icon?: ReactNode;
-	/** Hint only: add-on settings screens use `settings`. The nav stays flat. */
-	group?: 'settings';
+	/** Sidebar section. Missing or unknown values land in `settings`. */
+	group?: NavGroup;
+	/** Sort position inside the group (built-in screens use 10, 20, 30 …). */
 	order?: number;
 	render: ( props: ScreenProps ) => ReactNode;
 };
@@ -107,12 +111,37 @@ export type BulkActionRegistration = {
 	run: ( props: BulkContext & { ctx: AdminContext } ) => Promise< void > | void;
 };
 
+/** A card on the Features tab of Docs & Features. */
+export type DocsFeature = {
+	id: string;
+	title: string;
+	description: string;
+	icon?: ReactNode;
+	order?: number;
+	/** `pro`: listed under "Deskovi Pro" and replaces the teaser with the same id. */
+	plan?: 'pro';
+	/** Id of a screen to open from the card. */
+	screen?: string;
+};
+
+/** A guide on the Documentation tab of Docs & Features. */
+export type DocsSection = {
+	id: string;
+	title: string;
+	intro: string;
+	steps?: string[];
+	order?: number;
+	plan?: 'pro';
+};
+
 export type ItsdeskAdminApi = {
 	apiVersion: number;
 	ctx: AdminContext;
 	registerScreen: ( screen: ScreenRegistration ) => void;
 	registerSlot: < K extends SlotName >( slot: K, registration: SlotRegistration< K > ) => void;
 	registerBulkAction: ( action: BulkActionRegistration ) => void;
+	registerDocsFeature: ( feature: DocsFeature ) => void;
+	registerDocsSection: ( section: DocsSection ) => void;
 };
 
 declare global {
@@ -126,6 +155,8 @@ const DEFAULT_ORDER = 100;
 const screens = new Map< string, ScreenRegistration >();
 const slots = new Map< SlotName, Map< string, SlotRegistration< SlotName > > >();
 const bulkActions = new Map< string, BulkActionRegistration >();
+const docsFeatures = new Map< string, DocsFeature >();
+const docsSections = new Map< string, DocsSection >();
 
 const listeners = new Set< () => void >();
 let version = 0;
@@ -173,6 +204,14 @@ export function getExtensionScreens(): ScreenRegistration[] {
 
 export function getExtensionScreen( id: string ): ScreenRegistration | undefined {
 	return screens.get( id );
+}
+
+export function getDocsFeatures(): DocsFeature[] {
+	return Array.from( docsFeatures.values() ).sort( ( a, b ) => byOrder( a, b ) );
+}
+
+export function getDocsSections(): DocsSection[] {
+	return Array.from( docsSections.values() ).sort( ( a, b ) => byOrder( a, b ) );
 }
 
 export function getBulkActions(): BulkActionRegistration[] {
@@ -255,7 +294,25 @@ const api: ItsdeskAdminApi = {
 		bulkActions.set( action.id, action );
 		emit();
 	},
+	registerDocsFeature( feature ) {
+		docsFeatures.set( feature.id, feature );
+		emit();
+	},
+	registerDocsSection( section ) {
+		docsSections.set( section.id, section );
+		emit();
+	},
 };
 
 window.itsdesk = window.itsdesk || {};
 window.itsdesk.admin = api;
+
+// Stores without Deskovi Pro see what it offers. Pro registers its own "pro" screen, which replaces this one.
+screens.set( 'pro', {
+	id: 'pro',
+	label: 'Pro',
+	icon: <Icons.IconStar size={ 17 } />,
+	group: 'settings',
+	order: 900,
+	render: ( props ) => <ProTeaserScreen { ...props } />,
+} );
