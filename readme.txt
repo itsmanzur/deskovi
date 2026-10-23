@@ -97,6 +97,7 @@ The admin screen uses Inter (Latin) and Hind Siliguri (Bengali), both under the 
 * Fix: creating a ticket now fails with a clear error if it could not be stored, and over-long subjects/names are cut instead of breaking the insert
 * Fix: two messages stored within the same second could appear in the wrong order
 * Fix: uninstall now also removes notification settings, canned replies, uploaded attachments and the capability from the Shop Manager role
+* Improve: faster ticket lists and reports on large stores (new database indexes on the ticket table)
 * Improve: the personal-data export now includes customer-visible messages and attachment file names
 * Improve: notification emails skip an empty recipient and can carry attachments
 * Raise the minimum WordPress version to 6.6 (required by the admin app's JavaScript runtime)

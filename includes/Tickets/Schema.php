@@ -16,7 +16,7 @@ defined( 'ABSPATH' ) || exit;
 final class Schema {
 
 	public const DB_VERSION_OPTION = 'itsdesk_tickets_db_version';
-	public const DB_VERSION        = '1.3.1';
+	public const DB_VERSION        = '1.4.0';
 
 	/**
 	 * Create tables if missing, or upgrade if the schema version changed.
@@ -66,6 +66,8 @@ final class Schema {
 			KEY order_id (order_id),
 			KEY idempotency_key (idempotency_key),
 			KEY updated_at (updated_at),
+			KEY created_at (created_at),
+			KEY status_created (status, created_at),
 			KEY assigned_agent_id (assigned_agent_id)
 		) {$charset_collate};";
 
