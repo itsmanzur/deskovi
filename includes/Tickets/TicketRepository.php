@@ -335,6 +335,26 @@ final class TicketRepository {
 	}
 
 	/**
+	 * Move every message and attachment of one ticket to another (used when tickets are merged).
+	 * The files stay where they are: an attachment row knows its own path.
+	 *
+	 * @param string $from Source ticket id.
+	 * @param string $to   Target ticket id.
+	 * @return int Messages moved.
+	 */
+	public function move_content( string $from, string $to ): int {
+		global $wpdb;
+
+		$messages    = Schema::messages_table();
+		$attachments = Schema::attachments_table();
+
+		$moved = $wpdb->query( $wpdb->prepare( "UPDATE {$messages} SET ticket_id = %s WHERE ticket_id = %s", $to, $from ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- custom plugin table, internal table name.
+		$wpdb->query( $wpdb->prepare( "UPDATE {$attachments} SET ticket_id = %s WHERE ticket_id = %s", $to, $from ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- custom plugin table, internal table name.
+
+		return is_int( $moved ) ? $moved : 0;
+	}
+
+	/**
 	 * Delete by ids (ticket rows + their messages).
 	 *
 	 * @param array<int, string> $ids IDs.

@@ -51,6 +51,13 @@ function freeFeatures(): Card[] {
 			screen: 'tickets',
 		},
 		{
+			id: 'merge',
+			icon: i( Icons.IconLink ),
+			title: __( 'Merge duplicate tickets', 'deskovi' ),
+			description: __( 'When a customer writes twice about the same thing, merge one ticket into the other: every message and file moves, and the conversation stays in one place.', 'deskovi' ),
+			screen: 'tickets',
+		},
+		{
 			id: 'priority',
 			icon: i( Icons.IconFlag ),
 			title: __( 'Priority and assignment', 'deskovi' ),
@@ -161,6 +168,17 @@ function freeDocs(): DocsSection[] {
 				__( 'Click “Save this view”, give it a name and press Enter. It appears as a button above the list.', 'deskovi' ),
 				__( 'Click a view to apply it again. The × on a view deletes it. Views belong to you: other agents never see or change them, and each agent can keep up to 20.', 'deskovi' ),
 				__( 'Add-ons can add their own filters beside the built-in ones (Deskovi Pro adds a tag filter).', 'deskovi' ),
+			],
+		},
+		{
+			id: 'merge-tickets',
+			title: __( 'Merging duplicate tickets', 'deskovi' ),
+			intro: __( 'Open the ticket that should go away, click “Merge into another ticket…” under the status buttons, find the ticket it belongs to (the customer’s other tickets are listed first, or search by subject, name or email) and click “Merge into this”. Deskovi asks you to confirm because it cannot be undone.', 'deskovi' ),
+			steps: [
+				__( 'All messages (including internal notes) and attachments move to the ticket you chose, in the order they were written. The merged ticket is deleted.', 'deskovi' ),
+				__( 'The ticket that stays keeps its customer and subject. It takes the higher priority, gets the merged ticket’s agent if it had none, and is opened again if it was resolved or closed while the merged ticket was still active.', 'deskovi' ),
+				__( 'An internal note on it records which ticket was merged, when and by whom. Nobody is emailed.', 'deskovi' ),
+				__( 'Merging tickets of two different customers is allowed, so check the email address before you confirm.', 'deskovi' ),
 			],
 		},
 		{

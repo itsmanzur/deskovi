@@ -88,6 +88,7 @@ The admin screen uses Inter (Latin) and Hind Siliguri (Bengali), both under the 
 * New admin design: a grouped side menu (Work, Insights, Automate, Channels, Settings), a real Overview with what is waiting, new tickets per day and the latest tickets, a calmer ticket list and one set of type sizes
 * New fonts: Inter for English and Hind Siliguri for Bengali, bundled with the plugin and loaded only on Deskovi's own admin screen (nothing comes from an outside server); Bengali text gets more line spacing
 * The chat widget now uses your store's own font
+* Merge duplicate tickets: move every message and file of one ticket into another, with an internal note that records it and an action for add-ons
 * Ticket list: filter by status (including "Open or pending"), priority and category as well as assignee and search, with the CSV export following the same filters, and saved views per agent (up to 20)
 * Accessibility: ticket rows work with the keyboard, controls have names, the chat widget ties each label to its field, announces errors, takes focus when it opens and returns it to the launcher button when it closes, and the amber status colour now meets the contrast minimum
 * Docs & Features is rewritten: every feature and a guide for each, and it shows what the optional Deskovi Pro add-on offers

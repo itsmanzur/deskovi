@@ -200,6 +200,15 @@ export function updateTicketStatus( id: string, status: string ): Promise< Ticke
 	} );
 }
 
+/** Merge a ticket into another: its messages move there and it is deleted. Returns the ticket that stays. */
+export function mergeTicket( id: string, into: string ): Promise< Ticket > {
+	return apiFetch( {
+		path: `${ base }/tickets/${ id }/merge`,
+		method: 'POST',
+		data: { into },
+	} );
+}
+
 export function updateTicketPriority( id: string, priority: string ): Promise< Ticket > {
 	return apiFetch( {
 		path: `${ base }/tickets/${ id }/priority`,

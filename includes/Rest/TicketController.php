@@ -122,6 +122,16 @@ final class TicketController {
 
 		register_rest_route(
 			self::REST_NAMESPACE,
+			'/tickets/(?P<id>[a-zA-Z0-9_-]+)/merge',
+			array(
+				'methods'             => WP_REST_Server::CREATABLE,
+				'callback'            => array( $this, 'admin_merge' ),
+				'permission_callback' => array( $this, 'can_manage' ),
+			)
+		);
+
+		register_rest_route(
+			self::REST_NAMESPACE,
 			'/tickets/(?P<id>[a-zA-Z0-9_-]+)/priority',
 			array(
 				'methods'             => WP_REST_Server::CREATABLE,
@@ -374,6 +384,22 @@ final class TicketController {
 		$body   = $request->get_json_params() ?: array();
 		$status = isset( $body['status'] ) ? (string) $body['status'] : '';
 		$result = ( new TicketService() )->update_status( (string) $request['id'], $status );
+		if ( is_wp_error( $result ) ) {
+			return $result;
+		}
+		return new WP_REST_Response( $result, 200 );
+	}
+
+	/**
+	 * Merge this ticket into another (this one is deleted).
+	 *
+	 * @param WP_REST_Request $request Request.
+	 * @return WP_REST_Response|WP_Error
+	 */
+	public function admin_merge( WP_REST_Request $request ) {
+		$body   = $request->get_json_params() ?: array();
+		$target = isset( $body['into'] ) ? sanitize_text_field( (string) $body['into'] ) : '';
+		$result = ( new TicketService() )->merge( (string) $request['id'], $target );
 		if ( is_wp_error( $result ) ) {
 			return $result;
 		}

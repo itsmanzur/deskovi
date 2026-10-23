@@ -14,6 +14,7 @@ import {
 	deleteView,
 	fetchTickets,
 	fetchViews,
+	mergeTicket,
 	saveView,
 	formatBytes,
 	linkTicketOrder,
@@ -150,6 +151,9 @@ export function TicketsScreen( { onToast }: Props ) {
 	const [ extra, setExtraState ] = useState< Record< string, string > >( {} );
 	const [ views, setViews ] = useState< SavedView[] >( [] );
 	const [ viewName, setViewName ] = useState< string | null >( null );
+	const [ mergeOpen, setMergeOpen ] = useState( false );
+	const [ mergeSearch, setMergeSearch ] = useState( '' );
+	const [ mergeResults, setMergeResults ] = useState< Ticket[] >( [] );
 	const [ selectedId, setSelectedId ] = useState< string | null >( null );
 	const [ selected, setSelected ] = useState< Ticket | null >( null );
 	const [ loading, setLoading ] = useState( true );
@@ -332,6 +336,48 @@ export function TicketsScreen( { onToast }: Props ) {
 					orderRes.order_id ? String( orderRes.order_id ) : ''
 				);
 				setBusy( false );
+			} )
+			.catch( ( err: unknown ) => {
+				onToast( apiErrorMessage( err ), 'danger' );
+				setBusy( false );
+			} );
+	};
+
+	// Candidates to merge into: the customer's other tickets first, then whatever is searched for.
+	useEffect( () => {
+		if ( ! mergeOpen || ! selected ) {
+			return;
+		}
+		const term = mergeSearch.trim() || selected.customer_email;
+		const handle = window.setTimeout( () => {
+			fetchTickets( { per_page: 8, search: term } )
+				.then( ( res ) => setMergeResults( ( res.tickets || [] ).filter( ( t ) => t.id !== selected.id ) ) )
+				.catch( () => setMergeResults( [] ) );
+		}, 250 );
+		return () => window.clearTimeout( handle );
+	}, [ mergeOpen, mergeSearch, selected ] );
+
+	useEffect( () => {
+		setMergeOpen( false );
+		setMergeSearch( '' );
+		setMergeResults( [] );
+	}, [ selectedId ] );
+
+	const onMerge = ( target: Ticket ) => {
+		if ( ! selected ) {
+			return;
+		}
+		// eslint-disable-next-line no-alert
+		if ( ! window.confirm( sprintf( /* translators: 1: this ticket, 2: the ticket it goes into */ __( 'Move all messages and files of "%1$s" into "%2$s" and delete "%1$s"? This cannot be undone. Nobody is emailed.', 'deskovi' ), selected.subject, target.subject ) ) ) {
+			return;
+		}
+		setBusy( true );
+		mergeTicket( selected.id, target.id )
+			.then( () => {
+				onToast( __( 'Tickets merged.', 'deskovi' ) );
+				setMergeOpen( false );
+				loadTickets();
+				openTicket( target.id );
 			} )
 			.catch( ( err: unknown ) => {
 				onToast( apiErrorMessage( err ), 'danger' );
@@ -1414,6 +1460,35 @@ export function TicketsScreen( { onToast }: Props ) {
 											{ labelStatus( s ) }
 										</button>
 									)
+								) }
+							</div>
+
+							<div className="itsdesk-merge">
+								<button type="button" className="itsdesk-link" aria-expanded={ mergeOpen } onClick={ () => setMergeOpen( ( v ) => ! v ) }>
+									{ __( 'Merge into another ticket…', 'deskovi' ) }
+								</button>
+								{ mergeOpen && (
+									<div className="itsdesk-merge__panel">
+										<label htmlFor="itsdesk-merge-search">{ __( 'Find the ticket this one belongs to', 'deskovi' ) }</label>
+										<input id="itsdesk-merge-search" className="itsdesk-input" type="search" value={ mergeSearch } placeholder={ selected.customer_email } onChange={ ( e ) => setMergeSearch( ( e.target as HTMLInputElement ).value ) } />
+										{ mergeResults.length === 0 ? (
+											<p className="itsdesk-admin__muted">{ __( 'No other tickets found. Try a subject, a name or an email.', 'deskovi' ) }</p>
+										) : (
+											<ul className="itsdesk-list">
+												{ mergeResults.map( ( t ) => (
+													<li key={ t.id }>
+														<button type="button" disabled={ busy } onClick={ () => onMerge( t ) }>
+															<span className="itsdesk-list__main">
+																<strong>{ t.subject }</strong>
+																<span>{ ( t.customer_name || t.customer_email ) + ' · ' + labelStatus( t.status ) }</span>
+															</span>
+															<span className="itsdesk-link">{ __( 'Merge into this', 'deskovi' ) }</span>
+														</button>
+													</li>
+												) ) }
+											</ul>
+										) }
+									</div>
 								) }
 							</div>
 

@@ -551,6 +551,103 @@ final class TicketService {
 	}
 
 	/**
+	 * Merge one ticket into another: its messages and attachments move to the target, the target
+	 * keeps the higher priority, an agent, and is opened again if it was finished while the merged
+	 * ticket was not, and the merged ticket is deleted. Nobody is emailed.
+	 *
+	 * @param string $source_id The ticket that goes away.
+	 * @param string $target_id The ticket that stays.
+	 * @return array<string, mixed>|\WP_Error The target ticket.
+	 */
+	public function merge( string $source_id, string $target_id ) {
+		if ( '' === $source_id || $source_id === $target_id ) {
+			return new \WP_Error( 'itsdesk_merge_same', __( 'Choose a different ticket to merge into.', 'deskovi' ), array( 'status' => 400 ) );
+		}
+
+		$source = $this->repo->find( $source_id );
+		$target = $this->repo->find( $target_id );
+		if ( null === $source || null === $target ) {
+			return new \WP_Error( 'itsdesk_ticket_not_found', __( 'Ticket not found.', 'deskovi' ), array( 'status' => 404 ) );
+		}
+
+		$moved = $this->repo->move_content( $source_id, $target_id );
+
+		$rank     = array(
+			'low'    => 0,
+			'normal' => 1,
+			'high'   => 2,
+			'urgent' => 3,
+		);
+		$previous = (string) ( $target['status'] ?? '' );
+
+		if ( ( $rank[ (string) ( $source['priority'] ?? 'normal' ) ] ?? 1 ) > ( $rank[ (string) ( $target['priority'] ?? 'normal' ) ] ?? 1 ) ) {
+			$target['priority'] = (string) $source['priority'];
+		}
+		if ( empty( $target['assigned_agent_id'] ) && ! empty( $source['assigned_agent_id'] ) ) {
+			$target['assigned_agent_id'] = (int) $source['assigned_agent_id'];
+		}
+		if ( in_array( $previous, array( 'resolved', 'closed' ), true ) && in_array( (string) ( $source['status'] ?? '' ), array( 'open', 'pending' ), true ) ) {
+			$target['status'] = 'open';
+		}
+
+		$user                 = wp_get_current_user();
+		$now                  = gmdate( 'c' );
+		$target['updated_at'] = $now;
+		$target['messages']   = array(
+			array(
+				'id'         => 'msg_' . self::new_message_id(),
+				'author'     => 'system',
+				'body'       => sprintf(
+					/* translators: 1: merged ticket subject, 2: merged ticket id, 3: number of messages moved, 4: agent name */
+					_n( 'Ticket "%1$s" (%2$s) was merged into this one by %4$s. %3$d message was moved here.', 'Ticket "%1$s" (%2$s) was merged into this one by %4$s. %3$d messages were moved here.', $moved, 'deskovi' ),
+					(string) ( $source['subject'] ?? '' ),
+					$source_id,
+					$moved,
+					'' !== (string) $user->display_name ? (string) $user->display_name : __( 'an agent', 'deskovi' )
+				),
+				'internal'   => true,
+				'created_at' => $now,
+			),
+		);
+		$this->repo->save( $target );
+
+		$merged = $this->repo->find( $target_id );
+		if ( null === $merged ) {
+			return new \WP_Error( 'itsdesk_ticket_not_found', __( 'Ticket not found.', 'deskovi' ), array( 'status' => 404 ) );
+		}
+
+		/**
+		 * Fires when a ticket was merged into another, after its messages moved and before it is deleted
+		 * (the deletion then fires itsdesk_tickets_deleted for the merged ticket). Add-ons move the data
+		 * they keep per ticket here.
+		 *
+		 * @param array<string, mixed> $merged  The ticket that stays, as it is now.
+		 * @param array<string, mixed> $source  The merged ticket as it was.
+		 * @param int                  $moved   Messages that moved.
+		 */
+		do_action( 'itsdesk_tickets_merged', $merged, $source, $moved );
+
+		$this->repo->delete_ids( array( $source_id ) );
+
+		$this->logger->log(
+			'Ticket',
+			sprintf(
+				/* translators: 1: merged ticket id, 2: target ticket id */
+				__( 'Ticket %1$s merged into %2$s', 'deskovi' ),
+				$source_id,
+				$target_id
+			),
+			'OK'
+		);
+
+		if ( (string) ( $merged['status'] ?? '' ) !== $previous ) {
+			do_action( 'itsdesk_ticket_status_changed', $merged, $previous, (string) $merged['status'] );
+		}
+
+		return $this->decorate_ticket( $merged );
+	}
+
+	/**
 	 * Bulk delete tickets (admin).
 	 *
 	 * @param array<int, string> $ids Ticket ids.

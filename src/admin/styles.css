@@ -1939,3 +1939,30 @@
 	outline-offset: 2px;
 	border-radius: 6px;
 }
+
+/* —— Merge into another ticket —— */
+.itsdesk-merge {
+	margin: 10px 0 0;
+}
+
+.itsdesk-merge__panel {
+	margin-top: 8px;
+	padding: 12px 14px;
+	border: 1px solid var(--dk-line);
+	border-radius: 10px;
+	background: var(--dk-canvas);
+}
+
+.itsdesk-merge__panel label {
+	display: block;
+	margin-bottom: 6px;
+	font-size: var(--dk-text-sm);
+	font-weight: 600;
+	color: var(--dk-label);
+}
+
+.itsdesk-merge__panel .itsdesk-list {
+	margin-top: 8px;
+	background: var(--dk-surface);
+	border-radius: 8px;
+}
