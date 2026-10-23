@@ -85,7 +85,13 @@ export type BulkContext = {
 	clearSelection: () => void;
 };
 
+export type OverviewContext = {
+	/** Open one of the admin screens by id, for example `mailboxes`. */
+	navigate: ( screen: string ) => void;
+};
+
 export type SlotContextMap = {
+	'overview.top': OverviewContext;
 	'ticket.detail.header': TicketDetailContext;
 	'ticket.detail.order': TicketDetailContext;
 	'ticket.detail.meta': TicketDetailContext;

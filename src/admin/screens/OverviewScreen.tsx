@@ -1,6 +1,7 @@
 import { useEffect, useState } from '@wordpress/element';
 import { __, _n, sprintf } from '@wordpress/i18n';
 import { fetchTickets } from '../api';
+import { Slot } from '../extensions';
 import { MetricCard } from '../components/MetricCard';
 import { IconCart, IconCheck, IconPulse, IconShield, IconTicket, IconWidget } from '../components/Icons';
 import type { DeskStats, OverviewData, Screen, Ticket } from '../types';
@@ -104,6 +105,8 @@ export function OverviewScreen( { data, onNavigate, onRefresh }: Props ) {
 					{ __( 'Open tickets', 'deskovi' ) }
 				</button>
 			</div>
+
+			<Slot name="overview.top" context={ { navigate: onNavigate } } />
 
 			{ ! widget.enabled && (
 				<div className="itsdesk-callout">

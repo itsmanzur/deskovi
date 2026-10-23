@@ -93,6 +93,7 @@ Add a card to the Features tab and a guide to the Documentation tab of Docs & Fe
 
 | Slot | Where | Context |
 |---|---|---|
+| `overview.top` | At the top of the Overview, under its title | `{ navigate( screenId ) }` (since 1.4.0) |
 | `ticket.detail.header` | Under the ticket title and customer line | detail |
 | `ticket.detail.order` | Inside the order card, before the refund card | detail |
 | `ticket.detail.meta` | After the status buttons, before the message thread | detail |
