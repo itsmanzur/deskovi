@@ -43,6 +43,7 @@ Use your own prefix for options, cron events and tables. Never reuse names start
 | `itsdesk_widget_enqueue_scripts` `( string $handle )` | action | The widget loader (`itsdesk-widget`) and its config are enqueued; enqueue your storefront script here with that handle as a dependency. Fires only where the widget loads (not on cart or checkout, and not when the widget is off). Since 1.7.0. |
 | `itsdesk_ticket_status_changed` `( array $ticket, string $old, string $new )` | action | After a ticket's status really changed: agent action, bulk update, or Deskovi's own transition (an agent reply moves open → pending, a customer reply reopens a resolved ticket). Not fired when the status is set to the value it already had. Since 1.6.0. |
 | `itsdesk_ticket_priority_changed` `( array $ticket, string $old, string $new )` | action | After a ticket's priority really changed. Since 1.6.0. |
+| `itsdesk_order_refunded` `( array $ticket, int $order_id, float $amount, string $currency, bool $gateway_refunded )` | action | After a refund was issued from a ticket (`$gateway_refunded` false = recorded manually because the gateway cannot refund). Since 1.8.0. |
 | `itsdesk_tickets_deleted` `( array $ids )` | action | After tickets (with messages and attachment files) were deleted, including by the GDPR eraser. Remove your per-ticket data here. |
 
 ### Creating tickets and replies from an add-on (trusted ingest)
@@ -101,6 +102,14 @@ The ticket list is a narrow card list, not a table: "columns" are row extras.
 ### `registerBulkAction( { id, label, order?, tone?, run( { selectedIds, tickets, onToast, reload, clearSelection, ctx } ) } )`
 
 Adds a button to the bulk bar (shown when tickets are selected). `run` executes in the browser — call your own REST route. A rejected promise is shown as an error toast. `tone`: `secondary` (default) or `danger`.
+
+### Reporting data
+
+Read-only helpers on `TicketService` for add-ons that build reports (so they never query Deskovi's tables). Since 1.8.0.
+
+- `report_rows( $from, $to )` — tickets created in `[$from, $to)` (ISO 8601 UTC strings, for example `gmdate( 'c' )`), newest last, capped at 50,000 rows. Each row: `id`, `status`, `priority`, `category`, `order_id`, `assigned_agent_id`, `created_at`, `updated_at` and `first_agent_reply_at` (the first visible agent message, or `null`). No message text.
+- `open_rows()` — the same light rows (without `order_id` and `first_agent_reply_at`) for tickets that are open or pending, capped at 5,000.
+- `ids_older_than( $before, $statuses, $limit = 100 )` — ids of tickets last updated before `$before` in the given statuses (cap 1,000), for data-retention add-ons. Delete them with `bulk_delete()`, which also removes messages and files and fires `itsdesk_tickets_deleted`.
 
 ### Looking up tickets by order
 

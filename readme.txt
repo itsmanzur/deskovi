@@ -4,7 +4,7 @@ Tags: woocommerce, helpdesk, support, tickets, customer-service
 Requires at least: 6.6
 Tested up to: 7.0
 Requires PHP: 7.4
-Stable tag: 1.7.0
+Stable tag: 1.8.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -79,6 +79,10 @@ https://github.com/itsmanzur/deskovi
 2. Customer widget — optional storefront chat for shoppers
 
 == Changelog ==
+
+= 1.8.0 =
+* Add read-only reporting helpers for add-ons (ticket rows for a period, open tickets, old ticket ids) and the `itsdesk_order_refunded` action
+* No change for stores that do not use an add-on
 
 = 1.7.0 =
 * Add a documented storefront-widget extension API for add-ons: a slot in the new-ticket form, the `itsdesk_widget_config` filter and the `itsdesk_widget_enqueue_scripts` action

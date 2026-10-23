@@ -1,13 +1,13 @@
 /**
  * Build a clean WordPress.org distributable zip using .distignore.
- * Output: deskovi-1.7.0.zip with root folder `deskovi/`.
+ * Output: deskovi-1.8.0.zip with root folder `deskovi/`.
  */
 const fs = require( 'fs' );
 const path = require( 'path' );
 const { execFileSync } = require( 'child_process' );
 
 const root = path.resolve( __dirname, '..' );
-const version = '1.7.0';
+const version = '1.8.0';
 const slug = 'deskovi';
 const outZip = path.join( root, `${ slug }-${ version }.zip` );
 const distIgnorePath = path.join( root, '.distignore' );

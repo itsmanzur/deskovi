@@ -189,6 +189,75 @@ final class TicketRepository {
 	}
 
 	/**
+	 * Light rows (no messages) of tickets created in a period, for reports. Includes when
+	 * the first visible agent reply was written.
+	 *
+	 * @param string $from  ISO 8601 UTC, inclusive.
+	 * @param string $to    ISO 8601 UTC, exclusive.
+	 * @param int    $limit Row cap (default 50,000).
+	 * @return array<int, array<string, mixed>>
+	 */
+	public function report_rows( string $from, string $to, int $limit = 50000 ): array {
+		global $wpdb;
+		$tickets  = Schema::tickets_table();
+		$messages = Schema::messages_table();
+		$rows     = $wpdb->get_results( // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- custom plugin tables, no core caching API applies.
+			$wpdb->prepare(
+				"SELECT t.id, t.status, t.priority, t.category, t.order_id, t.assigned_agent_id, t.created_at, t.updated_at,
+					(SELECT MIN(m.created_at) FROM {$messages} m WHERE m.ticket_id = t.id AND m.author = 'agent' AND m.internal = 0) AS first_agent_reply_at
+				FROM {$tickets} t WHERE t.created_at >= %s AND t.created_at < %s ORDER BY t.created_at ASC LIMIT %d", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table names are internal constants.
+				$from,
+				$to,
+				max( 1, min( 50000, $limit ) )
+			),
+			ARRAY_A
+		);
+
+		return is_array( $rows ) ? $rows : array();
+	}
+
+	/**
+	 * Light rows of tickets that are still being worked on (open or pending), for reports.
+	 *
+	 * @param int $limit Row cap.
+	 * @return array<int, array<string, mixed>>
+	 */
+	public function open_rows( int $limit = 5000 ): array {
+		global $wpdb;
+		$table = Schema::tickets_table();
+		$rows  = $wpdb->get_results( // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- custom plugin table, no core caching API applies.
+			$wpdb->prepare( "SELECT id, status, priority, category, assigned_agent_id, created_at, updated_at FROM {$table} WHERE status IN ('open', 'pending') ORDER BY created_at ASC LIMIT %d", max( 1, min( 5000, $limit ) ) ), // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name is an internal constant.
+			ARRAY_A
+		);
+
+		return is_array( $rows ) ? $rows : array();
+	}
+
+	/**
+	 * Ids of tickets not touched since a date and in one of the given statuses (data retention).
+	 *
+	 * @param string             $before   ISO 8601 UTC; tickets last updated before this.
+	 * @param array<int, string> $statuses Statuses to include.
+	 * @param int                $limit    Max ids.
+	 * @return array<int, string>
+	 */
+	public function ids_older_than( string $before, array $statuses, int $limit ): array {
+		global $wpdb;
+		$statuses = array_values( array_intersect( array_map( 'strval', $statuses ), array( 'open', 'pending', 'resolved', 'closed' ) ) );
+		if ( array() === $statuses ) {
+			return array();
+		}
+
+		$table        = Schema::tickets_table();
+		$placeholders = implode( ', ', array_fill( 0, count( $statuses ), '%s' ) );
+		$ids          = $wpdb->get_col( // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- custom plugin table, no core caching API applies.
+			$wpdb->prepare( "SELECT id FROM {$table} WHERE updated_at < %s AND status IN ({$placeholders}) ORDER BY updated_at ASC LIMIT %d", array_merge( array( $before ), $statuses, array( max( 1, min( 1000, $limit ) ) ) ) ), // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQL.UnfinishedPrepare -- table name is an internal constant; placeholders built from a validated list.
+		);
+
+		return is_array( $ids ) ? array_map( 'strval', $ids ) : array();
+	}
+
+	/**
 	 * Tickets linked to an order.
 	 *
 	 * @return array<int, array<string, mixed>>

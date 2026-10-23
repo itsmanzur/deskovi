@@ -97,6 +97,38 @@ final class TicketService {
 	}
 
 	/**
+	 * Light ticket rows for reports (add-ons): created in [from, to), with the first visible agent reply time.
+	 *
+	 * @param string $from ISO 8601 UTC, inclusive.
+	 * @param string $to   ISO 8601 UTC, exclusive.
+	 * @return array<int, array<string, mixed>>
+	 */
+	public function report_rows( string $from, string $to ): array {
+		return $this->repo->report_rows( $from, $to );
+	}
+
+	/**
+	 * Light rows of open and pending tickets for reports (add-ons).
+	 *
+	 * @return array<int, array<string, mixed>>
+	 */
+	public function open_rows(): array {
+		return $this->repo->open_rows();
+	}
+
+	/**
+	 * Ids of tickets last updated before a date, in the given statuses (add-ons: data retention).
+	 *
+	 * @param string             $before   ISO 8601 UTC.
+	 * @param array<int, string> $statuses Statuses.
+	 * @param int                $limit    Max ids (cap 1,000).
+	 * @return array<int, string>
+	 */
+	public function ids_older_than( string $before, array $statuses, int $limit = 100 ): array {
+		return $this->repo->ids_older_than( $before, $statuses, $limit );
+	}
+
+	/**
 	 * Tickets linked to a WooCommerce order (used by add-ons for order-event automation).
 	 *
 	 * @param int $order_id Order id.
@@ -774,6 +806,17 @@ final class TicketService {
 			),
 			'OK'
 		);
+
+		/**
+		 * A refund was issued from a ticket.
+		 *
+		 * @param array<string, mixed> $ticket           The ticket.
+		 * @param int                  $order_id         Order id.
+		 * @param float                $amount           Refunded amount.
+		 * @param string               $currency         Currency code.
+		 * @param bool                 $gateway_refunded The payment gateway returned the money (false = recorded manually).
+		 */
+		do_action( 'itsdesk_order_refunded', $ticket, $order_id, (float) $result['amount'], (string) $result['currency'], ! empty( $result['gateway_refunded'] ) );
 
 		return $ticket;
 	}
