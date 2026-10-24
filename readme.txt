@@ -90,6 +90,7 @@ The admin screen uses Inter (Latin) and Hind Siliguri (Bengali), both under the 
 * The chat widget now uses your store's own font
 * Merge duplicate tickets: move every message and file of one ticket into another, with an internal note that records it and an action for add-ons
 * Ticket list: filter by status (including "Open or pending"), priority and category as well as assignee and search, with the CSV export following the same filters, and saved views per agent (up to 20)
+* Store managers are given ticket access once, when Deskovi is activated, instead of on every page load, so an owner can take it away (for example with Deskovi Pro's roles screen)
 * Accessibility: ticket rows work with the keyboard, controls have names, the chat widget ties each label to its field, announces errors, takes focus when it opens and returns it to the launcher button when it closes, and the amber status colour now meets the contrast minimum
 * Docs & Features is rewritten: every feature and a guide for each, and it shows what the optional Deskovi Pro add-on offers
 * Add a documented extension API (hooks, filters, an admin JavaScript registry and a storefront-widget slot) so add-on plugins can attach without modifying Deskovi; screens can be placed in a menu group, bring icons and add cards and guides to Docs & Features

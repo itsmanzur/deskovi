@@ -6,7 +6,7 @@ export type ProFeatureInfo = {
 	title: string;
 	description: string;
 	bullets: string[];
-	icon: 'IconMail' | 'IconBolt' | 'IconClock' | 'IconBook' | 'IconSparkle' | 'IconChart' | 'IconQueue';
+	icon: 'IconMail' | 'IconBolt' | 'IconClock' | 'IconBook' | 'IconSparkle' | 'IconChart' | 'IconQueue' | 'IconFileGeneric' | 'IconShield';
 };
 
 /**
@@ -46,6 +46,26 @@ export function getProCatalog(): ProFeatureInfo[] {
 			bullets: [
 				__( 'Labels such as “vip” or “damaged-item”, shown in the ticket list', 'deskovi' ),
 				__( 'Filter the list by tag, save it as a view, and let automation rules add tags', 'deskovi' ),
+			],
+		},
+		{
+			id: 'pro-fields',
+			icon: 'IconFileGeneric',
+			title: __( 'Custom fields', 'deskovi' ),
+			description: __( 'Add your own details to tickets, such as the return reason or the carrier.', 'deskovi' ),
+			bullets: [
+				__( 'Text, number, dropdown, checkbox and date fields that only your team sees', 'deskovi' ),
+				__( 'They move with a merge and are deleted with the ticket', 'deskovi' ),
+			],
+		},
+		{
+			id: 'pro-roles',
+			icon: 'IconShield',
+			title: __( 'Roles & permissions', 'deskovi' ),
+			description: __( 'Decide which role may refund, see reports, set up rules or manage mailboxes.', 'deskovi' ),
+			bullets: [
+				__( 'A Support Manager role next to the Support Agent role', 'deskovi' ),
+				__( 'One table that shows what every role may do', 'deskovi' ),
 			],
 		},
 		{

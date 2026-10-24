@@ -25,6 +25,7 @@ $itsdesk_options = array(
 	'itsdesk_tickets',
 	'itsdesk_delivery_secret',
 	'itsdesk_tickets_db_version',
+	'itsdesk_caps_granted',
 );
 
 foreach ( $itsdesk_options as $itsdesk_option ) {

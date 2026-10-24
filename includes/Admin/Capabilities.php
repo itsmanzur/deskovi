@@ -21,6 +21,12 @@ final class Capabilities {
 	public const AGENT_ROLE = 'itsdesk_agent';
 
 	/**
+	 * Set once store managers have been given the capability, so that an owner who takes it away
+	 * from them (for example with Deskovi Pro's roles screen) is not overruled on the next request.
+	 */
+	private const GRANTED_OPTION = 'itsdesk_caps_granted';
+
+	/**
 	 * Ability ids understood by can().
 	 */
 	public const ABILITY_MANAGE = 'manage';
@@ -85,14 +91,25 @@ final class Capabilities {
 	}
 
 	/**
-	 * Add manage_itsdesk to administrator and shop_manager.
+	 * Add manage_itsdesk to administrator (always) and shop_manager (once).
 	 */
 	private static function grant(): void {
-		foreach ( array( 'administrator', 'shop_manager' ) as $role_name ) {
-			$role = get_role( $role_name );
-			if ( $role && ! $role->has_cap( self::CAP ) ) {
-				$role->add_cap( self::CAP );
+		$admin = get_role( 'administrator' );
+		if ( $admin && ! $admin->has_cap( self::CAP ) ) {
+			$admin->add_cap( self::CAP );
+		}
+
+		if ( get_option( self::GRANTED_OPTION ) ) {
+			return;
+		}
+
+		// Only counts once the store manager role exists (WooCommerce may be activated later).
+		$manager = get_role( 'shop_manager' );
+		if ( $manager ) {
+			if ( ! $manager->has_cap( self::CAP ) ) {
+				$manager->add_cap( self::CAP );
 			}
+			update_option( self::GRANTED_OPTION, '1', false );
 		}
 	}
 
