@@ -648,6 +648,270 @@ final class TicketService {
 	}
 
 	/**
+	 * Split a ticket: the chosen message and every message after it move to a new ticket for the same customer
+	 * (and order), and both tickets get an internal note. Nobody is emailed and no "new ticket" event fires, since the
+	 * customer did not open anything; add-ons hear about it through itsdesk_ticket_split.
+	 *
+	 * @param string $ticket_id  The ticket to split.
+	 * @param string $message_id The first message that moves.
+	 * @param string $subject    Subject of the new ticket; the original subject when empty.
+	 * @return array{ticket: array<string, mixed>, new_ticket: array<string, mixed>}|\WP_Error
+	 */
+	public function split( string $ticket_id, string $message_id, string $subject = '' ) {
+		$ticket = $this->repo->find( $ticket_id );
+		if ( null === $ticket ) {
+			return new \WP_Error( 'itsdesk_ticket_not_found', __( 'Ticket not found.', 'deskovi' ), array( 'status' => 404 ) );
+		}
+
+		$messages = array_values( (array) ( $ticket['messages'] ?? array() ) );
+		$index    = null;
+		foreach ( $messages as $i => $message ) {
+			if ( (string) ( $message['id'] ?? '' ) === $message_id ) {
+				$index = $i;
+				break;
+			}
+		}
+		if ( null === $index ) {
+			return new \WP_Error( 'itsdesk_split_message', __( 'That message is not on this ticket.', 'deskovi' ), array( 'status' => 404 ) );
+		}
+		if ( 0 === $index ) {
+			return new \WP_Error( 'itsdesk_split_first', __( 'Choose a later message: the first message has to stay on this ticket.', 'deskovi' ), array( 'status' => 400 ) );
+		}
+
+		$moving = array_slice( $messages, $index );
+		$real   = array_values(
+			array_filter(
+				$moving,
+				static function ( $message ) {
+					return 'system' !== (string) ( $message['author'] ?? '' );
+				}
+			)
+		);
+		if ( array() === $real ) {
+			return new \WP_Error( 'itsdesk_split_message', __( 'Choose a message written by the customer or an agent.', 'deskovi' ), array( 'status' => 400 ) );
+		}
+
+		$subject = '' !== trim( $subject ) ? mb_substr( sanitize_text_field( $subject ), 0, 255 ) : (string) $ticket['subject'];
+		$user    = wp_get_current_user();
+		$who     = '' !== (string) $user->display_name ? (string) $user->display_name : __( 'an agent', 'deskovi' );
+		$now     = gmdate( 'c' );
+		$new_id  = 'tkt_' . wp_generate_uuid4();
+
+		$new_ticket = array(
+			'id'                    => $new_id,
+			'status'                => 'open',
+			'priority'              => (string) ( $ticket['priority'] ?? 'normal' ),
+			'category'              => $ticket['category'] ?? null,
+			'subject'               => $subject,
+			'order_id'              => $ticket['order_id'] ?? null,
+			'guest_order_id'        => $ticket['guest_order_id'] ?? null,
+			'order_snapshot'        => $ticket['order_snapshot'] ?? null,
+			'customer_user_id'      => $ticket['customer_user_id'] ?? null,
+			'customer_email'        => (string) ( $ticket['customer_email'] ?? '' ),
+			'customer_name'         => (string) ( $ticket['customer_name'] ?? '' ),
+			'assigned_agent_id'     => $ticket['assigned_agent_id'] ?? null,
+			'customer_last_read_at' => $now,
+			'agent_last_reply_at'   => null,
+			'created_at'            => (string) ( $real[0]['created_at'] ?? $now ),
+			'updated_at'            => $now,
+			'messages'              => array(),
+		);
+		$this->repo->save( $new_ticket );
+
+		$moved = $this->repo->move_messages(
+			$ticket_id,
+			$new_id,
+			array_map(
+				static function ( $message ) {
+					return (string) $message['id'];
+				},
+				$moving
+			)
+		);
+
+		$new_ticket['messages'] = array(
+			array(
+				'id'         => 'msg_' . self::new_message_id(),
+				'author'     => 'system',
+				'body'       => sprintf(
+					/* translators: 1: original ticket subject, 2: original ticket id, 3: agent name */
+					__( 'Split from ticket "%1$s" (%2$s) by %3$s.', 'deskovi' ),
+					(string) ( $ticket['subject'] ?? '' ),
+					$ticket_id,
+					$who
+				),
+				'internal'   => true,
+				'created_at' => $now,
+			),
+		);
+		$this->repo->save( $new_ticket );
+
+		// Only the note goes in: the moved messages already belong to the new ticket and would be inserted twice.
+		$ticket['updated_at'] = $now;
+		$ticket['messages']   = array(
+			array(
+				'id'         => 'msg_' . self::new_message_id(),
+				'author'     => 'system',
+				'body'       => sprintf(
+					/* translators: 1: number of messages, 2: new ticket subject, 3: new ticket id, 4: agent name */
+					_n( '%1$d message was moved to the new ticket "%2$s" (%3$s) by %4$s.', '%1$d messages were moved to the new ticket "%2$s" (%3$s) by %4$s.', $moved, 'deskovi' ),
+					$moved,
+					$subject,
+					$new_id,
+					$who
+				),
+				'internal'   => true,
+				'created_at' => $now,
+			),
+		);
+		$this->repo->save( $ticket );
+
+		$original = $this->repo->find( $ticket_id );
+		$created  = $this->repo->find( $new_id );
+		if ( null === $original || null === $created ) {
+			return new \WP_Error( 'itsdesk_ticket_not_found', __( 'Ticket not found.', 'deskovi' ), array( 'status' => 404 ) );
+		}
+
+		$this->logger->log(
+			'Ticket',
+			sprintf(
+				/* translators: 1: original ticket id, 2: new ticket id */
+				__( 'Ticket %1$s split, new ticket %2$s', 'deskovi' ),
+				$ticket_id,
+				$new_id
+			),
+			'OK'
+		);
+
+		/**
+		 * Fires when a ticket was split and the messages moved. Add-ons copy the data they keep per ticket
+		 * (tags, fields) and start their own timers here.
+		 *
+		 * @param array<string, mixed> $created  The new ticket.
+		 * @param array<string, mixed> $original The ticket it was split from, as it is now.
+		 * @param int                  $moved    Messages that moved.
+		 */
+		do_action( 'itsdesk_ticket_split', $created, $original, $moved );
+
+		return array(
+			'ticket'     => $this->decorate_ticket( $original ),
+			'new_ticket' => $this->decorate_ticket( $created ),
+		);
+	}
+
+	/**
+	 * Store a finished conversation from somewhere else (an importer), exactly as it happened: its own dates and
+	 * statuses, nothing sent. No "ticket created" or "replied" event fires, so rules, SLA timers, automatic replies,
+	 * notifications and webhooks stay quiet; add-ons hear about it through itsdesk_ticket_imported. The caller checks
+	 * permissions. A ticket whose idempotency_key already exists is not stored again.
+	 *
+	 * @param array<string, mixed> $data subject, customer_email, customer_name, status, priority, category, created_at, updated_at,
+	 *                                   idempotency_key (required) and messages (each: author customer|agent, body, internal, created_at).
+	 * @return array{ticket: array<string, mixed>, created: bool}|\WP_Error
+	 */
+	public function import( array $data ) {
+		$key = mb_substr( sanitize_text_field( (string) ( $data['idempotency_key'] ?? '' ) ), 0, 100 );
+		if ( '' === $key ) {
+			return new \WP_Error( 'itsdesk_import_key', __( 'An imported ticket needs a unique key.', 'deskovi' ), array( 'status' => 400 ) );
+		}
+
+		$existing = $this->repo->find_by_idempotency( $key );
+		if ( null !== $existing ) {
+			return array(
+				'ticket'  => $existing,
+				'created' => false,
+			);
+		}
+
+		$email = sanitize_email( (string) ( $data['customer_email'] ?? '' ) );
+		if ( ! is_email( $email ) || strlen( $email ) > 190 ) {
+			return new \WP_Error( 'itsdesk_import_email', __( 'The customer email address is not valid.', 'deskovi' ), array( 'status' => 400 ) );
+		}
+
+		$now  = gmdate( 'c' );
+		$when = static function ( $value, string $fallback ): string {
+			$time = is_string( $value ) && '' !== trim( $value ) ? strtotime( $value ) : false;
+			return false === $time || $time <= 0 || $time > time() + DAY_IN_SECONDS ? $fallback : gmdate( 'c', $time );
+		};
+
+		$created_at = $when( $data['created_at'] ?? '', $now );
+		$messages   = array();
+		foreach ( array_slice( array_values( (array) ( $data['messages'] ?? array() ) ), 0, 500 ) as $raw ) {
+			if ( ! is_array( $raw ) ) {
+				continue;
+			}
+			$body = trim( sanitize_textarea_field( mb_substr( (string) ( $raw['body'] ?? '' ), 0, 20000 ) ) );
+			if ( '' === $body ) {
+				continue;
+			}
+			$author     = 'agent' === ( $raw['author'] ?? '' ) ? 'agent' : 'customer';
+			$messages[] = array(
+				'id'         => 'msg_' . self::new_message_id(),
+				'author'     => $author,
+				'body'       => $body,
+				'internal'   => 'agent' === $author && ! empty( $raw['internal'] ),
+				'created_at' => $when( $raw['created_at'] ?? '', $created_at ),
+			);
+		}
+		if ( array() === $messages ) {
+			return new \WP_Error( 'itsdesk_import_messages', __( 'An imported ticket needs at least one message.', 'deskovi' ), array( 'status' => 400 ) );
+		}
+
+		$last_agent = '';
+		$updated_at = $created_at;
+		foreach ( $messages as $message ) {
+			if ( strcmp( $message['created_at'], $updated_at ) > 0 ) {
+				$updated_at = $message['created_at'];
+			}
+			if ( 'agent' === $message['author'] && ! $message['internal'] && strcmp( $message['created_at'], $last_agent ) > 0 ) {
+				$last_agent = $message['created_at'];
+			}
+		}
+		$updated_at = $when( $data['updated_at'] ?? '', $updated_at );
+
+		$status   = sanitize_key( (string) ( $data['status'] ?? '' ) );
+		$priority = sanitize_key( (string) ( $data['priority'] ?? '' ) );
+		$category = sanitize_key( (string) ( $data['category'] ?? '' ) );
+		$user     = get_user_by( 'email', $email );
+		$subject  = mb_substr( sanitize_text_field( (string) ( $data['subject'] ?? '' ) ), 0, 255 );
+
+		$ticket = array(
+			'id'                    => 'tkt_' . wp_generate_uuid4(),
+			'status'                => in_array( $status, array( 'open', 'pending', 'resolved', 'closed' ), true ) ? $status : 'closed',
+			'priority'              => in_array( $priority, array( 'low', 'normal', 'high', 'urgent' ), true ) ? $priority : 'normal',
+			'category'              => isset( Categories::all()[ $category ] ) ? $category : null,
+			'subject'               => '' !== $subject ? $subject : __( '(no subject)', 'deskovi' ),
+			'customer_user_id'      => $user ? (int) $user->ID : 0,
+			'customer_email'        => $email,
+			'customer_name'         => mb_substr( sanitize_text_field( (string) ( $data['customer_name'] ?? '' ) ), 0, 190 ),
+			'idempotency_key'       => $key,
+			'customer_last_read_at' => $updated_at,
+			'agent_last_reply_at'   => '' !== $last_agent ? $last_agent : null,
+			'created_at'            => $created_at,
+			'updated_at'            => $updated_at,
+			'messages'              => $messages,
+		);
+
+		$this->repo->save( $ticket );
+		$stored = $this->repo->find( (string) $ticket['id'] );
+		if ( null === $stored ) {
+			return new \WP_Error( 'itsdesk_ticket_save', __( 'The ticket could not be saved.', 'deskovi' ), array( 'status' => 500 ) );
+		}
+
+		/**
+		 * Fires after an importer stored a ticket. Nothing else fires for it (no created, replied or status events).
+		 *
+		 * @param array<string, mixed> $stored The stored ticket.
+		 */
+		do_action( 'itsdesk_ticket_imported', $stored );
+
+		return array(
+			'ticket'  => $stored,
+			'created' => true,
+		);
+	}
+
+	/**
 	 * Bulk delete tickets (admin).
 	 *
 	 * @param array<int, string> $ids Ticket ids.
@@ -755,6 +1019,12 @@ final class TicketService {
 		$ids = apply_filters( 'itsdesk_ticket_filter_ids', null, $filters );
 		if ( is_array( $ids ) ) {
 			$out['ids'] = $ids;
+		}
+
+		// An agent limited to their own tickets (see Capabilities::scope_agent_id()) only gets those.
+		$scope = Capabilities::scope_agent_id();
+		if ( $scope > 0 ) {
+			$out['scope_agent'] = $scope;
 		}
 
 		return $out;

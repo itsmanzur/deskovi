@@ -74,12 +74,12 @@ final class OrderController {
 				array(
 					'methods'             => WP_REST_Server::READABLE,
 					'callback'            => array( $this, 'ticket_order_get' ),
-					'permission_callback' => array( $this, 'can_manage' ),
+					'permission_callback' => array( $this, 'can_manage_ticket' ),
 				),
 				array(
 					'methods'             => WP_REST_Server::CREATABLE,
 					'callback'            => array( $this, 'ticket_order_link' ),
-					'permission_callback' => array( $this, 'can_manage' ),
+					'permission_callback' => array( $this, 'can_manage_ticket' ),
 				),
 			)
 		);
@@ -90,7 +90,7 @@ final class OrderController {
 			array(
 				'methods'             => WP_REST_Server::CREATABLE,
 				'callback'            => array( $this, 'ticket_order_refund' ),
-				'permission_callback' => array( $this, 'can_manage_orders' ),
+				'permission_callback' => array( $this, 'can_manage_ticket_orders' ),
 			)
 		);
 
@@ -100,7 +100,7 @@ final class OrderController {
 			array(
 				'methods'             => WP_REST_Server::CREATABLE,
 				'callback'            => array( $this, 'ticket_order_resend_invoice' ),
-				'permission_callback' => array( $this, 'can_manage_orders' ),
+				'permission_callback' => array( $this, 'can_manage_ticket_orders' ),
 			)
 		);
 	}
@@ -110,6 +110,24 @@ final class OrderController {
 	 */
 	public function can_manage(): bool {
 		return Capabilities::can( Capabilities::ABILITY_MANAGE );
+	}
+
+	/**
+	 * Permission: manage Deskovi and the ticket in the route is one this agent may work on.
+	 *
+	 * @param WP_REST_Request $request Request.
+	 */
+	public function can_manage_ticket( WP_REST_Request $request ): bool {
+		return $this->can_manage() && Capabilities::can_access_ticket( sanitize_text_field( (string) $request['id'] ) );
+	}
+
+	/**
+	 * Permission: manage orders and the ticket in the route is one this agent may work on.
+	 *
+	 * @param WP_REST_Request $request Request.
+	 */
+	public function can_manage_ticket_orders( WP_REST_Request $request ): bool {
+		return $this->can_manage_orders() && Capabilities::can_access_ticket( sanitize_text_field( (string) $request['id'] ) );
 	}
 
 	/**

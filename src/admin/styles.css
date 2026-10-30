@@ -1808,6 +1808,7 @@
 	margin: 14px 0 16px;
 	border-bottom: 1px solid var(--dk-line);
 	overflow-x: auto;
+	overflow-y: hidden;
 }
 
 .itsdesk-tab {
@@ -1965,4 +1966,24 @@
 	margin-top: 8px;
 	background: var(--dk-surface);
 	border-radius: 8px;
+}
+
+.itsdesk-split {
+	margin-top: 6px;
+	font-size: 12px;
+}
+.itsdesk-split__panel {
+	display: grid;
+	gap: 6px;
+	margin-top: 6px;
+	padding: 10px;
+	border: 1px solid var(--dk-line);
+	border-radius: 6px;
+	background: var(--dk-surface);
+}
+.itsdesk-split__panel label {
+	font-weight: 500;
+}
+.itsdesk-split__panel .itsdesk-btn {
+	justify-self: start;
 }

@@ -209,6 +209,15 @@ export function mergeTicket( id: string, into: string ): Promise< Ticket > {
 	} );
 }
 
+/** Split a ticket: the chosen message and everything after it become a new ticket. */
+export function splitTicket( id: string, messageId: string, subject: string ): Promise< { ticket: Ticket; new_ticket: Ticket } > {
+	return apiFetch( {
+		path: `${ base }/tickets/${ id }/split`,
+		method: 'POST',
+		data: { message_id: messageId, subject },
+	} );
+}
+
 export function updateTicketPriority( id: string, priority: string ): Promise< Ticket > {
 	return apiFetch( {
 		path: `${ base }/tickets/${ id }/priority`,

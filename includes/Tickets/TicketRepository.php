@@ -148,6 +148,12 @@ final class TicketRepository {
 			$params[] = $category;
 		}
 
+		// An agent who may only work on their own tickets: assigned to them, or not assigned yet.
+		if ( ! empty( $args['scope_agent'] ) ) {
+			$where[]  = '(assigned_agent_id = %d OR assigned_agent_id IS NULL)';
+			$params[] = (int) $args['scope_agent'];
+		}
+
 		if ( array_key_exists( 'ids', $args ) ) {
 			$ids = array_slice( array_values( array_filter( array_map( 'strval', (array) $args['ids'] ) ) ), 0, 5000 );
 			if ( array() === $ids ) {
@@ -350,6 +356,33 @@ final class TicketRepository {
 
 		$moved = $wpdb->query( $wpdb->prepare( "UPDATE {$messages} SET ticket_id = %s WHERE ticket_id = %s", $to, $from ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- custom plugin table, internal table name.
 		$wpdb->query( $wpdb->prepare( "UPDATE {$attachments} SET ticket_id = %s WHERE ticket_id = %s", $to, $from ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- custom plugin table, internal table name.
+
+		return is_int( $moved ) ? $moved : 0;
+	}
+
+	/**
+	 * Move chosen messages, and the files that belong to them, from one ticket to another (used when a ticket is split).
+	 *
+	 * @param string             $from        Source ticket id.
+	 * @param string             $to          Target ticket id.
+	 * @param array<int, string> $message_ids Message ids to move.
+	 * @return int Messages moved.
+	 */
+	public function move_messages( string $from, string $to, array $message_ids ): int {
+		$message_ids = array_values( array_filter( array_map( 'strval', $message_ids ) ) );
+		if ( array() === $message_ids ) {
+			return 0;
+		}
+
+		global $wpdb;
+		$messages     = Schema::messages_table();
+		$attachments  = Schema::attachments_table();
+		$placeholders = implode( ', ', array_fill( 0, count( $message_ids ), '%s' ) );
+
+		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare, WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- internal table name, IN(...) placeholders built via array_fill()+prepare().
+		$moved = $wpdb->query( $wpdb->prepare( "UPDATE {$messages} SET ticket_id = %s WHERE ticket_id = %s AND id IN ({$placeholders})", array_merge( array( $to, $from ), $message_ids ) ) );
+		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare, WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- internal table name, IN(...) placeholders built via array_fill()+prepare().
+		$wpdb->query( $wpdb->prepare( "UPDATE {$attachments} SET ticket_id = %s WHERE ticket_id = %s AND message_id IN ({$placeholders})", array_merge( array( $to, $from ), $message_ids ) ) );
 
 		return is_int( $moved ) ? $moved : 0;
 	}

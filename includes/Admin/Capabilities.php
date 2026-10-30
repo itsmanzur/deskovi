@@ -11,6 +11,8 @@ namespace Itsdesk\Admin;
 
 defined( 'ABSPATH' ) || exit;
 
+use Itsdesk\Tickets\TicketRepository;
+
 /**
  * Ensures manage_itsdesk exists on roles that manage the store.
  */
@@ -65,6 +67,59 @@ final class Capabilities {
 		 * @param int    $user_id User id.
 		 */
 		return (bool) apply_filters( 'itsdesk_user_can', $allowed, $ability, $user_id );
+	}
+
+	/**
+	 * The user whose own tickets this user is limited to, or 0 for no limit. Limited users see and work on
+	 * tickets assigned to them and tickets nobody has taken yet. Add-ons set the limit (for example Deskovi Pro's
+	 * roles screen); on its own Deskovi limits nobody.
+	 *
+	 * @param int|null $user_id User id; defaults to the current user.
+	 */
+	public static function scope_agent_id( ?int $user_id = null ): int {
+		$user_id = $user_id ?? get_current_user_id();
+
+		/**
+		 * Filters the agent a user is limited to.
+		 *
+		 * @param int $agent_id The user id to limit the user to (usually the user's own id), 0 for no limit.
+		 * @param int $user_id  The user.
+		 */
+		return max( 0, (int) apply_filters( 'itsdesk_ticket_scope', 0, $user_id ) );
+	}
+
+	/**
+	 * May this user work on this ticket? True for everybody unless an add-on limits the user to their own tickets
+	 * (see scope_agent_id()) or says otherwise through itsdesk_can_access_ticket. A ticket that does not exist passes,
+	 * so the caller can answer "not found" as it always did.
+	 *
+	 * @param string   $ticket_id Ticket id.
+	 * @param int|null $user_id   User id; defaults to the current user.
+	 */
+	public static function can_access_ticket( string $ticket_id, ?int $user_id = null ): bool {
+		$user_id = $user_id ?? get_current_user_id();
+		$scope   = self::scope_agent_id( $user_id );
+
+		if ( $scope <= 0 && ! has_filter( 'itsdesk_can_access_ticket' ) ) {
+			return true;
+		}
+
+		$ticket = ( new TicketRepository() )->find( $ticket_id );
+		if ( null === $ticket ) {
+			return true;
+		}
+
+		$assigned = (int) ( $ticket['assigned_agent_id'] ?? 0 );
+		$allowed  = $scope <= 0 || 0 === $assigned || $assigned === $scope;
+
+		/**
+		 * Filters whether a user may work on a ticket.
+		 *
+		 * @param bool                 $allowed Default decision.
+		 * @param array<string, mixed> $ticket  The ticket.
+		 * @param int                  $user_id The user.
+		 */
+		return (bool) apply_filters( 'itsdesk_can_access_ticket', $allowed, $ticket, $user_id );
 	}
 
 	/**

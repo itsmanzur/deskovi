@@ -96,7 +96,7 @@ final class TicketController {
 			array(
 				'methods'             => WP_REST_Server::READABLE,
 				'callback'            => array( $this, 'admin_get' ),
-				'permission_callback' => array( $this, 'can_manage' ),
+				'permission_callback' => array( $this, 'can_manage_ticket' ),
 			)
 		);
 
@@ -106,7 +106,7 @@ final class TicketController {
 			array(
 				'methods'             => WP_REST_Server::CREATABLE,
 				'callback'            => array( $this, 'admin_reply' ),
-				'permission_callback' => array( $this, 'can_manage' ),
+				'permission_callback' => array( $this, 'can_manage_ticket' ),
 			)
 		);
 
@@ -116,7 +116,7 @@ final class TicketController {
 			array(
 				'methods'             => WP_REST_Server::CREATABLE,
 				'callback'            => array( $this, 'admin_status' ),
-				'permission_callback' => array( $this, 'can_manage' ),
+				'permission_callback' => array( $this, 'can_manage_ticket' ),
 			)
 		);
 
@@ -126,7 +126,17 @@ final class TicketController {
 			array(
 				'methods'             => WP_REST_Server::CREATABLE,
 				'callback'            => array( $this, 'admin_merge' ),
-				'permission_callback' => array( $this, 'can_manage' ),
+				'permission_callback' => array( $this, 'can_manage_ticket' ),
+			)
+		);
+
+		register_rest_route(
+			self::REST_NAMESPACE,
+			'/tickets/(?P<id>[a-zA-Z0-9_-]+)/split',
+			array(
+				'methods'             => WP_REST_Server::CREATABLE,
+				'callback'            => array( $this, 'admin_split' ),
+				'permission_callback' => array( $this, 'can_manage_ticket' ),
 			)
 		);
 
@@ -136,7 +146,7 @@ final class TicketController {
 			array(
 				'methods'             => WP_REST_Server::CREATABLE,
 				'callback'            => array( $this, 'admin_priority' ),
-				'permission_callback' => array( $this, 'can_manage' ),
+				'permission_callback' => array( $this, 'can_manage_ticket' ),
 			)
 		);
 
@@ -146,7 +156,7 @@ final class TicketController {
 			array(
 				'methods'             => WP_REST_Server::CREATABLE,
 				'callback'            => array( $this, 'admin_assign' ),
-				'permission_callback' => array( $this, 'can_manage' ),
+				'permission_callback' => array( $this, 'can_manage_ticket' ),
 			)
 		);
 
@@ -213,7 +223,7 @@ final class TicketController {
 			array(
 				'methods'             => WP_REST_Server::CREATABLE,
 				'callback'            => array( $this, 'admin_upload_attachment' ),
-				'permission_callback' => array( $this, 'can_manage' ),
+				'permission_callback' => array( $this, 'can_manage_ticket' ),
 			)
 		);
 
@@ -243,6 +253,16 @@ final class TicketController {
 	 */
 	public function can_manage(): bool {
 		return Capabilities::can( Capabilities::ABILITY_MANAGE );
+	}
+
+	/**
+	 * Admin capability, and the ticket in the route is one this agent may work on (see Capabilities::can_access_ticket()).
+	 *
+	 * @param WP_REST_Request $request Request.
+	 */
+	public function can_manage_ticket( WP_REST_Request $request ): bool {
+		return Capabilities::can( Capabilities::ABILITY_MANAGE )
+			&& Capabilities::can_access_ticket( sanitize_text_field( (string) $request['id'] ) );
 	}
 
 	/**
@@ -399,11 +419,33 @@ final class TicketController {
 	public function admin_merge( WP_REST_Request $request ) {
 		$body   = $request->get_json_params() ?: array();
 		$target = isset( $body['into'] ) ? sanitize_text_field( (string) $body['into'] ) : '';
+		if ( '' !== $target && ! Capabilities::can_access_ticket( $target ) ) {
+			return new WP_Error( 'rest_forbidden', __( 'You cannot work on that ticket.', 'deskovi' ), array( 'status' => 403 ) );
+		}
 		$result = ( new TicketService() )->merge( (string) $request['id'], $target );
 		if ( is_wp_error( $result ) ) {
 			return $result;
 		}
 		return new WP_REST_Response( $result, 200 );
+	}
+
+	/**
+	 * Split this ticket: the chosen message and everything after it become a new ticket.
+	 *
+	 * @param WP_REST_Request $request Request.
+	 * @return WP_REST_Response|WP_Error
+	 */
+	public function admin_split( WP_REST_Request $request ) {
+		$body   = $request->get_json_params() ?: array();
+		$result = ( new TicketService() )->split(
+			(string) $request['id'],
+			isset( $body['message_id'] ) ? sanitize_text_field( (string) $body['message_id'] ) : '',
+			isset( $body['subject'] ) ? (string) $body['subject'] : ''
+		);
+		if ( is_wp_error( $result ) ) {
+			return $result;
+		}
+		return new WP_REST_Response( $result, 201 );
 	}
 
 	/**
@@ -434,6 +476,16 @@ final class TicketController {
 			? array_map( 'strval', $body['ids'] )
 			: array();
 		$action = isset( $body['action'] ) ? (string) $body['action'] : '';
+
+		// An agent limited to their own tickets only touches those.
+		$ids = array_values(
+			array_filter(
+				$ids,
+				static function ( string $id ): bool {
+					return Capabilities::can_access_ticket( $id );
+				}
+			)
+		);
 
 		if ( empty( $ids ) ) {
 			return new WP_Error(

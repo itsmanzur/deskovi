@@ -87,6 +87,7 @@ export function getProCatalog(): ProFeatureInfo[] {
 			bullets: [
 				__( 'A notice when a colleague has the same ticket open or is writing a reply', 'deskovi' ),
 				__( '@mentions in internal notes, reply drafts, and handover with a note', 'deskovi' ),
+				__( 'Star and watch tickets, log the time you spend, and work from the keyboard', 'deskovi' ),
 			],
 		},
 		{
@@ -97,6 +98,17 @@ export function getProCatalog(): ProFeatureInfo[] {
 			bullets: [
 				__( 'Refund chosen items or an amount, change the status, cancel, add a note or fix the shipping address', 'deskovi' ),
 				__( 'A customer card with lifetime value, orders and earlier tickets', 'deskovi' ),
+				__( 'Send a replacement order or a one-time coupon', 'deskovi' ),
+			],
+		},
+		{
+			id: 'pro-import',
+			icon: 'IconFileGeneric',
+			title: __( 'Import tickets', 'deskovi' ),
+			description: __( 'Move your history from another helpdesk without emailing a single customer.', 'deskovi' ),
+			bullets: [
+				__( 'Bring in a CSV export from Help Scout, Zendesk, Freshdesk and others', 'deskovi' ),
+				__( 'Check first, keep the original dates and tags, and never import the same ticket twice', 'deskovi' ),
 			],
 		},
 		{
@@ -106,7 +118,7 @@ export function getProCatalog(): ProFeatureInfo[] {
 			description: __( 'Tell the other tools you use what happens in your helpdesk.', 'deskovi' ),
 			bullets: [
 				__( 'Signed webhooks for Zapier, Make or your CRM, and messages to Slack, Discord, Teams or Telegram', 'deskovi' ),
-				__( 'A REST API with read and write keys', 'deskovi' ),
+				__( 'A REST API with read and write keys, a customer lookup for your CRM, and a hook for your own code', 'deskovi' ),
 			],
 		},
 		{

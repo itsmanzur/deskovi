@@ -105,13 +105,24 @@ for ( const rel of files ) {
 	fs.copyFileSync( path.join( root, rel ), dest );
 }
 
-// Prefer tar/Compress-Archive via PowerShell on Windows for reliable zip.
+// Compress-Archive in Windows PowerShell 5.1 stores backslashes in entry names, which
+// Linux hosts unpack as flat files. Write the entries with forward slashes instead.
 const ps = `
 $ErrorActionPreference = 'Stop'
-$src = '${ stageRoot.replace( /'/g, "''" ) }'
+Add-Type -AssemblyName System.IO.Compression
+Add-Type -AssemblyName System.IO.Compression.FileSystem
+$src = '${ staging.replace( /'/g, "''" ) }'
 $dest = '${ outZip.replace( /'/g, "''" ) }'
 if (Test-Path $dest) { Remove-Item $dest -Force }
-Compress-Archive -Path $src -DestinationPath $dest -CompressionLevel Optimal
+$zip = [System.IO.Compression.ZipFile]::Open($dest, 'Create')
+try {
+	foreach ($f in Get-ChildItem -LiteralPath $src -Recurse -File) {
+		$name = $f.FullName.Substring($src.Length).TrimStart('\\', '/').Replace('\\', '/')
+		[void][System.IO.Compression.ZipFileExtensions]::CreateEntryFromFile($zip, $f.FullName, $name, [System.IO.Compression.CompressionLevel]::Optimal)
+	}
+} finally {
+	$zip.Dispose()
+}
 `
 execFileSync(
 	'powershell.exe',

@@ -88,6 +88,8 @@ The admin screen uses Inter (Latin) and Hind Siliguri (Bengali), both under the 
 * New admin design: a grouped side menu (Work, Insights, Automate, Channels, Settings), a real Overview with what is waiting, new tickets per day and the latest tickets, a calmer ticket list and one set of type sizes
 * New fonts: Inter for English and Hind Siliguri for Bengali, bundled with the plugin and loaded only on Deskovi's own admin screen (nothing comes from an outside server); Bengali text gets more line spacing
 * The chat widget now uses your store's own font
+* Split a ticket: move a message and everything after it into a new ticket for the same customer and order, with an internal note on both
+* Add `TicketService::import()` (a quiet way for add-ons to store finished conversations: nothing is sent and no events fire), `itsdesk_ticket_split` and `itsdesk_ticket_imported` actions, and `itsdesk_ticket_scope` / `itsdesk_can_access_ticket` filters so an add-on can limit an agent to their own tickets
 * Merge duplicate tickets: move every message and file of one ticket into another, with an internal note that records it and an action for add-ons
 * Ticket list: filter by status (including "Open or pending"), priority and category as well as assignee and search, with the CSV export following the same filters, and saved views per agent (up to 20)
 * Store managers are given ticket access once, when Deskovi is activated, instead of on every page load, so an owner can take it away (for example with Deskovi Pro's roles screen)

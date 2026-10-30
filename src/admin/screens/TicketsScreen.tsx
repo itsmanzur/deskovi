@@ -15,6 +15,7 @@ import {
 	fetchTickets,
 	fetchViews,
 	mergeTicket,
+	splitTicket,
 	saveView,
 	formatBytes,
 	linkTicketOrder,
@@ -154,6 +155,8 @@ export function TicketsScreen( { onToast }: Props ) {
 	const [ mergeOpen, setMergeOpen ] = useState( false );
 	const [ mergeSearch, setMergeSearch ] = useState( '' );
 	const [ mergeResults, setMergeResults ] = useState< Ticket[] >( [] );
+	const [ splitMessageId, setSplitMessageId ] = useState< string | null >( null );
+	const [ splitSubject, setSplitSubject ] = useState( '' );
 	const [ selectedId, setSelectedId ] = useState< string | null >( null );
 	const [ selected, setSelected ] = useState< Ticket | null >( null );
 	const [ loading, setLoading ] = useState( true );
@@ -361,7 +364,26 @@ export function TicketsScreen( { onToast }: Props ) {
 		setMergeOpen( false );
 		setMergeSearch( '' );
 		setMergeResults( [] );
+		setSplitMessageId( null );
 	}, [ selectedId ] );
+
+	const onSplit = () => {
+		if ( ! selected || ! splitMessageId ) {
+			return;
+		}
+		setBusy( true );
+		splitTicket( selected.id, splitMessageId, splitSubject.trim() )
+			.then( ( res ) => {
+				onToast( __( 'Ticket split.', 'deskovi' ) );
+				setSplitMessageId( null );
+				loadTickets();
+				openTicket( res.new_ticket.id );
+			} )
+			.catch( ( err: unknown ) => {
+				onToast( apiErrorMessage( err ), 'danger' );
+				setBusy( false );
+			} );
+	};
 
 	const onMerge = ( target: Ticket ) => {
 		if ( ! selected ) {
@@ -1497,7 +1519,7 @@ export function TicketsScreen( { onToast }: Props ) {
 							) }
 
 							<div className="itsdesk-thread">
-								{ selected.messages.map( ( m ) => (
+								{ selected.messages.map( ( m, index ) => (
 									<div
 										key={ m.id }
 										className={
@@ -1518,6 +1540,32 @@ export function TicketsScreen( { onToast }: Props ) {
 											</span>
 										</div>
 										<p>{ m.body }</p>
+										{ index > 0 && m.author !== 'system' && (
+											<div className="itsdesk-split">
+												<button
+													type="button"
+													className="itsdesk-link"
+													aria-expanded={ splitMessageId === m.id }
+													onClick={ () => {
+														setSplitSubject( selected.subject );
+														setSplitMessageId( splitMessageId === m.id ? null : m.id );
+													} }
+												>
+													{ __( 'Split into a new ticket from here…', 'deskovi' ) }
+												</button>
+												{ splitMessageId === m.id && (
+													<div className="itsdesk-split__panel">
+														<label htmlFor={ 'itsdesk-split-' + m.id }>
+															{ __( 'This message and every message after it move to a new ticket. Nobody is emailed. Subject of the new ticket:', 'deskovi' ) }
+														</label>
+														<input id={ 'itsdesk-split-' + m.id } className="itsdesk-input" type="text" maxLength={ 255 } value={ splitSubject } onChange={ ( e ) => setSplitSubject( ( e.target as HTMLInputElement ).value ) } />
+														<button type="button" className="itsdesk-btn itsdesk-btn--primary" disabled={ busy } onClick={ onSplit }>
+															{ __( 'Split ticket', 'deskovi' ) }
+														</button>
+													</div>
+												) }
+											</div>
+										) }
 										{ m.attachments && m.attachments.length > 0 && (
 											<div className="itsdesk-attachment-list">
 												{ m.attachments.map(
