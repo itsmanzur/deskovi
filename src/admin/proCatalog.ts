@@ -6,7 +6,7 @@ export type ProFeatureInfo = {
 	title: string;
 	description: string;
 	bullets: string[];
-	icon: 'IconMail' | 'IconBolt' | 'IconClock' | 'IconBook' | 'IconSparkle' | 'IconChart' | 'IconQueue' | 'IconFileGeneric' | 'IconShield';
+	icon: 'IconMail' | 'IconBolt' | 'IconClock' | 'IconBook' | 'IconSparkle' | 'IconChart' | 'IconQueue' | 'IconFileGeneric' | 'IconShield' | 'IconTicket' | 'IconCart' | 'IconLink';
 };
 
 /**
@@ -77,6 +77,36 @@ export function getProCatalog(): ProFeatureInfo[] {
 				__( 'Timers on every ticket and a “Needs attention” queue', 'deskovi' ),
 				__( 'The clock can pause while you wait for the customer', 'deskovi' ),
 				__( 'One-time warning and breach emails to your team', 'deskovi' ),
+			],
+		},
+		{
+			id: 'pro-team',
+			icon: 'IconTicket',
+			title: __( 'Team tools', 'deskovi' ),
+			description: __( 'Work on tickets together without stepping on each other.', 'deskovi' ),
+			bullets: [
+				__( 'A notice when a colleague has the same ticket open or is writing a reply', 'deskovi' ),
+				__( '@mentions in internal notes, reply drafts, and handover with a note', 'deskovi' ),
+			],
+		},
+		{
+			id: 'pro-orders',
+			icon: 'IconCart',
+			title: __( 'Order tools', 'deskovi' ),
+			description: __( 'Do more with the order without leaving the ticket.', 'deskovi' ),
+			bullets: [
+				__( 'Refund chosen items or an amount, change the status, cancel, add a note or fix the shipping address', 'deskovi' ),
+				__( 'A customer card with lifetime value, orders and earlier tickets', 'deskovi' ),
+			],
+		},
+		{
+			id: 'pro-connections',
+			icon: 'IconLink',
+			title: __( 'Connections and API', 'deskovi' ),
+			description: __( 'Tell the other tools you use what happens in your helpdesk.', 'deskovi' ),
+			bullets: [
+				__( 'Signed webhooks for Zapier, Make or your CRM, and messages to Slack, Discord, Teams or Telegram', 'deskovi' ),
+				__( 'A REST API with read and write keys', 'deskovi' ),
 			],
 		},
 		{
