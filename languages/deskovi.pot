@@ -1,0 +1,2443 @@
+# Copyright (C) 2026 Deskovi
+# This file is distributed under the GPL-2.0-or-later.
+msgid ""
+msgstr ""
+"Project-Id-Version: Deskovi 1.5.0\n"
+"Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/deskovi\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"POT-Creation-Date: 2026-11-15T14:36:21+00:00\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"X-Generator: WP-CLI 2.12.0\n"
+"X-Domain: deskovi\n"
+
+#. Plugin Name of the plugin
+#. Author of the plugin
+#: deskovi.php
+#: includes/Admin/AdminMenu.php:32
+#: includes/Admin/AdminMenu.php:33
+#: assets/admin/index.js:1
+#: assets/admin/index.js:6
+msgid "Deskovi"
+msgstr ""
+
+#. Description of the plugin
+#: deskovi.php
+msgid "A local WooCommerce helpdesk: support tickets, order context for agents, and an optional customer chat widget."
+msgstr ""
+
+#. Author URI of the plugin
+#: deskovi.php
+msgid "https://profiles.wordpress.org/getwpkit/"
+msgstr ""
+
+#: includes/Admin/AdminMenu.php:54
+msgid "You do not have permission to access Deskovi."
+msgstr ""
+
+#: includes/Admin/Capabilities.php:179
+msgid "Support Agent"
+msgstr ""
+
+#: includes/Auth/GuestSession.php:90
+msgid "Order number and a valid billing email are required."
+msgstr ""
+
+#: includes/Auth/GuestSession.php:100
+msgid "Too many verification attempts. Try again later."
+msgstr ""
+
+#: includes/Auth/GuestSession.php:109
+msgid "WooCommerce is required."
+msgstr ""
+
+#: includes/Auth/GuestSession.php:118
+#: includes/Orders/OrderActions.php:120
+#: includes/Orders/OrderActions.php:124
+#: includes/Orders/OrderContext.php:136
+#: includes/Orders/OrderContext.php:145
+#: includes/Tickets/TicketService.php:1296
+msgid "Order not found."
+msgstr ""
+
+#: includes/Auth/GuestSession.php:127
+msgid "Email does not match this order."
+msgstr ""
+
+#. translators: %s: site name
+#: includes/Auth/GuestSession.php:145
+#, php-format
+msgid "[%s] Your Deskovi support code"
+msgstr ""
+
+#. translators: %s: OTP code
+#: includes/Auth/GuestSession.php:150
+#, php-format
+msgid ""
+"Your one-time support verification code is: %s\n"
+"\n"
+"It expires in 10 minutes."
+msgstr ""
+
+#: includes/Auth/GuestSession.php:160
+msgid "Guest OTP sent"
+msgstr ""
+
+#: includes/Auth/GuestSession.php:161
+msgid "Guest OTP mail failed (check mail config)"
+msgstr ""
+
+#: includes/Auth/GuestSession.php:184
+msgid "Invalid verification request."
+msgstr ""
+
+#: includes/Auth/GuestSession.php:193
+msgid "Verification code expired. Request a new one."
+msgstr ""
+
+#: includes/Auth/GuestSession.php:201
+msgid "Incorrect verification code."
+msgstr ""
+
+#: includes/Auth/GuestSession.php:235
+msgid "Guest session verified"
+msgstr ""
+
+#: includes/Compatibility/WooCommerce.php:61
+msgid "Deskovi requires WooCommerce to be installed and active. Please install and activate WooCommerce to use this connector."
+msgstr ""
+
+#: includes/Orders/OrderActions.php:35
+msgid "Nothing left to refund on this order."
+msgstr ""
+
+#: includes/Orders/OrderActions.php:44
+msgid "Refund amount exceeds what remains on this order."
+msgstr ""
+
+#: includes/Orders/OrderActions.php:105
+msgid "Order details manually sent to customer (via Deskovi)."
+msgstr ""
+
+#: includes/Orders/OrderContext.php:53
+msgid "Login required."
+msgstr ""
+
+#: includes/Orders/OrderContext.php:164
+#: includes/Orders/OrderContext.php:176
+msgid "You can only view your own orders."
+msgstr ""
+
+#: includes/Privacy/PersonalData.php:39
+msgid "Deskovi is a WooCommerce support ticket plugin. When you contact support, this store stores your ticket (subject, messages, attachments, linked order ID, email) in its own database. Payment card data is never collected by Deskovi. Billing address and phone are shared with support agents only if the store owner enables those privacy toggles. Guests may verify with order number + billing email (one-time code). You can request export or erasure of this data via WordPress tools."
+msgstr ""
+
+#: includes/Privacy/PersonalData.php:53
+#: includes/Privacy/PersonalData.php:65
+#: includes/Privacy/PersonalData.php:144
+msgid "Deskovi support tickets"
+msgstr ""
+
+#: includes/Privacy/PersonalData.php:92
+#: includes/Widget/Frontend.php:104
+#: assets/admin/index.js:6
+msgid "Subject"
+msgstr ""
+
+#: includes/Privacy/PersonalData.php:96
+#: assets/admin/index.js:1
+#: assets/admin/index.js:6
+msgid "Status"
+msgstr ""
+
+#: includes/Privacy/PersonalData.php:100
+msgid "Name"
+msgstr ""
+
+#: includes/Privacy/PersonalData.php:104
+msgid "Email"
+msgstr ""
+
+#: includes/Privacy/PersonalData.php:108
+#: assets/admin/index.js:6
+msgid "Order ID"
+msgstr ""
+
+#: includes/Privacy/PersonalData.php:112
+msgid "Created"
+msgstr ""
+
+#. translators: 1: message author (customer/agent/system), 2: date
+#: includes/Privacy/PersonalData.php:124
+#, php-format
+msgid "Message (%1$s, %2$s)"
+msgstr ""
+
+#: includes/Privacy/PersonalData.php:137
+msgid "Attachment"
+msgstr ""
+
+#: includes/Privacy/PersonalData.php:145
+msgid "Support tickets stored on this store."
+msgstr ""
+
+#: includes/Privacy/PersonalData.php:184
+msgid "Deskovi support tickets could not be removed from this store."
+msgstr ""
+
+#. translators: %d: count
+#: includes/Privacy/PersonalData.php:196
+#, php-format
+msgid "Removed %d Deskovi support ticket(s) from this store."
+msgstr ""
+
+#: includes/Privacy/Settings.php:74
+msgid "Invalid historical import window."
+msgstr ""
+
+#: includes/Privacy/Settings.php:87
+msgid "Invalid retention period."
+msgstr ""
+
+#: includes/Rest/AdminController.php:384
+#: includes/Tickets/CannedReplies.php:115
+msgid "Canned reply not found."
+msgstr ""
+
+#: includes/Rest/OrderController.php:210
+msgid "You can only view your verified order."
+msgstr ""
+
+#: includes/Rest/TicketController.php:423
+msgid "You cannot work on that ticket."
+msgstr ""
+
+#: includes/Rest/TicketController.php:493
+msgid "No tickets selected."
+msgstr ""
+
+#: includes/Rest/TicketController.php:516
+msgid "Invalid bulk action."
+msgstr ""
+
+#: includes/Rest/TicketController.php:785
+msgid "That message does not belong to this ticket."
+msgstr ""
+
+#: includes/Rest/TicketController.php:793
+#: includes/Tickets/AttachmentService.php:107
+msgid "No file was provided."
+msgstr ""
+
+#: includes/Rest/TicketController.php:815
+msgid "Attachment not found."
+msgstr ""
+
+#: includes/Rest/TicketController.php:824
+#: includes/Rest/TicketController.php:829
+#: includes/Rest/TicketController.php:834
+msgid "You cannot access this file."
+msgstr ""
+
+#: includes/Rest/TicketController.php:839
+msgid "File no longer exists."
+msgstr ""
+
+#: includes/Rest/ViewsController.php:103
+msgid "That view does not exist."
+msgstr ""
+
+#: includes/Tickets/AttachmentService.php:77
+msgid "No file was uploaded."
+msgstr ""
+
+#: includes/Tickets/AttachmentService.php:81
+msgid "The file failed to upload."
+msgstr ""
+
+#: includes/Tickets/AttachmentService.php:117
+#: includes/Tickets/AttachmentService.php:146
+#: includes/Tickets/AttachmentService.php:165
+msgid "Could not save the file."
+msgstr ""
+
+#. translators: %s: human-readable max size
+#: includes/Tickets/AttachmentService.php:199
+#, php-format
+msgid "File exceeds the %s upload limit."
+msgstr ""
+
+#: includes/Tickets/AttachmentService.php:230
+msgid "This ticket has reached its attachment limit."
+msgstr ""
+
+#: includes/Tickets/AttachmentService.php:238
+#: includes/Tickets/AttachmentService.php:245
+msgid "This file type is not allowed."
+msgstr ""
+
+#: includes/Tickets/AttachmentService.php:263
+msgid "Could not save the uploaded file."
+msgstr ""
+
+#: includes/Tickets/CannedReplies.php:197
+msgid "Title is required and must be 80 characters or fewer."
+msgstr ""
+
+#: includes/Tickets/CannedReplies.php:216
+msgid "Body is required and must be 2000 characters or fewer."
+msgstr ""
+
+#: includes/Tickets/Categories.php:25
+msgid "Order question"
+msgstr ""
+
+#: includes/Tickets/Categories.php:26
+msgid "Shipping / tracking"
+msgstr ""
+
+#: includes/Tickets/Categories.php:27
+msgid "Refund / return"
+msgstr ""
+
+#: includes/Tickets/Categories.php:28
+msgid "Cancel request"
+msgstr ""
+
+#: includes/Tickets/Categories.php:29
+msgid "Product question"
+msgstr ""
+
+#: includes/Tickets/Categories.php:30
+msgid "Other"
+msgstr ""
+
+#. translators: 1: site name, 2: ticket subject
+#: includes/Tickets/Notifications.php:73
+#, php-format
+msgid "[%1$s] New support ticket: %2$s"
+msgstr ""
+
+#. translators: 1: ticket subject, 2: customer name, 3: customer email, 4: message excerpt, 5: dashboard URL
+#: includes/Tickets/Notifications.php:80
+#, php-format
+msgid ""
+"A new support ticket was opened.\n"
+"\n"
+"Subject: %1$s\n"
+"From: %2$s <%3$s>\n"
+"\n"
+"Message:\n"
+"%4$s\n"
+"\n"
+"Open it here: %5$s"
+msgstr ""
+
+#. translators: %s: ticket subject
+#: includes/Tickets/Notifications.php:121
+#, php-format
+msgid "Re: %s"
+msgstr ""
+
+#. translators: 1: message excerpt
+#: includes/Tickets/Notifications.php:127
+#, php-format
+msgid ""
+"You have a new reply on your support ticket.\n"
+"\n"
+"%1$s\n"
+"\n"
+"Log back in to view the full reply."
+msgstr ""
+
+#. translators: %s: ticket subject
+#: includes/Tickets/Notifications.php:161
+#, php-format
+msgid "New reply on ticket: %s"
+msgstr ""
+
+#. translators: 1: message excerpt, 2: dashboard URL
+#: includes/Tickets/Notifications.php:167
+#, php-format
+msgid ""
+"A customer replied to a support ticket.\n"
+"\n"
+"%1$s\n"
+"\n"
+"Open it here: %2$s"
+msgstr ""
+
+#. translators: %s: ticket subject
+#: includes/Tickets/Notifications.php:205
+#, php-format
+msgid "Ticket assigned to you: %s"
+msgstr ""
+
+#. translators: 1: ticket subject, 2: dashboard URL
+#: includes/Tickets/Notifications.php:211
+#, php-format
+msgid ""
+"A support ticket was assigned to you.\n"
+"\n"
+"Subject: %1$s\n"
+"\n"
+"Open it here: %2$s"
+msgstr ""
+
+#. translators: %s: notification channel id
+#: includes/Tickets/Notifications.php:282
+#, php-format
+msgid "Notification channel \"%s\" failed"
+msgstr ""
+
+#. translators: 1: recipient email, 2: ticket subject
+#: includes/Tickets/Notifications.php:386
+#, php-format
+msgid "Failed to email %1$s about ticket %2$s"
+msgstr ""
+
+#. translators: 1: recipient email, 2: ticket subject
+#: includes/Tickets/Notifications.php:399
+#, php-format
+msgid "Emailed %1$s about ticket %2$s"
+msgstr ""
+
+#: includes/Tickets/SavedViews.php:59
+msgid "Give the view a name."
+msgstr ""
+
+#: includes/Tickets/SavedViews.php:64
+msgid "Choose at least one filter before saving a view."
+msgstr ""
+
+#: includes/Tickets/SavedViews.php:69
+msgid "You have reached the maximum number of saved views. Delete one first."
+msgstr ""
+
+#: includes/Tickets/SavedViews.php:73
+msgid "You already have a view with this name."
+msgstr ""
+
+#: includes/Tickets/TicketService.php:187
+#: includes/Tickets/TicketService.php:481
+#: includes/Tickets/TicketService.php:528
+#: includes/Tickets/TicketService.php:572
+#: includes/Tickets/TicketService.php:618
+#: includes/Tickets/TicketService.php:665
+#: includes/Tickets/TicketService.php:774
+#: includes/Tickets/TicketService.php:1045
+#: includes/Tickets/TicketService.php:1099
+#: includes/Tickets/TicketService.php:1154
+#: includes/Tickets/TicketService.php:1234
+msgid "Ticket not found."
+msgstr ""
+
+#: includes/Tickets/TicketService.php:209
+msgid "You cannot access this ticket."
+msgstr ""
+
+#: includes/Tickets/TicketService.php:259
+msgid "Subject and message are required."
+msgstr ""
+
+#: includes/Tickets/TicketService.php:267
+msgid "Invalid ticket category."
+msgstr ""
+
+#: includes/Tickets/TicketService.php:279
+msgid "The email address is too long."
+msgstr ""
+
+#: includes/Tickets/TicketService.php:290
+msgid "Login or guest verification required to open a ticket."
+msgstr ""
+
+#: includes/Tickets/TicketService.php:298
+msgid "Guest"
+msgstr ""
+
+#: includes/Tickets/TicketService.php:378
+#: includes/Tickets/TicketService.php:900
+msgid "The ticket could not be saved."
+msgstr ""
+
+#. translators: %s: subject
+#: includes/Tickets/TicketService.php:387
+#, php-format
+msgid "Ticket created: %s"
+msgstr ""
+
+#: includes/Tickets/TicketService.php:415
+msgid "Reply message is required."
+msgstr ""
+
+#: includes/Tickets/TicketService.php:450
+msgid "Reply added to ticket"
+msgstr ""
+
+#: includes/Tickets/TicketService.php:472
+#: includes/Tickets/TicketService.php:949
+msgid "Invalid ticket status."
+msgstr ""
+
+#. translators: %s: status
+#: includes/Tickets/TicketService.php:495
+#, php-format
+msgid "Ticket status set to %s"
+msgstr ""
+
+#: includes/Tickets/TicketService.php:519
+msgid "Invalid ticket priority."
+msgstr ""
+
+#. translators: %s: priority
+#: includes/Tickets/TicketService.php:542
+#, php-format
+msgid "Ticket priority set to %s"
+msgstr ""
+
+#: includes/Tickets/TicketService.php:566
+msgid "Choose a different ticket to merge into."
+msgstr ""
+
+#. translators: 1: merged ticket subject, 2: merged ticket id, 3: number of messages moved, 4: agent name
+#: includes/Tickets/TicketService.php:604
+#, php-format
+msgid "Ticket \"%1$s\" (%2$s) was merged into this one by %4$s. %3$d message was moved here."
+msgid_plural "Ticket \"%1$s\" (%2$s) was merged into this one by %4$s. %3$d messages were moved here."
+msgstr[0] ""
+msgstr[1] ""
+
+#: includes/Tickets/TicketService.php:608
+#: includes/Tickets/TicketService.php:698
+msgid "an agent"
+msgstr ""
+
+#. translators: 1: merged ticket id, 2: target ticket id
+#: includes/Tickets/TicketService.php:638
+#, php-format
+msgid "Ticket %1$s merged into %2$s"
+msgstr ""
+
+#: includes/Tickets/TicketService.php:677
+msgid "That message is not on this ticket."
+msgstr ""
+
+#: includes/Tickets/TicketService.php:680
+msgid "Choose a later message: the first message has to stay on this ticket."
+msgstr ""
+
+#: includes/Tickets/TicketService.php:693
+msgid "Choose a message written by the customer or an agent."
+msgstr ""
+
+#. translators: 1: original ticket subject, 2: original ticket id, 3: agent name
+#: includes/Tickets/TicketService.php:740
+#, php-format
+msgid "Split from ticket \"%1$s\" (%2$s) by %3$s."
+msgstr ""
+
+#. translators: 1: number of messages, 2: new ticket subject, 3: new ticket id, 4: agent name
+#: includes/Tickets/TicketService.php:759
+#, php-format
+msgid "%1$d message was moved to the new ticket \"%2$s\" (%3$s) by %4$s."
+msgid_plural "%1$d messages were moved to the new ticket \"%2$s\" (%3$s) by %4$s."
+msgstr[0] ""
+msgstr[1] ""
+
+#. translators: 1: original ticket id, 2: new ticket id
+#: includes/Tickets/TicketService.php:781
+#, php-format
+msgid "Ticket %1$s split, new ticket %2$s"
+msgstr ""
+
+#: includes/Tickets/TicketService.php:817
+msgid "An imported ticket needs a unique key."
+msgstr ""
+
+#: includes/Tickets/TicketService.php:830
+msgid "The customer email address is not valid."
+msgstr ""
+
+#: includes/Tickets/TicketService.php:859
+msgid "An imported ticket needs at least one message."
+msgstr ""
+
+#: includes/Tickets/TicketService.php:885
+msgid "(no subject)"
+msgstr ""
+
+#. translators: %d: number of tickets deleted
+#: includes/Tickets/TicketService.php:928
+#, php-format
+msgid "%d ticket(s) deleted in bulk"
+msgstr ""
+
+#. translators: 1: number of tickets updated, 2: status
+#: includes/Tickets/TicketService.php:976
+#, php-format
+msgid "%1$d ticket(s) set to %2$s in bulk"
+msgstr ""
+
+#: includes/Tickets/TicketService.php:1056
+msgid "Ticket unassigned"
+msgstr ""
+
+#: includes/Tickets/TicketService.php:1065
+msgid "That user is not a support agent."
+msgstr ""
+
+#. translators: %s: agent display name
+#: includes/Tickets/TicketService.php:1078
+#, php-format
+msgid "Ticket assigned to %s"
+msgstr ""
+
+#: includes/Tickets/TicketService.php:1111
+msgid "Order unlinked from ticket"
+msgstr ""
+
+#. translators: %d: order id
+#: includes/Tickets/TicketService.php:1134
+#, php-format
+msgid "Order #%d linked to ticket"
+msgstr ""
+
+#: includes/Tickets/TicketService.php:1163
+#: includes/Tickets/TicketService.php:1243
+msgid "This ticket has no linked order."
+msgstr ""
+
+#. translators: 1: refunded amount, 2: currency code, 3: order id
+#: includes/Tickets/TicketService.php:1177
+#, php-format
+msgid "Refund of %1$s %2$s issued on order #%3$d via the payment gateway."
+msgstr ""
+
+#. translators: 1: refunded amount, 2: currency code, 3: order id
+#: includes/Tickets/TicketService.php:1184
+#, php-format
+msgid "Refund of %1$s %2$s recorded on order #%3$d. This order's payment method doesn't support automatic refunds — process the actual payment return manually if one is owed."
+msgstr ""
+
+#. translators: 1: order id, 2: ticket id
+#: includes/Tickets/TicketService.php:1203
+#, php-format
+msgid "Refund issued on order #%1$d from ticket %2$s"
+msgstr ""
+
+#. translators: %s: customer email
+#: includes/Tickets/TicketService.php:1259
+#, php-format
+msgid "Invoice email resent to %s."
+msgstr ""
+
+#. translators: 1: order id, 2: ticket id
+#: includes/Tickets/TicketService.php:1272
+#, php-format
+msgid "Invoice resent for order #%1$d from ticket %2$s"
+msgstr ""
+
+#: includes/Tickets/TicketService.php:1319
+msgid "You can only link your own orders."
+msgstr ""
+
+#: includes/Widget/Frontend.php:100
+msgid "Support"
+msgstr ""
+
+#: includes/Widget/Frontend.php:101
+msgid "Close"
+msgstr ""
+
+#: includes/Widget/Frontend.php:102
+msgid "Your tickets"
+msgstr ""
+
+#: includes/Widget/Frontend.php:103
+#: assets/admin/index.js:1
+msgid "New ticket"
+msgstr ""
+
+#: includes/Widget/Frontend.php:105
+#: assets/admin/index.js:1
+#: assets/admin/index.js:6
+msgid "Message"
+msgstr ""
+
+#: includes/Widget/Frontend.php:106
+#: assets/admin/index.js:1
+#: assets/admin/index.js:6
+msgid "Category"
+msgstr ""
+
+#: includes/Widget/Frontend.php:107
+msgid "Related order"
+msgstr ""
+
+#: includes/Widget/Frontend.php:108
+msgid "No order"
+msgstr ""
+
+#: includes/Widget/Frontend.php:109
+msgid "Send"
+msgstr ""
+
+#: includes/Widget/Frontend.php:110
+#: assets/admin/index.js:6
+msgid "Reply"
+msgstr ""
+
+#: includes/Widget/Frontend.php:111
+msgid "Back"
+msgstr ""
+
+#: includes/Widget/Frontend.php:112
+#: assets/admin/index.js:1
+#: assets/admin/index.js:5
+msgid "Loading…"
+msgstr ""
+
+#: includes/Widget/Frontend.php:113
+msgid "No tickets yet."
+msgstr ""
+
+#: includes/Widget/Frontend.php:114
+msgid "Get support"
+msgstr ""
+
+#: includes/Widget/Frontend.php:115
+msgid "Log in, or continue with your order number and billing email."
+msgstr ""
+
+#: includes/Widget/Frontend.php:116
+msgid "Log in"
+msgstr ""
+
+#: includes/Widget/Frontend.php:117
+msgid "Continue with order"
+msgstr ""
+
+#: includes/Widget/Frontend.php:118
+msgid "Order number"
+msgstr ""
+
+#: includes/Widget/Frontend.php:119
+msgid "Billing email"
+msgstr ""
+
+#: includes/Widget/Frontend.php:120
+msgid "Verification code"
+msgstr ""
+
+#: includes/Widget/Frontend.php:121
+msgid "Send code"
+msgstr ""
+
+#: includes/Widget/Frontend.php:122
+msgid "Verify"
+msgstr ""
+
+#: includes/Widget/Frontend.php:123
+msgid "Check your email for a one-time code."
+msgstr ""
+
+#: includes/Widget/Frontend.php:124
+msgid "Something went wrong. Please try again."
+msgstr ""
+
+#: includes/Widget/Frontend.php:125
+#: assets/admin/index.js:6
+msgid "Create ticket"
+msgstr ""
+
+#: includes/Widget/Frontend.php:126
+#: assets/admin/index.js:1
+#: assets/admin/index.js:4
+msgid "Open"
+msgstr ""
+
+#: includes/Widget/Frontend.php:127
+msgid "Unread"
+msgstr ""
+
+#: includes/Widget/Frontend.php:128
+msgid "Your orders"
+msgstr ""
+
+#: includes/Widget/Frontend.php:129
+msgid "Order details"
+msgstr ""
+
+#: includes/Widget/Frontend.php:130
+msgid "Tracking"
+msgstr ""
+
+#: includes/Widget/Frontend.php:131
+msgid "No tracking number yet."
+msgstr ""
+
+#: includes/Widget/Frontend.php:132
+msgid "View order / invoice"
+msgstr ""
+
+#: includes/Widget/Frontend.php:133
+msgid "Request return"
+msgstr ""
+
+#: includes/Widget/Frontend.php:134
+msgid "Request cancel"
+msgstr ""
+
+#: includes/Widget/Frontend.php:135
+msgid "No recent orders."
+msgstr ""
+
+#: includes/Widget/Settings.php:67
+msgid "Invalid widget placement."
+msgstr ""
+
+#: includes/Widget/Settings.php:80
+msgid "Invalid widget theme."
+msgstr ""
+
+#: assets/admin/index.js:1
+msgid "Dismiss"
+msgstr ""
+
+#: assets/admin/index.js:1
+msgid "Failed to load activity."
+msgstr ""
+
+#: assets/admin/index.js:1
+msgid "No activity data."
+msgstr ""
+
+#: assets/admin/index.js:1
+#: assets/admin/index.js:6
+msgid "Activity"
+msgstr ""
+
+#: assets/admin/index.js:1
+msgid "A running log of ticket and account events on this site."
+msgstr ""
+
+#: assets/admin/index.js:1
+msgid "When"
+msgstr ""
+
+#: assets/admin/index.js:1
+msgid "Type"
+msgstr ""
+
+#: assets/admin/index.js:1
+msgid "Event"
+msgstr ""
+
+#: assets/admin/index.js:1
+msgid "Result"
+msgstr ""
+
+#: assets/admin/index.js:1
+msgid "Failed to load diagnostics."
+msgstr ""
+
+#: assets/admin/index.js:1
+msgid "Pass"
+msgstr ""
+
+#: assets/admin/index.js:1
+msgid "OK"
+msgstr ""
+
+#: assets/admin/index.js:1
+msgid "Fail"
+msgstr ""
+
+#: assets/admin/index.js:1
+msgid "Info"
+msgstr ""
+
+#: assets/admin/index.js:1
+#: assets/admin/index.js:6
+msgid "Diagnostics"
+msgstr ""
+
+#: assets/admin/index.js:1
+msgid "Support-safe environment snapshot. Share intentionally — never automatic full log upload."
+msgstr ""
+
+#: assets/admin/index.js:1
+msgid "Report copied to clipboard."
+msgstr ""
+
+#: assets/admin/index.js:1
+msgid "Could not copy report."
+msgstr ""
+
+#: assets/admin/index.js:1
+msgid "Copy report"
+msgstr ""
+
+#: assets/admin/index.js:1
+msgid "Diagnostics refreshed."
+msgstr ""
+
+#: assets/admin/index.js:1
+msgid "Run health check"
+msgstr ""
+
+#: assets/admin/index.js:1
+msgid "Check"
+msgstr ""
+
+#: assets/admin/index.js:1
+msgid "Value"
+msgstr ""
+
+#: assets/admin/index.js:1
+msgid "Active theme"
+msgstr ""
+
+#: assets/admin/index.js:1
+msgid "Sanitized recent errors"
+msgstr ""
+
+#: assets/admin/index.js:1
+msgid "No diagnostic errors recorded."
+msgstr ""
+
+#: assets/admin/index.js:1
+msgid "Time"
+msgstr ""
+
+#: assets/admin/index.js:1
+msgid "Code"
+msgstr ""
+
+#: assets/admin/index.js:1
+msgid "Email channel"
+msgstr ""
+
+#: assets/admin/index.js:1
+msgid "Customers write to your support address and the mail becomes a ticket. Your replies go back as email and thread with the customer’s own mail."
+msgstr ""
+
+#: assets/admin/index.js:1
+msgid "Gmail / Google Workspace, Microsoft 365 / Outlook or any IMAP mailbox, with your own app, no relay server"
+msgstr ""
+
+#: assets/admin/index.js:1
+msgid "Replies are matched to the right ticket, quoted history and signatures are removed, attachments are saved"
+msgstr ""
+
+#: assets/admin/index.js:1
+msgid "Agents can answer a notification by replying to the email"
+msgstr ""
+
+#: assets/admin/index.js:1
+msgid "Automation"
+msgstr ""
+
+#: assets/admin/index.js:1
+msgid "Rules that assign, prioritise and annotate tickets for you when something happens."
+msgstr ""
+
+#: assets/admin/index.js:1
+msgid "Assign to one agent, in turn, or to whoever has the fewest open tickets"
+msgstr ""
+
+#: assets/admin/index.js:1
+msgid "Practice mode shows what a rule would do before it changes anything"
+msgstr ""
+
+#: assets/admin/index.js:1
+msgid "Rules never email customers, refund or delete anything"
+msgstr ""
+
+#: assets/admin/index.js:1
+msgid "Tags"
+msgstr ""
+
+#: assets/admin/index.js:1
+msgid "Put your own labels on tickets and find them again."
+msgstr ""
+
+#: assets/admin/index.js:1
+msgid "Labels such as “vip” or “damaged-item”, shown in the ticket list"
+msgstr ""
+
+#: assets/admin/index.js:1
+msgid "Filter the list by tag, save it as a view, and let automation rules add tags"
+msgstr ""
+
+#: assets/admin/index.js:1
+msgid "Custom fields"
+msgstr ""
+
+#: assets/admin/index.js:1
+msgid "Add your own details to tickets, such as the return reason or the carrier."
+msgstr ""
+
+#: assets/admin/index.js:1
+msgid "Text, number, dropdown, checkbox and date fields that only your team sees"
+msgstr ""
+
+#: assets/admin/index.js:1
+msgid "They move with a merge and are deleted with the ticket"
+msgstr ""
+
+#: assets/admin/index.js:1
+msgid "Roles & permissions"
+msgstr ""
+
+#: assets/admin/index.js:1
+msgid "Decide which role may refund, see reports, set up rules or manage mailboxes."
+msgstr ""
+
+#: assets/admin/index.js:1
+msgid "A Support Manager role next to the Support Agent role"
+msgstr ""
+
+#: assets/admin/index.js:1
+msgid "One table that shows what every role may do"
+msgstr ""
+
+#: assets/admin/index.js:1
+msgid "Response times (SLA)"
+msgstr ""
+
+#: assets/admin/index.js:1
+msgid "First-reply and resolution targets per priority, counted in your working hours."
+msgstr ""
+
+#: assets/admin/index.js:1
+msgid "Timers on every ticket and a “Needs attention” queue"
+msgstr ""
+
+#: assets/admin/index.js:1
+msgid "The clock can pause while you wait for the customer"
+msgstr ""
+
+#: assets/admin/index.js:1
+msgid "One-time warning and breach emails to your team"
+msgstr ""
+
+#: assets/admin/index.js:1
+msgid "Team tools"
+msgstr ""
+
+#: assets/admin/index.js:1
+msgid "Work on tickets together without stepping on each other."
+msgstr ""
+
+#: assets/admin/index.js:1
+msgid "A notice when a colleague has the same ticket open or is writing a reply"
+msgstr ""
+
+#: assets/admin/index.js:1
+msgid "@mentions in internal notes, reply drafts, and handover with a note"
+msgstr ""
+
+#: assets/admin/index.js:1
+msgid "Star and watch tickets, log the time you spend, and work from the keyboard"
+msgstr ""
+
+#: assets/admin/index.js:1
+msgid "Order tools"
+msgstr ""
+
+#: assets/admin/index.js:1
+msgid "Do more with the order without leaving the ticket."
+msgstr ""
+
+#: assets/admin/index.js:1
+msgid "Refund chosen items or an amount, change the status, cancel, add a note or fix the shipping address"
+msgstr ""
+
+#: assets/admin/index.js:1
+msgid "A customer card with lifetime value, orders and earlier tickets"
+msgstr ""
+
+#: assets/admin/index.js:1
+msgid "Send a replacement order or a one-time coupon"
+msgstr ""
+
+#: assets/admin/index.js:1
+msgid "Import tickets"
+msgstr ""
+
+#: assets/admin/index.js:1
+msgid "Move your history from another helpdesk without emailing a single customer."
+msgstr ""
+
+#: assets/admin/index.js:1
+msgid "Bring in a CSV export from Help Scout, Zendesk, Freshdesk and others"
+msgstr ""
+
+#: assets/admin/index.js:1
+msgid "Check first, keep the original dates and tags, and never import the same ticket twice"
+msgstr ""
+
+#: assets/admin/index.js:1
+msgid "Connections and API"
+msgstr ""
+
+#: assets/admin/index.js:1
+msgid "Tell the other tools you use what happens in your helpdesk."
+msgstr ""
+
+#: assets/admin/index.js:1
+msgid "Signed webhooks for Zapier, Make or your CRM, and messages to Slack, Discord, Teams or Telegram"
+msgstr ""
+
+#: assets/admin/index.js:1
+msgid "A REST API with read and write keys, a customer lookup for your CRM, and a hook for your own code"
+msgstr ""
+
+#: assets/admin/index.js:1
+msgid "Self-service"
+msgstr ""
+
+#: assets/admin/index.js:1
+msgid "Before a customer sends a ticket, the chat widget shows where their order is and pages of your store that may already answer the question."
+msgstr ""
+
+#: assets/admin/index.js:1
+msgid "Order status and tracking for the customer’s own order"
+msgstr ""
+
+#: assets/admin/index.js:1
+msgid "Suggested public pages, then “Did this answer your question?”"
+msgstr ""
+
+#: assets/admin/index.js:1
+msgid "AI assistant"
+msgstr ""
+
+#: assets/admin/index.js:1
+msgid "Order-aware reply drafts, summaries, translation and suggestions inside the ticket, with your own OpenAI or Anthropic key."
+msgstr ""
+
+#: assets/admin/index.js:1
+msgid "Customer details are masked before anything leaves your site"
+msgstr ""
+
+#: assets/admin/index.js:1
+msgid "Drafts only: nothing is sent or changed unless an agent does it"
+msgstr ""
+
+#: assets/admin/index.js:1
+msgid "Reports and satisfaction"
+msgstr ""
+
+#: assets/admin/index.js:1
+msgid "How fast you answer, what is waiting, who is busy and how customers feel, plus store views such as tickets per product."
+msgstr ""
+
+#: assets/admin/index.js:1
+msgid "Optional one-click satisfaction survey when a ticket is resolved"
+msgstr ""
+
+#: assets/admin/index.js:1
+msgid "Weekly or monthly summary email and optional deletion of old tickets"
+msgstr ""
+
+#: assets/admin/index.js:1
+msgid "Deskovi Pro"
+msgstr ""
+
+#: assets/admin/index.js:1
+msgid "A separate add-on for stores with more tickets to handle. It works on top of this plugin and keeps everything on your own site."
+msgstr ""
+
+#: assets/admin/index.js:1
+msgid "Learn more"
+msgstr ""
+
+#: assets/admin/index.js:1
+msgid "Pro"
+msgstr ""
+
+#: assets/admin/index.js:1
+msgid "Everything in Deskovi (free) keeps working as it is. Installing Deskovi Pro turns these features on and replaces this page with their settings."
+msgstr ""
+
+#: assets/admin/index.js:1
+msgid "Support tickets"
+msgstr ""
+
+#: assets/admin/index.js:1
+msgid "Customers open tickets, logged in or as a verified guest. Every ticket has a conversation, a status (Open, Pending, Resolved, Closed) and optional attachments."
+msgstr ""
+
+#: assets/admin/index.js:1
+msgid "Order-aware support"
+msgstr ""
+
+#: assets/admin/index.js:1
+msgid "Link a ticket to a WooCommerce order and see its items, total, shipping, status and timeline beside the conversation."
+msgstr ""
+
+#: assets/admin/index.js:1
+msgid "Refunds from a ticket"
+msgstr ""
+
+#: assets/admin/index.js:1
+msgid "Issue a full or partial refund, or resend the order invoice email, without opening the order."
+msgstr ""
+
+#: assets/admin/index.js:1
+msgid "Filters and saved views"
+msgstr ""
+
+#: assets/admin/index.js:1
+msgid "Narrow the ticket list by status, priority, category, assignee or search, and save a combination as a view you can open with one click."
+msgstr ""
+
+#: assets/admin/index.js:1
+msgid "Merge duplicate tickets"
+msgstr ""
+
+#: assets/admin/index.js:1
+msgid "When a customer writes twice about the same thing, merge one ticket into the other: every message and file moves, and the conversation stays in one place."
+msgstr ""
+
+#: assets/admin/index.js:1
+msgid "Priority and assignment"
+msgstr ""
+
+#: assets/admin/index.js:1
+msgid "Mark tickets Low, Normal, High or Urgent, hand them to an agent, and filter by Unassigned or Assigned to me."
+msgstr ""
+
+#: assets/admin/index.js:1
+msgid "Internal notes"
+msgstr ""
+
+#: assets/admin/index.js:1
+msgid "Leave a note only your team can see. It is never shown to the customer and its attachments stay private too."
+msgstr ""
+
+#: assets/admin/index.js:1
+msgid "Canned replies"
+msgstr ""
+
+#: assets/admin/index.js:1
+msgid "Save reusable answers with placeholders such as {customer_name} and {order_id}, and insert one with a click."
+msgstr ""
+
+#: assets/admin/index.js:1
+msgid "Attachments"
+msgstr ""
+
+#: assets/admin/index.js:1
+msgid "Customers and agents can attach JPG, PNG, GIF, WebP, PDF and TXT files, up to 5 MB each. Files are served only to people who may see the ticket."
+msgstr ""
+
+#: assets/admin/index.js:1
+msgid "Bulk actions and CSV export"
+msgstr ""
+
+#: assets/admin/index.js:1
+msgid "Change the status of, or delete, many tickets at once. Export the list you are looking at to a spreadsheet."
+msgstr ""
+
+#: assets/admin/index.js:1
+msgid "Email notifications"
+msgstr ""
+
+#: assets/admin/index.js:1
+msgid "Switch on or off the emails for a new ticket, a customer reply, an agent reply and an assignment. They are sent by WordPress itself."
+msgstr ""
+
+#: assets/admin/index.js:1
+msgid "Storefront chat widget"
+msgstr ""
+
+#: assets/admin/index.js:1
+msgid "A small launcher on your store. It loads only after it is clicked and never on the cart or checkout. Visitors who are not logged in confirm with a code sent to their email."
+msgstr ""
+
+#: assets/admin/index.js:1
+#: assets/admin/index.js:6
+msgid "Overview"
+msgstr ""
+
+#: assets/admin/index.js:1
+msgid "One screen with what is open, pending and unassigned, how long the oldest ticket has been waiting, new tickets per day and the latest tickets."
+msgstr ""
+
+#: assets/admin/index.js:1
+msgid "Privacy by design"
+msgstr ""
+
+#: assets/admin/index.js:1
+msgid "Everything stays in your WordPress database. Choose what order details agents see, and use WordPress’s own export and erase tools for personal data."
+msgstr ""
+
+#: assets/admin/index.js:1
+msgid "Diagnostics and activity log"
+msgstr ""
+
+#: assets/admin/index.js:1
+msgid "Health checks for your setup and a log of what Deskovi has done, so a problem is easy to explain and fix."
+msgstr ""
+
+#: assets/admin/index.js:1
+msgid "Built for add-ons"
+msgstr ""
+
+#: assets/admin/index.js:1
+msgid "Other plugins can add screens, buttons and panels through a documented extension API, without changing Deskovi."
+msgstr ""
+
+#: assets/admin/index.js:1
+msgid "Finding your way around"
+msgstr ""
+
+#: assets/admin/index.js:1
+msgid "Open “Deskovi” in the WordPress admin menu. The menu on the left of the Deskovi screen is grouped: Work (Tickets, Canned Replies), Insights (Activity, and Reports with Pro), Automate (Pro), Channels (Widget, and Mailboxes with Pro) and Settings (Notifications, Data & Privacy, Diagnostics, Docs & Features). Overview is the first item."
+msgstr ""
+
+#: assets/admin/index.js:1
+msgid "Reading the Overview"
+msgstr ""
+
+#: assets/admin/index.js:1
+msgid "The four numbers at the top are the tickets that need you. Open and Pending count the tickets in those statuses. Unassigned counts the open and pending ones that have no agent, and turns amber when there are any. “Oldest waiting” is how long the longest-waiting ticket has been open. The bars show how many tickets arrived on each of the last 7 days (UTC)."
+msgstr ""
+
+#: assets/admin/index.js:1
+msgid "How customers open a ticket"
+msgstr ""
+
+#: assets/admin/index.js:1
+msgid "Customers use the chat widget on your store. If they are logged in they fill in a short form (subject, category, message, an optional order). If they are not, they enter their email and the order number and confirm with a one-time code sent to that email, so no account is needed."
+msgstr ""
+
+#: assets/admin/index.js:1
+msgid "Replying to a ticket"
+msgstr ""
+
+#: assets/admin/index.js:1
+msgid "Open Deskovi → Tickets and click a ticket. The conversation is on the right."
+msgstr ""
+
+#: assets/admin/index.js:1
+msgid "Write your answer in the reply box. Insert a canned reply from the menu above it if you have one."
+msgstr ""
+
+#: assets/admin/index.js:1
+msgid "Tick “Internal note (not visible to customer)” for a message only your team should see."
+msgstr ""
+
+#: assets/admin/index.js:1
+msgid "Click “Send reply”. The customer is emailed if the “Agent reply” notification is on. When an agent replies to an open ticket it moves to Pending; when a customer replies to a resolved ticket it opens again."
+msgstr ""
+
+#: assets/admin/index.js:1
+msgid "Above the ticket list, choose a status (including “Open or pending”, which is what still needs work), a priority and a category, use the Unassigned and Assigned to me buttons, or search by subject, name or email. They combine, and the list, the count and Export CSV all follow them."
+msgstr ""
+
+#: assets/admin/index.js:1
+msgid "Set the filters you use often, for example status “Open or pending” and priority “Urgent”."
+msgstr ""
+
+#: assets/admin/index.js:1
+msgid "Click “Save this view”, give it a name and press Enter. It appears as a button above the list."
+msgstr ""
+
+#: assets/admin/index.js:1
+msgid "Click a view to apply it again. The × on a view deletes it. Views belong to you: other agents never see or change them, and each agent can keep up to 20."
+msgstr ""
+
+#: assets/admin/index.js:1
+msgid "Add-ons can add their own filters beside the built-in ones (Deskovi Pro adds a tag filter)."
+msgstr ""
+
+#: assets/admin/index.js:1
+msgid "Merging duplicate tickets"
+msgstr ""
+
+#: assets/admin/index.js:1
+msgid "Open the ticket that should go away, click “Merge into another ticket…” under the status buttons, find the ticket it belongs to (the customer’s other tickets are listed first, or search by subject, name or email) and click “Merge into this”. Deskovi asks you to confirm because it cannot be undone."
+msgstr ""
+
+#: assets/admin/index.js:1
+msgid "All messages (including internal notes) and attachments move to the ticket you chose, in the order they were written. The merged ticket is deleted."
+msgstr ""
+
+#: assets/admin/index.js:1
+msgid "The ticket that stays keeps its customer and subject. It takes the higher priority, gets the merged ticket’s agent if it had none, and is opened again if it was resolved or closed while the merged ticket was still active."
+msgstr ""
+
+#: assets/admin/index.js:1
+msgid "An internal note on it records which ticket was merged, when and by whom. Nobody is emailed."
+msgstr ""
+
+#: assets/admin/index.js:1
+msgid "Merging tickets of two different customers is allowed, so check the email address before you confirm."
+msgstr ""
+
+#: assets/admin/index.js:1
+msgid "Status and priority"
+msgstr ""
+
+#: assets/admin/index.js:1
+msgid "Use the four buttons under the ticket to set Open, Pending, Resolved or Closed. Pending means you are waiting for the customer. Use the Priority menu (Low, Normal, High, Urgent) to show what needs attention first. Both are saved at once."
+msgstr ""
+
+#: assets/admin/index.js:1
+msgid "Assigning tickets"
+msgstr ""
+
+#: assets/admin/index.js:1
+msgid "Pick an agent in “Assigned to”, or leave it on Unassigned for anyone to take. Above the ticket list, “Unassigned” and “Assigned to me” filter the list. The assigned agent is the one emailed about customer replies. Agents are people who may manage Deskovi (administrators and shop managers by default)."
+msgstr ""
+
+#: assets/admin/index.js:1
+msgid "Linking a ticket to an order"
+msgstr ""
+
+#: assets/admin/index.js:1
+msgid "If the customer chose an order it is linked already. Otherwise type a WooCommerce order number into “Order ID” and click “Link order”. The ticket then shows the order’s items, total, payment and shipping method and timeline. Billing address and phone only appear if you allowed them under Data & Privacy."
+msgstr ""
+
+#: assets/admin/index.js:1
+msgid "Issuing a refund or resending an invoice"
+msgstr ""
+
+#: assets/admin/index.js:1
+msgid "You need the permission to edit WooCommerce orders. In the linked order card:"
+msgstr ""
+
+#: assets/admin/index.js:1
+msgid "Leave the amount empty to refund what is left of the order, or type a smaller amount for a partial refund."
+msgstr ""
+
+#: assets/admin/index.js:1
+msgid "Add a short reason if you like; it is saved with the refund."
+msgstr ""
+
+#: assets/admin/index.js:1
+msgid "Click “Issue refund”. If the payment gateway can refund, the money is returned there; if not, the refund is recorded in WooCommerce and you return the money yourself. A note in the ticket says which happened."
+msgstr ""
+
+#: assets/admin/index.js:1
+msgid "To send the customer their order email again instead, click “Resend invoice”. No money moves."
+msgstr ""
+
+#: assets/admin/index.js:1
+msgid "Click “Attach” under the reply box. Allowed files: JPG, PNG, GIF, WebP, PDF and TXT, up to 5 MB each. Files are checked on upload and are downloadable only by the customer who owns the ticket and by agents. Attachments on internal notes are never visible to the customer."
+msgstr ""
+
+#: assets/admin/index.js:1
+msgid "Answers you give again and again."
+msgstr ""
+
+#: assets/admin/index.js:1
+msgid "Go to Deskovi → Canned Replies and click “Add canned reply”."
+msgstr ""
+
+#: assets/admin/index.js:1
+msgid "Write a title and the message. Placeholders such as {customer_name} and {order_id} are filled in for the ticket you use it on."
+msgstr ""
+
+#: assets/admin/index.js:1
+msgid "In a ticket, choose it from “Insert canned reply”. It is added to your draft, so you can still edit it before sending."
+msgstr ""
+
+#: assets/admin/index.js:1
+msgid "Tick the box beside several tickets to change their status or delete them together; deleting also removes their messages and files and cannot be undone. To export, search or filter the list, then click “Export CSV”: the file contains exactly the tickets you are looking at."
+msgstr ""
+
+#: assets/admin/index.js:1
+msgid "Deskovi → Notifications has four switches: a new ticket (emailed to every agent), a customer reply (to the assigned agent, or all agents if nobody is assigned), an agent reply (to the customer) and an assignment (to the agent). Emails are sent by WordPress, so they need a working mail setup on your server; a mail plugin with SMTP makes delivery more reliable."
+msgstr ""
+
+#: assets/admin/index.js:1
+msgid "Setting up the chat widget"
+msgstr ""
+
+#: assets/admin/index.js:1
+msgid "Deskovi → Widget. Turn on “Enable support widget”, choose the corner (placement), a light or dark theme, and an optional text for the button; leave the text empty for an icon only. The widget does not load on the cart or checkout, and when it is off nothing at all is added to your store. It uses your store’s own font."
+msgstr ""
+
+#: assets/admin/index.js:1
+msgid "Privacy and your data"
+msgstr ""
+
+#: assets/admin/index.js:1
+msgid "Tickets, messages and attachments live in your own WordPress database; Deskovi sends nothing to an outside service. Under Data & Privacy you choose whether agents may see the billing address and phone number, whether to share diagnostics (only with your consent), the historical import window (off by default) and how long synced order context is kept. Deskovi adds a privacy-policy suggestion and works with Tools → Export / Erase Personal Data: an erase request deletes that customer’s tickets, messages and files."
+msgstr ""
+
+#: assets/admin/index.js:1
+msgid "Diagnostics and the activity log"
+msgstr ""
+
+#: assets/admin/index.js:1
+msgid "Diagnostics lists the versions of WordPress, WooCommerce and PHP and runs checks on your setup; copy its report when you ask for help. Activity is a short log of what Deskovi did (replies, assignments, refunds, errors). Use these two before contacting support."
+msgstr ""
+
+#: assets/admin/index.js:1
+msgid "Who can use Deskovi"
+msgstr ""
+
+#: assets/admin/index.js:1
+msgid "Administrators and shop managers get the “manage_itsdesk” permission when the plugin is activated, and they can use every Deskovi screen. Refunds also need the WooCommerce permission to edit orders. To give another role access, add the manage_itsdesk capability to it with a role editor plugin. Customers never see the admin screens."
+msgstr ""
+
+#: assets/admin/index.js:1
+msgid "For developers: add-ons"
+msgstr ""
+
+#: assets/admin/index.js:1
+msgid "Add-on plugins can hook into tickets, notifications, refunds and the widget, and can add screens, panels and bulk actions to this admin app. The contract is documented in contracts/extensions-v1.md in the plugin, and it is what Deskovi Pro is built on."
+msgstr ""
+
+#: assets/admin/index.js:1
+#: assets/admin/index.js:6
+msgid "Docs & Features"
+msgstr ""
+
+#: assets/admin/index.js:1
+msgid "What Deskovi can do and how to set it up. Everything is stored in your own WordPress database; there is no outside account."
+msgstr ""
+
+#: assets/admin/index.js:1
+msgid "Features"
+msgstr ""
+
+#: assets/admin/index.js:1
+msgid "Documentation"
+msgstr ""
+
+#: assets/admin/index.js:1
+msgid "Available with Deskovi Pro"
+msgstr ""
+
+#: assets/admin/index.js:1
+msgid "Deskovi Pro is a separate add-on. These features turn on when it is installed; they are not part of the free plugin."
+msgstr ""
+
+#: assets/admin/index.js:1
+msgid "See what Pro adds"
+msgstr ""
+
+#: assets/admin/index.js:1
+msgid "On this page"
+msgstr ""
+
+#: assets/admin/index.js:1
+msgid "The guides for Deskovi Pro (connecting Gmail or Microsoft 365, automation rules, response times, the AI assistant, reports and more) appear here once the add-on is installed. The features it adds are listed under Features."
+msgstr ""
+
+#: assets/admin/index.js:1
+#: assets/admin/index.js:6
+msgid "Canned Replies"
+msgstr ""
+
+#: assets/admin/index.js:1
+msgid "Reusable reply templates agents can insert into the ticket reply composer with one click."
+msgstr ""
+
+#: assets/admin/index.js:1
+msgid "Add canned reply"
+msgstr ""
+
+#: assets/admin/index.js:1
+msgid "Edit canned reply"
+msgstr ""
+
+#: assets/admin/index.js:1
+msgid "New canned reply"
+msgstr ""
+
+#: assets/admin/index.js:1
+msgid "Title"
+msgstr ""
+
+#: assets/admin/index.js:1
+msgid "Body"
+msgstr ""
+
+#: assets/admin/index.js:1
+msgid "Available placeholders: {customer_name}, {customer_email}, {order_id}, {agent_name}"
+msgstr ""
+
+#: assets/admin/index.js:1
+msgid "Canned reply updated."
+msgstr ""
+
+#: assets/admin/index.js:1
+msgid "Canned reply created."
+msgstr ""
+
+#: assets/admin/index.js:1
+#: assets/admin/index.js:6
+msgid "Saving…"
+msgstr ""
+
+#: assets/admin/index.js:1
+msgid "Save"
+msgstr ""
+
+#: assets/admin/index.js:1
+#: assets/admin/index.js:6
+msgid "Cancel"
+msgstr ""
+
+#: assets/admin/index.js:1
+msgid "No canned replies yet."
+msgstr ""
+
+#: assets/admin/index.js:1
+msgid "Preview"
+msgstr ""
+
+#: assets/admin/index.js:1
+msgid "Actions"
+msgstr ""
+
+#: assets/admin/index.js:1
+msgid "Edit"
+msgstr ""
+
+#: assets/admin/index.js:1
+msgid "Delete this canned reply?"
+msgstr ""
+
+#: assets/admin/index.js:1
+msgid "Canned reply deleted."
+msgstr ""
+
+#: assets/admin/index.js:1
+msgid "Deleting…"
+msgstr ""
+
+#: assets/admin/index.js:1
+#: assets/admin/index.js:5
+msgid "Delete"
+msgstr ""
+
+#: assets/admin/index.js:1
+#: assets/admin/index.js:6
+msgid "Notifications"
+msgstr ""
+
+#: assets/admin/index.js:1
+msgid "Local email notifications only — sent via wp_mail(), nothing leaves your site."
+msgstr ""
+
+#: assets/admin/index.js:1
+msgid "Ticket event emails"
+msgstr ""
+
+#: assets/admin/index.js:1
+msgid "Email every support agent when a customer opens a new ticket."
+msgstr ""
+
+#: assets/admin/index.js:1
+msgid "Customer reply"
+msgstr ""
+
+#: assets/admin/index.js:1
+msgid "Email the assigned agent (or all agents, if unassigned) when a customer replies."
+msgstr ""
+
+#: assets/admin/index.js:1
+msgid "Agent reply"
+msgstr ""
+
+#: assets/admin/index.js:1
+msgid "Email the customer when an agent replies to their ticket."
+msgstr ""
+
+#: assets/admin/index.js:1
+msgid "Ticket assigned"
+msgstr ""
+
+#: assets/admin/index.js:1
+msgid "Email an agent when a ticket is assigned to them."
+msgstr ""
+
+#: assets/admin/index.js:1
+msgid "Notification settings saved."
+msgstr ""
+
+#: assets/admin/index.js:1
+msgid "Save notification settings"
+msgstr ""
+
+#: assets/admin/index.js:1
+msgid "just now"
+msgstr ""
+
+#. translators: %d: minutes
+#: assets/admin/index.js:1
+#, js-format
+msgid "%d minute"
+msgid_plural "%d minutes"
+msgstr[0] ""
+msgstr[1] ""
+
+#. translators: %d: hours
+#: assets/admin/index.js:1
+#, js-format
+msgid "%d hour"
+msgid_plural "%d hours"
+msgstr[0] ""
+msgstr[1] ""
+
+#. translators: %d: days
+#: assets/admin/index.js:1
+#, js-format
+msgid "%d day"
+msgid_plural "%d days"
+msgstr[0] ""
+msgstr[1] ""
+
+#: assets/admin/index.js:1
+#: assets/admin/index.js:4
+msgid "Pending"
+msgstr ""
+
+#: assets/admin/index.js:1
+#: assets/admin/index.js:4
+msgid "Resolved"
+msgstr ""
+
+#: assets/admin/index.js:1
+#: assets/admin/index.js:4
+msgid "Closed"
+msgstr ""
+
+#: assets/admin/index.js:1
+msgid "New tickets per day, last 7 days"
+msgstr ""
+
+#: assets/admin/index.js:1
+msgid "What needs you today."
+msgstr ""
+
+#: assets/admin/index.js:1
+msgid "Refresh"
+msgstr ""
+
+#: assets/admin/index.js:1
+msgid "Open tickets"
+msgstr ""
+
+#: assets/admin/index.js:1
+msgid "Customers cannot reach you yet"
+msgstr ""
+
+#: assets/admin/index.js:1
+msgid "The chat widget is off. Turn it on so customers can write to you from your store."
+msgstr ""
+
+#: assets/admin/index.js:1
+msgid "Set up the widget"
+msgstr ""
+
+#. translators: %s: how long
+#: assets/admin/index.js:1
+#, js-format
+msgid "oldest waiting %s"
+msgstr ""
+
+#: assets/admin/index.js:1
+msgid "nothing waiting"
+msgstr ""
+
+#: assets/admin/index.js:1
+msgid "waiting for the customer"
+msgstr ""
+
+#: assets/admin/index.js:1
+#: assets/admin/index.js:5
+#: assets/admin/index.js:6
+msgid "Unassigned"
+msgstr ""
+
+#: assets/admin/index.js:1
+msgid "nobody owns these yet"
+msgstr ""
+
+#: assets/admin/index.js:1
+msgid "everything has an owner"
+msgstr ""
+
+#: assets/admin/index.js:1
+msgid "New, last 7 days"
+msgstr ""
+
+#. translators: %d: tickets
+#: assets/admin/index.js:1
+#, js-format
+msgid "%d ticket waiting now"
+msgid_plural "%d tickets waiting now"
+msgstr[0] ""
+msgstr[1] ""
+
+#: assets/admin/index.js:1
+msgid "all caught up"
+msgstr ""
+
+#: assets/admin/index.js:1
+msgid "New tickets, last 7 days"
+msgstr ""
+
+#: assets/admin/index.js:1
+msgid "Latest tickets"
+msgstr ""
+
+#: assets/admin/index.js:1
+msgid "View all"
+msgstr ""
+
+#: assets/admin/index.js:1
+msgid "No tickets yet. They show up here as soon as a customer writes in."
+msgstr ""
+
+#: assets/admin/index.js:1
+msgid "Setup and status"
+msgstr ""
+
+#: assets/admin/index.js:1
+msgid "Support widget"
+msgstr ""
+
+#: assets/admin/index.js:1
+msgid "Off: customers cannot start a ticket from your store."
+msgstr ""
+
+#: assets/admin/index.js:1
+msgid "On"
+msgstr ""
+
+#: assets/admin/index.js:1
+msgid "Off"
+msgstr ""
+
+#: assets/admin/index.js:1
+msgid "Privacy"
+msgstr ""
+
+#. translators: %d: days
+#: assets/admin/index.js:1
+#, js-format
+msgid "Tickets are kept for %d days."
+msgstr ""
+
+#: assets/admin/index.js:1
+msgid "Set"
+msgstr ""
+
+#: assets/admin/index.js:1
+msgid "Order storage"
+msgstr ""
+
+#: assets/admin/index.js:1
+msgid "Works with WooCommerce high-performance order storage."
+msgstr ""
+
+#: assets/admin/index.js:1
+msgid "Compatible"
+msgstr ""
+
+#: assets/admin/index.js:1
+msgid "Everything is stored in your own WordPress database. No outside account is needed."
+msgstr ""
+
+#: assets/admin/index.js:1
+#: assets/admin/index.js:6
+msgid "Data & Privacy"
+msgstr ""
+
+#: assets/admin/index.js:1
+msgid "Data minimization by default — sync only what agents need. Historical import stays off unless you opt in."
+msgstr ""
+
+#: assets/admin/index.js:1
+msgid "Customer fields"
+msgstr ""
+
+#: assets/admin/index.js:1
+msgid "Allow billing address sync"
+msgstr ""
+
+#: assets/admin/index.js:1
+msgid "Useful for shipping disputes. Off by default."
+msgstr ""
+
+#: assets/admin/index.js:1
+msgid "Allow phone number sync"
+msgstr ""
+
+#: assets/admin/index.js:1
+msgid "Only when agents need to call the customer."
+msgstr ""
+
+#: assets/admin/index.js:1
+msgid "Share diagnostics with consent"
+msgstr ""
+
+#: assets/admin/index.js:1
+msgid "Sanitized environment data only — never automatic full log upload."
+msgstr ""
+
+#: assets/admin/index.js:1
+msgid "Historical import"
+msgstr ""
+
+#: assets/admin/index.js:1
+msgid "Import window"
+msgstr ""
+
+#: assets/admin/index.js:1
+msgid "Off (recommended)"
+msgstr ""
+
+#: assets/admin/index.js:1
+msgid "Last 30 days"
+msgstr ""
+
+#: assets/admin/index.js:1
+msgid "Last 60 days"
+msgstr ""
+
+#: assets/admin/index.js:1
+msgid "Last 90 days"
+msgstr ""
+
+#: assets/admin/index.js:1
+msgid "Retention"
+msgstr ""
+
+#: assets/admin/index.js:1
+msgid "Synced context retention (days)"
+msgstr ""
+
+#: assets/admin/index.js:1
+msgid "WordPress privacy tools"
+msgstr ""
+
+#: assets/admin/index.js:1
+msgid "Deskovi registers a privacy-policy suggestion and ticket export/erase under Tools → Export/Erase Personal Data."
+msgstr ""
+
+#: assets/admin/index.js:1
+#: assets/admin/index.js:6
+msgid "Save failed."
+msgstr ""
+
+#: assets/admin/index.js:1
+msgid "Save privacy settings"
+msgstr ""
+
+#: assets/admin/index.js:1
+msgid "Request remote data deletion"
+msgstr ""
+
+#: assets/admin/index.js:1
+#: assets/admin/index.js:6
+msgid "Urgent"
+msgstr ""
+
+#: assets/admin/index.js:1
+#: assets/admin/index.js:6
+msgid "High"
+msgstr ""
+
+#: assets/admin/index.js:1
+#: assets/admin/index.js:6
+msgid "Low"
+msgstr ""
+
+#: assets/admin/index.js:1
+#: assets/admin/index.js:6
+msgid "Normal"
+msgstr ""
+
+#: assets/admin/index.js:1
+msgid "View saved."
+msgstr ""
+
+#: assets/admin/index.js:1
+msgid "Ticket split."
+msgstr ""
+
+#: assets/admin/index.js:1
+#: assets/admin/index.js:6
+msgid "Tickets"
+msgstr ""
+
+#: assets/admin/index.js:1
+msgid "Tickets are created, replied to, and stored locally in your WordPress database."
+msgstr ""
+
+#: assets/admin/index.js:1
+msgid "Search tickets"
+msgstr ""
+
+#: assets/admin/index.js:1
+msgid "Search subject, name, or email…"
+msgstr ""
+
+#: assets/admin/index.js:1
+msgid "Export CSV"
+msgstr ""
+
+#: assets/admin/index.js:1
+msgid "All"
+msgstr ""
+
+#: assets/admin/index.js:1
+msgid "Assigned to me"
+msgstr ""
+
+#: assets/admin/index.js:1
+msgid "Any status"
+msgstr ""
+
+#: assets/admin/index.js:1
+msgid "Open or pending"
+msgstr ""
+
+#: assets/admin/index.js:1
+#: assets/admin/index.js:6
+msgid "Priority"
+msgstr ""
+
+#: assets/admin/index.js:1
+msgid "Any priority"
+msgstr ""
+
+#: assets/admin/index.js:1
+msgid "Any category"
+msgstr ""
+
+#: assets/admin/index.js:1
+msgid "Clear filters"
+msgstr ""
+
+#. translators: %s: view name
+#: assets/admin/index.js:1
+#, js-format
+msgid "Delete the view %s"
+msgstr ""
+
+#: assets/admin/index.js:1
+msgid "Choose a filter first"
+msgstr ""
+
+#: assets/admin/index.js:1
+msgid "Save this view"
+msgstr ""
+
+#: assets/admin/index.js:1
+msgid "Name, for example \"Urgent refunds\""
+msgstr ""
+
+#. translators: 1: result count, 2: search query
+#: assets/admin/index.js:2
+#, js-format
+msgid "%1$d result(s) for \"%2$s\""
+msgstr ""
+
+#. translators: %d: total ticket count
+#: assets/admin/index.js:3
+#, js-format
+msgid "%d ticket(s) found"
+msgstr ""
+
+#: assets/admin/index.js:3
+msgid "Select all"
+msgstr ""
+
+#. translators: %d: number of selected tickets
+#: assets/admin/index.js:4
+#, js-format
+msgid "%d selected"
+msgstr ""
+
+#: assets/admin/index.js:4
+msgid "Status updated for selected tickets."
+msgstr ""
+
+#: assets/admin/index.js:4
+msgid "Set status…"
+msgstr ""
+
+#. translators: %d: number of tickets to delete
+#: assets/admin/index.js:5
+#, js-format
+msgid "Delete %d ticket(s)? This can't be undone."
+msgstr ""
+
+#: assets/admin/index.js:5
+msgid "Selected tickets deleted."
+msgstr ""
+
+#: assets/admin/index.js:5
+msgid "No tickets match this search/filter."
+msgstr ""
+
+#: assets/admin/index.js:5
+msgid "No tickets yet. Create one to test the bridge."
+msgstr ""
+
+#. translators: %s: ticket subject
+#: assets/admin/index.js:5
+#, js-format
+msgid "Select ticket: %s"
+msgstr ""
+
+#: assets/admin/index.js:5
+msgid "Prev"
+msgstr ""
+
+#. translators: 1: current page, 2: total pages
+#: assets/admin/index.js:6
+#, js-format
+msgid "Page %1$d of %2$d"
+msgstr ""
+
+#: assets/admin/index.js:6
+msgid "Next"
+msgstr ""
+
+#: assets/admin/index.js:6
+msgid "Order ID (optional)"
+msgstr ""
+
+#: assets/admin/index.js:6
+msgid "Ticket created."
+msgstr ""
+
+#: assets/admin/index.js:6
+msgid "Creating…"
+msgstr ""
+
+#: assets/admin/index.js:6
+msgid "Select a ticket or create a new one to exercise the bridge."
+msgstr ""
+
+#: assets/admin/index.js:6
+msgid "Order context"
+msgstr ""
+
+#: assets/admin/index.js:6
+msgid "Order"
+msgstr ""
+
+#: assets/admin/index.js:6
+msgid "Shipping"
+msgstr ""
+
+#: assets/admin/index.js:6
+msgid "Billing"
+msgstr ""
+
+#: assets/admin/index.js:6
+msgid "Phone"
+msgstr ""
+
+#: assets/admin/index.js:6
+msgid "Address/phone hidden by privacy settings."
+msgstr ""
+
+#: assets/admin/index.js:6
+msgid "Hide timeline"
+msgstr ""
+
+#: assets/admin/index.js:6
+msgid "Show timeline"
+msgstr ""
+
+#: assets/admin/index.js:6
+msgid "Refund"
+msgstr ""
+
+#: assets/admin/index.js:6
+msgid "Amount (leave blank for full remaining amount)"
+msgstr ""
+
+#: assets/admin/index.js:6
+msgid "Reason (optional)"
+msgstr ""
+
+#: assets/admin/index.js:6
+msgid "Enter a valid refund amount, or leave it blank for the full remaining amount."
+msgstr ""
+
+#: assets/admin/index.js:6
+msgid "Refund issued."
+msgstr ""
+
+#: assets/admin/index.js:6
+msgid "Processing…"
+msgstr ""
+
+#: assets/admin/index.js:6
+msgid "Issue refund"
+msgstr ""
+
+#: assets/admin/index.js:6
+msgid "Invoice email resent."
+msgstr ""
+
+#: assets/admin/index.js:6
+msgid "Resend invoice"
+msgstr ""
+
+#: assets/admin/index.js:6
+msgid "Order unlinked."
+msgstr ""
+
+#: assets/admin/index.js:6
+msgid "Unlink order"
+msgstr ""
+
+#: assets/admin/index.js:6
+msgid "No order linked. Enter a WooCommerce order ID to attach context."
+msgstr ""
+
+#: assets/admin/index.js:6
+msgid "Order linked."
+msgstr ""
+
+#: assets/admin/index.js:6
+msgid "Enter a valid order ID."
+msgstr ""
+
+#: assets/admin/index.js:6
+msgid "Linking…"
+msgstr ""
+
+#: assets/admin/index.js:6
+msgid "Link order"
+msgstr ""
+
+#: assets/admin/index.js:6
+msgid "Assigned to"
+msgstr ""
+
+#: assets/admin/index.js:6
+msgid "Assignment updated."
+msgstr ""
+
+#: assets/admin/index.js:6
+msgid "Priority updated."
+msgstr ""
+
+#: assets/admin/index.js:6
+msgid "Status updated."
+msgstr ""
+
+#: assets/admin/index.js:6
+msgid "Merge into another ticket…"
+msgstr ""
+
+#: assets/admin/index.js:6
+msgid "Find the ticket this one belongs to"
+msgstr ""
+
+#: assets/admin/index.js:6
+msgid "No other tickets found. Try a subject, a name or an email."
+msgstr ""
+
+#. translators: 1: this ticket, 2: the ticket it goes into
+#: assets/admin/index.js:6
+#, js-format
+msgid "Move all messages and files of \"%1$s\" into \"%2$s\" and delete \"%1$s\"? This cannot be undone. Nobody is emailed."
+msgstr ""
+
+#: assets/admin/index.js:6
+msgid "Tickets merged."
+msgstr ""
+
+#: assets/admin/index.js:6
+msgid "Merge into this"
+msgstr ""
+
+#: assets/admin/index.js:6
+msgid "internal"
+msgstr ""
+
+#: assets/admin/index.js:6
+msgid "Split into a new ticket from here…"
+msgstr ""
+
+#: assets/admin/index.js:6
+msgid "This message and every message after it move to a new ticket. Nobody is emailed. Subject of the new ticket:"
+msgstr ""
+
+#: assets/admin/index.js:6
+msgid "Split ticket"
+msgstr ""
+
+#: assets/admin/index.js:6
+msgid "is too large (max 5 MB)."
+msgstr ""
+
+#: assets/admin/index.js:6
+msgid "is not an allowed type (jpg, jpeg, png, gif, webp, pdf, txt)."
+msgstr ""
+
+#: assets/admin/index.js:6
+msgid "Remove file"
+msgstr ""
+
+#: assets/admin/index.js:6
+msgid "Internal note (not visible to customer)"
+msgstr ""
+
+#: assets/admin/index.js:6
+msgid "Reply sent."
+msgstr ""
+
+#: assets/admin/index.js:6
+msgid "Uploading files…"
+msgstr ""
+
+#: assets/admin/index.js:6
+msgid "Sending…"
+msgstr ""
+
+#: assets/admin/index.js:6
+msgid "Send reply"
+msgstr ""
+
+#: assets/admin/index.js:6
+msgid "Attach file"
+msgstr ""
+
+#: assets/admin/index.js:6
+msgid "Attach"
+msgstr ""
+
+#: assets/admin/index.js:6
+msgid "Insert canned reply"
+msgstr ""
+
+#: assets/admin/index.js:6
+msgid "Insert canned reply…"
+msgstr ""
+
+#: assets/admin/index.js:6
+msgid "Widget"
+msgstr ""
+
+#: assets/admin/index.js:6
+msgid "Theme-safe launcher with lazy load after interaction — not another always-on chat bubble that taxes every page view."
+msgstr ""
+
+#: assets/admin/index.js:6
+msgid "Storefront launcher"
+msgstr ""
+
+#: assets/admin/index.js:6
+msgid "Loads on storefront (skips checkout)"
+msgstr ""
+
+#: assets/admin/index.js:6
+msgid "No frontend assets"
+msgstr ""
+
+#: assets/admin/index.js:6
+msgid "Enable support widget"
+msgstr ""
+
+#: assets/admin/index.js:6
+msgid "When off, Deskovi adds zero scripts on the storefront. When on, a lazy launcher appears (not on cart/checkout)."
+msgstr ""
+
+#: assets/admin/index.js:6
+msgid "Placement"
+msgstr ""
+
+#: assets/admin/index.js:6
+msgid "Bottom right"
+msgstr ""
+
+#: assets/admin/index.js:6
+msgid "Bottom left"
+msgstr ""
+
+#: assets/admin/index.js:6
+msgid "Theme"
+msgstr ""
+
+#: assets/admin/index.js:6
+msgid "System"
+msgstr ""
+
+#: assets/admin/index.js:6
+msgid "Light"
+msgstr ""
+
+#: assets/admin/index.js:6
+msgid "Dark"
+msgstr ""
+
+#: assets/admin/index.js:6
+msgid "Launcher button label"
+msgstr ""
+
+#: assets/admin/index.js:6
+msgid "Leave empty to show an icon-only button. Add a short label like 'Chat with us' if you want text next to the icon."
+msgstr ""
+
+#: assets/admin/index.js:6
+msgid "Live behavior"
+msgstr ""
+
+#: assets/admin/index.js:6
+msgid "Logged-in shoppers and verified guests (order + email OTP) can open tickets. Unread badges poll while the panel is open. Full UI loads only after the launcher is opened; cart/checkout never get the bundle."
+msgstr ""
+
+#: assets/admin/index.js:6
+msgid "Save widget settings"
+msgstr ""
+
+#: assets/admin/index.js:6
+msgid "Work"
+msgstr ""
+
+#: assets/admin/index.js:6
+msgid "Insights"
+msgstr ""
+
+#: assets/admin/index.js:6
+msgid "Automate"
+msgstr ""
+
+#: assets/admin/index.js:6
+msgid "Channels"
+msgstr ""
+
+#: assets/admin/index.js:6
+msgid "Settings"
+msgstr ""
+
+#: assets/admin/index.js:6
+msgid "Failed to load Deskovi admin data."
+msgstr ""
+
+#: assets/admin/index.js:6
+msgid "Widget settings saved."
+msgstr ""
+
+#: assets/admin/index.js:6
+msgid "Privacy settings saved."
+msgstr ""
+
+#: assets/admin/index.js:6
+msgid "Deskovi sections"
+msgstr ""
