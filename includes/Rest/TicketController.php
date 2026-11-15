@@ -824,6 +824,11 @@ final class TicketController {
 			return new WP_Error( 'itsdesk_attachment_forbidden', __( 'You cannot access this file.', 'deskovi' ), array( 'status' => 403 ) );
 		}
 
+		// An agent limited to their own tickets may not fetch files from someone else's.
+		if ( $is_admin && ! Capabilities::can_access_ticket( (string) $attachment['ticket_id'] ) ) {
+			return new WP_Error( 'itsdesk_attachment_forbidden', __( 'You cannot access this file.', 'deskovi' ), array( 'status' => 403 ) );
+		}
+
 		// Files attached to an internal note are for agents only.
 		if ( ! $is_admin && in_array( (string) ( $attachment['message_id'] ?? '' ), $this->internal_message_ids( $ticket ), true ) ) {
 			return new WP_Error( 'itsdesk_attachment_forbidden', __( 'You cannot access this file.', 'deskovi' ), array( 'status' => 403 ) );

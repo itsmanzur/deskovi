@@ -190,12 +190,17 @@ final class AdminController {
 	private function desk_stats(): array {
 		$service = new TicketService();
 		$now     = time();
+		// Same rule as the ticket list: an agent limited to their own tickets counts only those and unassigned ones.
+		$scope = Capabilities::scope_agent_id();
 
 		$open       = 0;
 		$pending    = 0;
 		$unassigned = 0;
 		$oldest     = null;
 		foreach ( $service->open_rows() as $row ) {
+			if ( ! $this->in_scope( $row, $scope ) ) {
+				continue;
+			}
 			if ( 'pending' === ( $row['status'] ?? '' ) ) {
 				++$pending;
 			} else {
@@ -216,6 +221,9 @@ final class AdminController {
 		}
 		$from = (int) strtotime( (string) array_key_first( $days ) . ' 00:00:00 UTC' );
 		foreach ( $service->report_rows( gmdate( 'c', $from ), gmdate( 'c', $now + 60 ) ) as $row ) {
+			if ( ! $this->in_scope( $row, $scope ) ) {
+				continue;
+			}
 			$created = strtotime( (string) ( $row['created_at'] ?? '' ) );
 			$key     = false === $created ? '' : gmdate( 'Y-m-d', $created );
 			if ( isset( $days[ $key ] ) ) {
@@ -239,6 +247,21 @@ final class AdminController {
 			'new_7d'         => array_sum( $days ),
 			'days'           => $series,
 		);
+	}
+
+	/**
+	 * Does a ticket row count for an agent limited to $scope (0 = no limit)? Own and unassigned tickets do.
+	 *
+	 * @param array<string, mixed> $row   Ticket row with assigned_agent_id.
+	 * @param int                  $scope Agent id the user is limited to, 0 for none.
+	 */
+	private function in_scope( array $row, int $scope ): bool {
+		if ( $scope <= 0 ) {
+			return true;
+		}
+		$assigned = (int) ( $row['assigned_agent_id'] ?? 0 );
+
+		return 0 === $assigned || $assigned === $scope;
 	}
 
 	/**

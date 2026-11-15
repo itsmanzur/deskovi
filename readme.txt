@@ -89,6 +89,7 @@ The admin screen uses Inter (Latin) and Hind Siliguri (Bengali), both under the 
 * Add `TicketService::import()` (a quiet way for add-ons to store finished conversations: nothing is sent and no events fire), `itsdesk_ticket_split` and `itsdesk_ticket_imported` actions, and `itsdesk_ticket_scope` / `itsdesk_can_access_ticket` filters so an add-on can limit an agent to their own tickets
 * Docs & Features lists more of what the optional Deskovi Pro add-on offers (team tools, order tools, connections, importer)
 * Fix: a 1px vertical scrollbar on tab bars
+* Fix: an agent limited to their own tickets could still download attachments from, and see counts for, other agents' tickets
 
 = 1.4.0 =
 * New admin design: a grouped side menu (Work, Insights, Automate, Channels, Settings), a real Overview with what is waiting, new tickets per day and the latest tickets, a calmer ticket list and one set of type sizes

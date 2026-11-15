@@ -174,6 +174,8 @@ final class TicketService {
 	/**
 	 * Get ticket if allowed.
 	 *
+	 * Does not apply Capabilities::can_access_ticket(); callers acting for an agent must check it (the REST routes do).
+	 *
 	 * @param array{email: string, order_id: int}|null $guest Guest session.
 	 * @return array<string, mixed>|\WP_Error
 	 */
