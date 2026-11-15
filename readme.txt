@@ -2,9 +2,9 @@
 Contributors: getwpkit
 Tags: woocommerce, helpdesk, support, tickets, customer-service
 Requires at least: 6.6
-Tested up to: 7.0
+Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.4.0
+Stable tag: 1.5.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -84,12 +84,16 @@ The admin screen uses Inter (Latin) and Hind Siliguri (Bengali), both under the 
 
 == Changelog ==
 
+= 1.5.0 =
+* Split a ticket: move a message and everything after it into a new ticket for the same customer and order, with an internal note on both; files go with their message and the customer is not emailed
+* Add `TicketService::import()` (a quiet way for add-ons to store finished conversations: nothing is sent and no events fire), `itsdesk_ticket_split` and `itsdesk_ticket_imported` actions, and `itsdesk_ticket_scope` / `itsdesk_can_access_ticket` filters so an add-on can limit an agent to their own tickets
+* Docs & Features lists more of what the optional Deskovi Pro add-on offers (team tools, order tools, connections, importer)
+* Fix: a 1px vertical scrollbar on tab bars
+
 = 1.4.0 =
 * New admin design: a grouped side menu (Work, Insights, Automate, Channels, Settings), a real Overview with what is waiting, new tickets per day and the latest tickets, a calmer ticket list and one set of type sizes
 * New fonts: Inter for English and Hind Siliguri for Bengali, bundled with the plugin and loaded only on Deskovi's own admin screen (nothing comes from an outside server); Bengali text gets more line spacing
 * The chat widget now uses your store's own font
-* Split a ticket: move a message and everything after it into a new ticket for the same customer and order, with an internal note on both
-* Add `TicketService::import()` (a quiet way for add-ons to store finished conversations: nothing is sent and no events fire), `itsdesk_ticket_split` and `itsdesk_ticket_imported` actions, and `itsdesk_ticket_scope` / `itsdesk_can_access_ticket` filters so an add-on can limit an agent to their own tickets
 * Merge duplicate tickets: move every message and file of one ticket into another, with an internal note that records it and an action for add-ons
 * Ticket list: filter by status (including "Open or pending"), priority and category as well as assignee and search, with the CSV export following the same filters, and saved views per agent (up to 20)
 * Store managers are given ticket access once, when Deskovi is activated, instead of on every page load, so an owner can take it away (for example with Deskovi Pro's roles screen)
@@ -134,6 +138,12 @@ The admin screen uses Inter (Latin) and Hind Siliguri (Bengali), both under the 
 * Admin diagnostics
 
 == Upgrade Notice ==
+
+= 1.5.0 =
+Adds ticket splitting and the hooks Deskovi Pro 1.0 needs (quiet import, own-tickets-only scope). Update Deskovi before installing Deskovi Pro.
+
+= 1.4.0 =
+New admin design, ticket merge, list filters and saved views, accessibility fixes and an extension API for add-ons.
 
 = 1.3.0 =
 Adds ticket priority, bulk status/delete actions, CSV export, and order refund/resend-invoice actions from a ticket.
