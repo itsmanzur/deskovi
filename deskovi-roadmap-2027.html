@@ -1,0 +1,632 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+</head>
+<body>
+<title>Deskovi Roadmap 2027</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: one working column. Header with the overall count, tabs, then release cards stacked in ship order; each card is a checklist. */
+:root{
+  --bg:#F3F6F5; --surface:#FFFFFF; --surface-2:#EAF0EF; --ink:#12262A; --muted:#566D72; --line:#D5E0DE;
+  --brand:#1E4750; --teal:#0F766E; --mint:#17B8A6; --mint-soft:#DDF3EF;
+  --pro:#6D4AE6; --pro-soft:#ECE7FD; --free-ink:#0B5850;
+  --warn:#9A6200; --warn-soft:#FBF0D9; --done:#0C7A52; --done-soft:#DCF3E8; --drop:#7A8689; --drop-soft:#E6EBEA; --bad:#B4322B;
+  --f-head:'Space Grotesk',system-ui,sans-serif; --f-body:'IBM Plex Sans',system-ui,-apple-system,'Segoe UI',sans-serif; --f-mono:'IBM Plex Mono',ui-monospace,Consolas,monospace;
+  --r:14px;
+}
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){
+  --bg:#0B181B; --surface:#11252A; --surface-2:#173138; --ink:#E6F0EE; --muted:#9AB3B0; --line:#25424A;
+  --brand:#BFE6DF; --teal:#3BCDBB; --mint:#2DD4BF; --mint-soft:#143A3A;
+  --pro:#A995FF; --pro-soft:#2A2550; --free-ink:#7FE3D3;
+  --warn:#F0B95A; --warn-soft:#3A2E14; --done:#5FD6A3; --done-soft:#143527; --drop:#8FA3A5; --drop-soft:#1D3136; --bad:#FF8A80;
+  color-scheme:dark } }
+:root[data-theme="dark"]{
+  --bg:#0B181B; --surface:#11252A; --surface-2:#173138; --ink:#E6F0EE; --muted:#9AB3B0; --line:#25424A;
+  --brand:#BFE6DF; --teal:#3BCDBB; --mint:#2DD4BF; --mint-soft:#143A3A;
+  --pro:#A995FF; --pro-soft:#2A2550; --free-ink:#7FE3D3;
+  --warn:#F0B95A; --warn-soft:#3A2E14; --done:#5FD6A3; --done-soft:#143527; --drop:#8FA3A5; --drop-soft:#1D3136; --bad:#FF8A80;
+  color-scheme:dark }
+*,*::before,*::after{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:15px;line-height:1.55;margin:0}
+.wrap{max-width:1040px;margin:0 auto;padding-block:28px 64px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+h1,h2,h3{font-family:var(--f-head);color:var(--brand);letter-spacing:-.02em;text-wrap:balance;margin:0}
+h1{font-size:clamp(26px,4.4vw,38px);line-height:1.1}
+h2{font-size:22px;margin-bottom:6px}
+p{margin:0}
+a{color:var(--teal)}
+.mono{font-family:var(--f-mono);font-size:12px;letter-spacing:.04em}
+.muted{color:var(--muted)}
+:focus-visible{outline:2px solid var(--mint);outline-offset:2px;border-radius:6px}
+
+/* header */
+.top{display:flex;flex-wrap:wrap;gap:20px 28px;align-items:flex-end;justify-content:space-between;margin-bottom:22px}
+.top-l{min-width:0;flex:1 1 420px}
+.eyebrow{font-family:var(--f-mono);font-size:11.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--teal);margin-bottom:8px}
+.lede{color:var(--muted);max-width:62ch;margin-top:10px}
+.score{flex:0 1 300px;min-width:240px;background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:14px 16px}
+.score b{font-family:var(--f-head);font-size:28px;color:var(--brand);font-variant-numeric:tabular-nums}
+.score span{color:var(--muted);font-size:13px}
+.bar{height:8px;border-radius:99px;background:var(--surface-2);overflow:hidden;display:flex;margin-top:8px}
+.bar i{display:block;height:100%}
+.bar .b-done{background:var(--done)} .bar .b-doing{background:var(--warn)}
+.save{display:flex;align-items:center;gap:8px;margin-top:10px;font-size:12.5px;color:var(--muted)}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--drop);flex-shrink:0}
+.dot.ok{background:var(--done)} .dot.wait{background:var(--warn)} .dot.err{background:var(--bad)}
+
+/* tabs */
+.tabs{display:flex;gap:4px;flex-wrap:wrap;border-bottom:1px solid var(--line);margin-bottom:20px}
+.tabs a{padding:9px 14px;text-decoration:none;color:var(--muted);font-weight:500;border-bottom:2px solid transparent;margin-bottom:-1px;font-size:14.5px}
+.tabs a[aria-current="page"]{color:var(--brand);border-bottom-color:var(--mint)}
+.tabs a:hover{color:var(--ink)}
+
+/* filters */
+.filters{display:flex;flex-wrap:wrap;gap:10px 18px;align-items:center;margin-bottom:18px}
+.seg{display:inline-flex;flex-wrap:wrap;background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:3px;gap:2px}
+.seg button{border:0;background:none;color:var(--muted);font:500 13px var(--f-body);padding:6px 11px;border-radius:7px;cursor:pointer}
+.seg button[aria-pressed="true"]{background:var(--brand);color:var(--bg)}
+.tools{margin-left:auto;display:flex;gap:8px;flex-wrap:wrap}
+.btn{border:1px solid var(--line);background:var(--surface);color:var(--ink);font:500 13px var(--f-body);padding:7px 12px;border-radius:9px;cursor:pointer}
+.btn:hover{border-color:var(--mint)}
+
+/* release cards */
+.rel{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);margin-bottom:16px;overflow:hidden}
+.rel-h{padding:16px 18px 14px;display:grid;grid-template-columns:1fr auto;gap:6px 18px;align-items:start;border-bottom:1px solid var(--line)}
+.rel-v{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:6px}
+.ver{font-family:var(--f-mono);font-size:12px;padding:3px 9px;border-radius:99px;border:1px solid var(--line);white-space:nowrap}
+.ver.free{background:var(--mint-soft);color:var(--free-ink);border-color:transparent}
+.ver.pro{background:var(--pro-soft);color:var(--pro);border-color:transparent}
+.rel-h h2{font-size:20px}
+.rel-goal{color:var(--muted);font-size:14px;max-width:70ch;margin-top:4px}
+.rel-meta{text-align:right;min-width:150px}
+.rel-meta .when{font-family:var(--f-mono);font-size:12px;color:var(--muted)}
+.rel-meta .cnt{font-family:var(--f-head);font-size:18px;color:var(--brand);font-variant-numeric:tabular-nums}
+.rel-meta .bar{width:150px;margin-left:auto}
+.items{list-style:none;margin:0;padding:0}
+.it{border-bottom:1px solid var(--line)}
+.it:last-child{border-bottom:0}
+.it[data-s="done"] .it-t{color:var(--muted);text-decoration:line-through;text-decoration-color:var(--line)}
+.it[data-s="drop"] .it-t{color:var(--drop);text-decoration:line-through}
+.it-row{display:grid;grid-template-columns:auto 1fr auto;gap:10px 12px;align-items:center;padding:10px 18px}
+.st{font:600 12px var(--f-body);border-radius:99px;padding:5px 8px;border:1px solid var(--line);background:var(--surface-2);color:var(--muted);cursor:pointer;min-width:112px}
+.st[data-s="doing"]{background:var(--warn-soft);color:var(--warn);border-color:transparent}
+.st[data-s="done"]{background:var(--done-soft);color:var(--done);border-color:transparent}
+.st[data-s="drop"]{background:var(--drop-soft);color:var(--drop);border-color:transparent}
+.st:disabled{cursor:default;opacity:.8}
+.it-main{min-width:0;background:none;border:0;padding:0;text-align:left;color:inherit;font:inherit;cursor:pointer;display:block;width:100%}
+.it-t{font-weight:500}
+.it-id{font-family:var(--f-mono);font-size:11px;color:var(--muted);margin-right:6px}
+.chips{display:flex;gap:5px;flex-wrap:wrap;justify-content:flex-end}
+.chip{font:500 11px var(--f-mono);padding:2px 7px;border-radius:6px;border:1px solid var(--line);color:var(--muted);white-space:nowrap}
+.chip.free{color:var(--free-ink);background:var(--mint-soft);border-color:transparent}
+.chip.pro{color:var(--pro);background:var(--pro-soft);border-color:transparent}
+.chip.both{color:var(--brand);background:var(--surface-2);border-color:transparent}
+.chip.biz{color:var(--warn);background:var(--warn-soft);border-color:transparent}
+.chip.must{color:var(--ink);border-color:var(--ink)}
+.it-more{padding:0 18px 14px 18px;display:grid;gap:8px;font-size:14px}
+.it-more p{max-width:74ch}
+.why{color:var(--muted)}
+.why b{color:var(--ink);font-weight:600}
+.note{width:100%;font:14px var(--f-body);color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:9px;padding:8px 10px;resize:vertical;min-height:38px}
+.empty{padding:18px;color:var(--muted);font-size:14px}
+
+/* market */
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:14px;margin:14px 0 26px}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:16px;min-width:0}
+.card h3{font-size:17px;margin-bottom:2px}
+.card .kind{font-family:var(--f-mono);font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em}
+.card dl{margin:10px 0 0;display:grid;gap:7px;font-size:13.5px}
+.card dt{font-weight:600;font-size:12px;color:var(--muted)}
+.card dd{margin:0}
+.take{display:grid;gap:10px;margin:12px 0 26px;padding:0;list-style:none;counter-reset:t}
+.take li{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:12px 16px}
+.take b{color:var(--brand)}
+.tbl{overflow-x:auto;border:1px solid var(--line);border-radius:var(--r);background:var(--surface);margin:12px 0 10px}
+table{border-collapse:collapse;width:100%;min-width:760px;font-size:13px}
+th,td{padding:8px 10px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}
+thead th{font-family:var(--f-mono);font-size:11px;letter-spacing:.05em;text-transform:uppercase;color:var(--muted);background:var(--surface-2);white-space:nowrap}
+tbody tr:last-child td{border-bottom:0}
+td.us{background:var(--mint-soft)}
+.y{color:var(--done);font-weight:600} .h{color:var(--teal);font-weight:600} .p{color:var(--pro);font-weight:600} .n{color:var(--bad);font-weight:600} .q{color:var(--muted)}
+.legend{display:flex;gap:14px;flex-wrap:wrap;font-size:12.5px;color:var(--muted);margin-bottom:26px}
+.src{columns:2 320px;gap:26px;font-size:13.5px;padding-left:18px;margin:10px 0 0}
+.src li{margin-bottom:6px;break-inside:avoid}
+.callout{background:var(--warn-soft);color:var(--ink);border-radius:var(--r);padding:12px 16px;font-size:13.5px;margin:14px 0}
+.sheet{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:14px 16px;margin-bottom:18px}
+.sheet textarea{width:100%;height:120px;font:12px var(--f-mono);background:var(--bg);color:var(--ink);border:1px solid var(--line);border-radius:9px;padding:8px}
+@media (max-width:640px){
+  .rel-h{grid-template-columns:1fr}.rel-meta{text-align:left}.rel-meta .bar{margin-left:0}
+  .it-row{grid-template-columns:1fr;gap:6px}.chips{justify-content:flex-start}.st{justify-self:start}
+  .tools{margin-left:0}
+}
+@media (prefers-reduced-motion:no-preference){.bar i{transition:width .3s}}
+</style>
+
+<div class="wrap">
+  <header class="top">
+    <div class="top-l">
+      <div class="eyebrow">Deskovi Free + Pro · researched 16 Nov 2026</div>
+      <h1>Roadmap 2027</h1>
+      <p class="lede">What to build next in each release, and why: every item names the competitor fact behind it. Set a status on each line as you go; the counts update.</p>
+    </div>
+    <div class="score" aria-live="polite">
+      <div><b id="sc-done">0</b> <span>of <span id="sc-all">0</span> done · <span id="sc-doing">0</span> in progress</span></div>
+      <div class="bar" aria-hidden="true"><i class="b-done" id="sc-b1" style="width:0"></i><i class="b-doing" id="sc-b2" style="width:0"></i></div>
+      <div class="save"><i class="dot" id="save-dot"></i><span id="save-txt">Progress is saved in this browser.</span></div>
+    </div>
+  </header>
+
+  <nav class="tabs" aria-label="Views">
+    <a href="#roadmap" data-tab="roadmap">Roadmap</a>
+    <a href="#market" data-tab="market">Competitors</a>
+    <a href="#matrix" data-tab="matrix">Feature matrix</a>
+    <a href="#sources" data-tab="sources">Sources</a>
+  </nav>
+
+  <section id="v-roadmap" data-view="roadmap">
+    <div class="filters">
+      <div class="seg" role="group" aria-label="Plugin" id="f-plugin">
+        <button type="button" data-f="all" aria-pressed="true">All</button>
+        <button type="button" data-f="free" aria-pressed="false">Free</button>
+        <button type="button" data-f="pro" aria-pressed="false">Pro</button>
+        <button type="button" data-f="biz" aria-pressed="false">Business</button>
+      </div>
+      <div class="seg" role="group" aria-label="Status" id="f-status">
+        <button type="button" data-f="all" aria-pressed="true">Any status</button>
+        <button type="button" data-f="open" aria-pressed="false">Open</button>
+        <button type="button" data-f="doing" aria-pressed="false">In progress</button>
+        <button type="button" data-f="done" aria-pressed="false">Done</button>
+      </div>
+      <div class="seg" role="group" aria-label="Priority" id="f-prio">
+        <button type="button" data-f="all" aria-pressed="true">Any priority</button>
+        <button type="button" data-f="must" aria-pressed="false">Must only</button>
+      </div>
+      <div class="tools">
+        <button type="button" class="btn" id="btn-export">Export progress</button>
+        <button type="button" class="btn" id="btn-import">Import progress</button>
+        <input type="file" id="file-import" accept=".json,application/json" hidden>
+      </div>
+    </div>
+    <div class="sheet" id="sheet" hidden>
+      <p class="muted" id="sheet-msg" style="margin-bottom:8px"></p>
+      <textarea id="sheet-text" aria-label="Progress data"></textarea>
+      <div style="display:flex;gap:8px;margin-top:8px;flex-wrap:wrap">
+        <button type="button" class="btn" id="sheet-apply" hidden>Apply this text</button>
+        <button type="button" class="btn" id="sheet-close">Close</button>
+      </div>
+    </div>
+    <div id="releases"></div>
+  </section>
+
+  <section id="v-market" data-view="market" hidden>
+    <h2>What the research says</h2>
+    <p class="muted">Read from each vendor's own pricing, feature and WordPress.org pages on 16 Nov 2026. "Not found" means the page did not say it, not that the product lacks it.</p>
+    <ul class="take">
+      <li><b>Customers expect an AI answer before a ticket.</b> SupportCandy gives an AI chatbot in its free plugin; JS Help Desk, Support Genix, ThriveDesk and Gorgias sell one. Deskovi has agent-side AI and a self-service panel, but nothing that answers the customer. This is the largest gap. → Pro 1.2</li>
+      <li><b>Order actions are where Deskovi leads.</b> Every WordPress helpdesk checked shows order details; none of their pages mention refunding, cancelling or editing an order from the ticket. Deskovi does all of it. Returns and tracking extend that lead. → Pro 1.3</li>
+      <li><b>Other free plugins give more reach.</b> Fluent Support ships a customer portal, REST API and importer free; SupportCandy ships 15 custom field types free. Deskovi Free has no My Account page or order "Get help" button yet. → Free 1.6</li>
+      <li><b>Fluent Support ships every 4 to 8 weeks.</b> Six feature releases between April and November 2026 (agent groups, MCP server, multi-provider AI, advanced reports, remote portal, scheduled replies). A steady cadence matters as much as any one feature.</li>
+      <li><b>Lifetime and first-year deals are normal here.</b> SupportCandy and Support Genix sell lifetime licenses; Fluent Support and Heroic Inbox discount the first year by 40 to 50%. Deskovi is annual only.</li>
+      <li><b>Price position is fine.</b> $79 for one site matches SupportCandy and undercuts Fluent Support ($129), JS Help Desk ($99) and Heroic Inbox ($199). No reason to cut price; the work is features and proof.</li>
+    </ul>
+
+    <h2>Self-hosted WordPress helpdesks</h2>
+    <div class="grid">
+      <article class="card"><span class="kind">Closest rival</span><h3>Fluent Support</h3>
+        <dl><dt>Price per year</dt><dd>$129 / $249 / $399 for 1 / 5 / 50 sites; 40% off the first year. No lifetime found.</dd>
+        <dt>WordPress.org</dt><dd>10,000+ installs, 4.6 from 69 ratings, v2.5.0 (2 Nov 2026).</dd>
+        <dt>Free</dt><dd>REST API, 2FA, customer portal, importer, unlimited agents.</dd>
+        <dt>Pro</dt><dd>Email piping, saved replies, workflows, incoming webhook, custom fields, ratings, time tracking, merge, split, collision detection, Slack / Telegram / WhatsApp / Discord, AI (OpenAI, Gemini, Anthropic).</dd>
+        <dt>Shipped in 2026</dt><dd>Agent groups, MCP server, AI ticket audit, advanced reports, remote portal, scheduled replies.</dd>
+        <dt>Not found</dt><dd>SLA, refunds from a ticket, live chat, chatbot.</dd></dl></article>
+      <article class="card"><span class="kind">Most generous free tier</span><h3>SupportCandy</h3>
+        <dl><dt>Price</dt><dd>$79 / $149 / $299 per year for 1 / 5 / 20 sites, or lifetime $249 / $499 / $999. Every tier has all add-ons.</dd>
+        <dt>WordPress.org</dt><dd>10,000+ installs, 4.9 from 289 ratings, v3.5.5 (3 Nov 2026).</dd>
+        <dt>Free</dt><dd>AI chatbot and AI assistant with your own OpenAI or Gemini key, 15 custom field types, agent roles, REST API.</dd>
+        <dt>Paid</dt><dd>Email piping (IMAP, Gmail, Exchange), WooCommerce (order picker, order history, total spent), SLA, workflows, canned replies, survey, reports, timer, agent groups, Slack, webhooks.</dd>
+        <dt>Not found</dt><dd>Refunds from a ticket, WhatsApp.</dd></dl></article>
+      <article class="card"><span class="kind">Widest feature list</span><h3>JS Help Desk</h3>
+        <dl><dt>Price per year</dt><dd>$99 / $149 / $249 for 1 / 5 / 25 sites, all nine add-on packs included.</dd>
+        <dt>WordPress.org</dt><dd>7,000+ installs, 3.7 from 74 ratings, v5.0.7 (16 Nov 2026).</dd>
+        <dt>Free</dt><dd>Portal, guest tickets, custom fields, canned responses, reports, AI copilot.</dd>
+        <dt>Paid packs</dt><dd>Email (Gmail, Microsoft 365, IMAP), WooCommerce orders in the ticket, SLA and automation with escalation and recurring tickets, AI agent that answers from your content (Anthropic, OpenAI or a local model), live chat, knowledge base, time tracking, REST API, webhooks, Slack / Teams / Telegram / Discord.</dd>
+        <dt>Not found</dt><dd>Refund action, WhatsApp, mobile app. The rating is the weak point.</dd></dl></article>
+      <article class="card"><span class="kind">Cheapest multi-site</span><h3>Support Genix</h3>
+        <dl><dt>Price</dt><dd>$99 per year (5 sites), $149 (100 sites); lifetime $149 / $299 / $399.</dd>
+        <dt>WordPress.org</dt><dd>3,000+ installs, 4.5 from 11 ratings, v1.4.59 (12 Nov 2026).</dd>
+        <dt>Free</dt><dd>Portal, saved replies, basic custom fields, AI reply assistant, AI docs writer, basic WooCommerce order history.</dd>
+        <dt>Pro</dt><dd>Email to ticket, AI chatbot, WhatsApp, Slack, webhooks, business hours, advanced reports. AI uses your own OpenAI or Claude key.</dd>
+        <dt>Not found</dt><dd>Refund action, workflow builder, SLA, ratings, time tracking, REST API.</dd></dl></article>
+      <article class="card"><span class="kind">Email-first, premium price</span><h3>Heroic Inbox</h3>
+        <dl><dt>Price per year</dt><dd>$199 / $499 / $749 for 1 / 3 / 5 sites; half price the first year. No free version.</dd>
+        <dt>Included</dt><dd>Gmail, Outlook and IMAP shared inbox on every tier. Automation, canned responses and reports from $499. WooCommerce orders, subscriptions and lifetime value only at $749.</dd>
+        <dt>Not found</dt><dd>SLA, ratings, custom fields, time tracking, chatbot. The page says there is no portal, live chat or social channel.</dd></dl></article>
+      <article class="card"><span class="kind">Older players</span><h3>Awesome Support and WSDesk</h3>
+        <dl><dt>Awesome Support</dt><dd>$149 to $409 per year in bundles. 6,000+ installs, 3.5 from 194 ratings. WooCommerce add-on puts a "Get help" button on each order.</dd>
+        <dt>WSDesk (ELEX)</dt><dd>No price on the vendor page. Free version has IMAP and Google email piping and canned responses. 200+ installs, 3.9 from 7 ratings.</dd></dl></article>
+    </div>
+
+    <h2>Hosted services, as a benchmark</h2>
+    <div class="grid">
+      <article class="card"><span class="kind">Hosted, flat price</span><h3>ThriveDesk</h3>
+        <dl><dt>Price per month</dt><dd>$29 / $69 / $129 for 2 / 5 / unlimited teammates.</dd>
+        <dt>Has</dt><dd>WooCommerce order status and payment history beside the conversation, live chat, help centers, an AI that answers from help-center content and hands over to a person, AI drafts and summaries.</dd>
+        <dt>Not found</dt><dd>Cancel, address edit, returns, shipment tracking, WhatsApp, SMS. Data lives with them.</dd></dl></article>
+      <article class="card"><span class="kind">Hosted, e-commerce leader</span><h3>Gorgias</h3>
+        <dl><dt>Price</dt><dd>Metered by tickets; the AI agent costs about $0.90 to $1.00 per automated conversation, $1.50 over the bundle. The page showed two different plan price sets, so plan prices are unconfirmed.</dd>
+        <dt>Has</dt><dd>Shopify-first order data, cancel and discount inside the conversation, AI that automates returns and order tracking, email, chat, SMS, voice, WhatsApp, Instagram, Facebook, revenue attribution.</dd>
+        <dt>Takeaway</dt><dd>The direction of the market: resolve order questions automatically and prove revenue. WooCommerce depth is not described.</dd></dl></article>
+    </div>
+  </section>
+
+  <section id="v-matrix" data-view="matrix" hidden>
+    <h2>Feature matrix</h2>
+    <p class="muted">Deskovi against the five self-hosted rivals with the clearest public feature lists.</p>
+    <div class="tbl"><table>
+      <thead><tr><th>Capability</th><th>Deskovi</th><th>Fluent Support</th><th>SupportCandy</th><th>JS Help Desk</th><th>Support Genix</th><th>Heroic Inbox</th></tr></thead>
+      <tbody id="mx"></tbody>
+    </table></div>
+    <div class="legend"><span><span class="y">Free</span> in the free plugin</span><span><span class="p">Paid</span> in a paid plan or add-on</span><span><span class="h">Has</span> offered, tier not stated</span><span><span class="n">No</span> the vendor says it is not offered, or Deskovi does not have it</span><span><span class="q">n/f</span> not found on the vendor's pages</span></div>
+    <div class="callout">The cells in the Deskovi column marked "No" are the roadmap: each one maps to an item in the Roadmap tab.</div>
+  </section>
+
+  <section id="v-sources" data-view="sources" hidden>
+    <h2>Sources</h2>
+    <p class="muted">All read on 16 Nov 2026. Prices and features change; re-check the vendor page before quoting any of this publicly.</p>
+    <ul class="src">
+      <li><a href="https://fluentsupport.com/pricing">Fluent Support pricing</a>, <a href="https://fluentsupport.com/fluent-support-free-vs-pro/">free vs pro</a>, <a href="https://wordpress.org/plugins/fluent-support/">WordPress.org listing and changelog</a></li>
+      <li><a href="https://supportcandy.net/pricing/">SupportCandy pricing</a>, <a href="https://wordpress.org/plugins/supportcandy/">WordPress.org listing</a></li>
+      <li><a href="https://jshelpdesk.com/pricing/">JS Help Desk pricing</a>, <a href="https://wordpress.org/plugins/js-support-ticket/">WordPress.org listing</a></li>
+      <li><a href="https://supportgenix.com/pricing/">Support Genix pricing</a>, <a href="https://wordpress.org/plugins/support-genix-lite/">WordPress.org listing</a></li>
+      <li><a href="https://herothemes.com/plugins/heroic-inbox/">Heroic Inbox</a>, <a href="https://herothemes.com/pricing/">HeroThemes pricing</a></li>
+      <li><a href="https://getawesomesupport.com/pricing/">Awesome Support pricing</a>, <a href="https://wordpress.org/plugins/awesome-support/">WordPress.org listing</a></li>
+      <li><a href="https://elextensions.com/plugin/wsdesk-wordpress-helpdesk-plugin/">WSDesk by ELEX</a>, <a href="https://wordpress.org/plugins/elex-helpdesk-customer-support-ticket-system/">WordPress.org listing</a></li>
+      <li><a href="https://www.thrivedesk.com/pricing/">ThriveDesk pricing</a>, <a href="https://www.thrivedesk.com/woocommerce-help-desk-plugin">ThriveDesk WooCommerce article</a> (vendor-written)</li>
+      <li><a href="https://www.gorgias.com/pricing">Gorgias pricing</a> and home page</li>
+      <li>"Where is my order" is about 18% of requests: <a href="https://www.ringly.io/blog/ecommerce-customer-support-statistics-2026">vendor blog quoting Gorgias data</a>, indicative only</li>
+    </ul>
+    <div class="callout"><b>Limits of this research.</b> Nothing was tested hands-on; it is what the vendors publish. Two vendor pages contradict themselves (Fluent Support on agent management, Gorgias on plan prices). Awesome Support's install count came from a page summary, not the exact text. The target dates in the roadmap are proposals, not commitments.</div>
+  </section>
+</div>
+
+<script>
+(function(){
+'use strict';
+/* ------------------------------------------------------------------ data */
+var RELEASES = [
+ {id:'launch', free:'Free 1.5.0', pro:'Pro 1.0.0', name:'Launch', when:'Nov to Dec 2026',
+  goal:'Both plugins are built and pass their checks. What is left is publishing, Freemius settings and proving the features against real accounts.',
+  items:[
+   ['L1','free','must','S','Publish Deskovi 1.5.0 on WordPress.org','Merge the dev branch to main, tag 1.5.0, push to SVN trunk and tags. Pro 1.0.0 requires 1.5.0, so this goes first.','Release order: Pro refuses to run on an older Deskovi.'],
+   ['L2','pro','must','S','Set the Freemius plan rules','Turn on "block features after expiry", set the refund period to 14 days and switch on the prorated upgrade discount.','The sales page promises these three things.'],
+   ['L3','pro','must','S','Upload the zip to Freemius and test the served package','Install the package Freemius serves on a clean site: activate, enter a license, then delete the plugin and confirm the cleanup ran.','Freemius adds its own code to the package; the uninstall cleanup has only been tested in the test suite.'],
+   ['L4','pro','must','L','Run the 47 live checks on an HTTPS staging site','Gmail, Microsoft 365, IMAP, OpenAI, Anthropic, Slack, Discord, Teams, Telegram, refunds on a test gateway, license states. Write the date beside each line in docs/LIVE-CHECKS.md.','None of these can be proven on a local site.'],
+   ['L5','free','must','S','Give the Pro "Learn more" link a real address','Set the sales page as the default of the itsdesk_pro_url filter.','Free-only users currently see Pro teasers with no link.'],
+   ['L6','biz','must','M','Publish the sales site with terms, refund and privacy pages','Use the deskovi-demo plugin for the landing page. Confirm the "14-day money-back" wording matches Freemius.','Freemius is the merchant of record; the legal pages must exist before checkout goes live.'],
+   ['L7','biz','should','S','Run the WordPress.org Plugin Check tool on both builds','So far only PHPCS with the same rule families has been run.','wp.org reviewers use Plugin Check.'],
+   ['L8','biz','should','S','Watch activation errors for the first two weeks','Check the Freemius dashboard and the "Recent errors" list on a test site daily.','First real installs find what tests cannot.']
+  ]},
+ {id:'r16', free:'Free 1.6', pro:'Pro 1.1', name:'Reach', when:'Jan to Feb 2027',
+  goal:'Let customers start a ticket from the places they already visit, and close the quick gaps against Fluent Support and SupportCandy.',
+  items:[
+   ['A1','free','must','M','Support tab in WooCommerce My Account','List, open and reply to tickets from My Account, not only from the chat widget.','Fluent Support, JS Help Desk and Support Genix ship a customer portal in their free plugins.'],
+   ['A2','free','must','S','"Get help" button on every order','On the My Account order list and the order page. Opens a ticket already linked to that order.','Awesome Support and SupportCandy let the customer pick an order; it also makes every ticket order-aware.'],
+   ['A3','free','should','S','Shortcode and block for the ticket form and "my tickets"','So a store can build a Support page in its own theme.','Fluent Support offers both a shortcode and a block.'],
+   ['A4','free','should','M','Customer-visible fields on the ticket form','A few field types (text, dropdown) shown to the customer. Pro keeps the internal fields.','SupportCandy gives 15 field types free; JS Help Desk and Support Genix give basic ones free.'],
+   ['A5','both','should','M','Ship translations with both plugins','Bengali first (the font is already bundled), then Spanish, German and French.','Only .pot files ship today; wp.org shows translated plugins to more stores.'],
+   ['A6','free','should','S','First-run setup in Free','Three steps on first activation: widget on or off, notification address, categories.','Pro has a setup checklist; Free drops a new user on an empty screen.'],
+   ['A7','pro','should','M','Scheduled replies and snooze','Send a reply later, or hide a ticket until a date and bring it back.','Fluent Support added scheduled replies in 2.5.0 (Nov 2026).'],
+   ['A8','pro','should','M','Tickets from forms and an incoming webhook','Contact Form 7, WPForms, Fluent Forms and Gravity Forms submissions become tickets; a signed URL does the same for anything else.','Fluent Support Pro has an incoming webhook and form integrations.'],
+   ['A9','pro','should','S','Google Gemini as an AI provider, and a guide for local models','Add Gemini beside OpenAI and Anthropic. Document running a local model through the OpenAI-compatible address that already exists.','Fluent Support and SupportCandy support Gemini; JS Help Desk advertises local models.'],
+   ['A10','pro','should','S','Richer customer card','Lifetime value, subscriptions and last orders beside the ticket. Verify the WooCommerce Subscriptions card on a real store.','Heroic Inbox sells exactly this at its $749 tier.'],
+   ['A11','biz','could','S','Test a first-year discount or a lifetime tier','Decide with numbers: run one offer for a month and compare.','SupportCandy and Support Genix sell lifetime; Fluent Support and Heroic Inbox discount year one.']
+  ]},
+ {id:'r17', free:'Free 1.7', pro:'Pro 1.2', name:'Answers', when:'Mar to May 2027',
+  goal:'Answer the customer before a ticket exists. A small knowledge base in Free, and an AI that answers from it in Pro, with a person one click away.',
+  items:[
+   ['B1','free','must','L','Help articles: a simple knowledge base','An article type with categories, a public help page and a search block.','JS Help Desk and ThriveDesk have one; SupportCandy and Fluent Support connect to one. Today Deskovi can only suggest ordinary site pages.'],
+   ['B2','free','must','M','Article search inside the widget','Show matching articles while the customer types, before the form is sent.','ThriveDesk does this in its widget; it is the base the AI answers build on.'],
+   ['B3','pro','must','L','AI answers in the widget','Answers from your help articles and the customer\'s own order, shows its sources, and hands over to a person in one click. Your own key, personal data masked, daily limit, off by default.','SupportCandy gives a chatbot free; JS Help Desk, Support Genix, ThriveDesk and Gorgias sell one. This is the largest gap.'],
+   ['B4','pro','should','S','Suggested articles for agents','Inside a ticket, show articles that match and insert a link with one click.','Fluent Support 2.4 added article suggestions.'],
+   ['B5','pro','should','M','"No answer found" report','List the questions the widget could not answer, grouped, so you know which articles to write.','Turns the self-service counts Deskovi already keeps into a to-do list.'],
+   ['B6','pro','should','M','AI triage as an automation action','Apply the suggested category, priority and tag automatically. Starts in practice mode like every rule.','WSDesk sells auto-tagging; Fluent Support has sentiment analysis.'],
+   ['B7','pro','could','M','Draft a help article from a resolved ticket','The AI writes a draft; an agent edits and publishes it.','Support Genix lists an AI docs writer.'],
+   ['B8','pro','could','M','Use an existing knowledge base plugin instead','Read articles from BetterDocs or Heroic KB when a store already has one.','SupportCandy integrates BetterDocs rather than building its own.']
+  ]},
+ {id:'r18', free:'Free 1.8', pro:'Pro 1.3', name:'Order problems', when:'Jun to Aug 2027',
+  goal:'Go deeper where no WordPress rival goes: returns, exchanges, tracking and subscriptions handled from the ticket.',
+  items:[
+   ['C1','free','must','M','Guided "problem with my order" form','Pick the order, pick the items, pick the problem (not arrived, damaged, wrong item, want to return), add photos.','Structured intake is what makes returns and reports possible.'],
+   ['C2','pro','must','L','Return and exchange requests','The customer asks, an agent approves, and one step issues the refund, replacement order or coupon. Customer emails for each stage.','Gorgias markets automated returns; no WordPress helpdesk page mentions it.'],
+   ['C3','pro','must','M','Shipment tracking integrations','Read tracking from Advanced Shipment Tracking, ShipStation and WooCommerce Shipping; show live status in the widget and the ticket.','"Where is my order" is about 18% of requests (vendor data).'],
+   ['C4','pro','should','M','Public "Track my order" block','Order number plus email, verified with a one-time code. No ticket needed.','Removes the most common question before it is asked.'],
+   ['C5','pro','should','M','Subscription actions from a ticket','Pause, cancel or change the next payment date for WooCommerce Subscriptions.','Heroic Inbox shows subscriptions but its page lists no actions.'],
+   ['C6','pro','should','M','Return reasons and problem products report','Which products and reasons cause the most tickets and refunds.','Deskovi already counts tickets per product; reasons make it actionable.'],
+   ['C7','pro','could','M','Proactive delay notice','A rule: when an order has been processing for N days, email the customer or open a ticket.','Gorgias and others push proactive order updates.'],
+   ['C8','pro','could','M','Money in reports','Refunds avoided by a coupon or replacement, and orders placed after a support conversation.','Gorgias sells revenue attribution as a headline feature.']
+  ]},
+ {id:'r19', free:'Free 1.9', pro:'Pro 1.4', name:'Teams and many stores', when:'Sep to Nov 2027',
+  goal:'Make Deskovi fit larger teams and agencies that run several stores, the buyers of the Business and Agency plans.',
+  items:[
+   ['D1','pro','must','M','Departments with their own routing and hours','Agent groups, rules that route to a group, working hours per group.','Fluent Support added agent groups in 2.1.0; SupportCandy sells them as an add-on.'],
+   ['D2','pro','should','L','One inbox for several stores','Connect other stores to a main Deskovi with signed keys; tickets and order actions show which store they belong to.','Fluent Support 2.4.5 added a remote portal; the Agency plan covers 25 sites.'],
+   ['D3','pro','should','M','MCP server','Let AI tools such as Claude or ChatGPT read tickets and draft replies through scoped keys.','Fluent Support shipped one in 2.3.0 (Jul 2026).'],
+   ['D4','pro','should','S','Scheduled report emails and exports','Send a chosen report as CSV on a schedule; save report views.','Fluent Support 2.4 advanced reports; JS Help Desk scheduled exports.'],
+   ['D5','free','should','S','Agents open a ticket for a customer','For phone calls and in-person requests, with the customer notified or not.','Fluent Support added agent-initiated tickets in 2.1.0.'],
+   ['D6','both','should','M','Speed at 250,000 tickets','Faster deep pagination and an archive for old tickets.','The last scale test (100,000 tickets) showed deep pages taking 1 to 2 seconds.'],
+   ['D7','pro','could','M','Escalation rules and recurring tickets','Escalate after a missed target; create a ticket on a schedule.','JS Help Desk includes both in its automation pack.'],
+   ['D8','pro','could','M','AI quality check for managers','Review a sample of replies for tone, policy and accuracy.','Fluent Support 2.4 added an AI ticket audit.']
+  ]},
+ {id:'r20', free:'Free 2.0', pro:'Pro 2.0', name:'More channels', when:'2028, first half',
+  goal:'Reach customers on chat and messaging without giving up local-first: every channel uses the store\'s own account.',
+  items:[
+   ['E1','pro','should','L','Live chat in the widget','Real-time when an agent is online; becomes a ticket when nobody is.','JS Help Desk and ThriveDesk have live chat; Heroic Inbox says it does not.'],
+   ['E2','pro','should','L','WhatsApp through your own Meta account','Messages become tickets and replies go back, with no relay server.','Support Genix and Fluent Support connect WhatsApp.'],
+   ['E3','both','should','M','Agent app for phones','An installable web app with push notifications for new tickets and replies.','The self-hosted rivals checked do not mention a mobile app; hosted services do.'],
+   ['E4','pro','could','M','SMS through your own Twilio account','Order-linked text messages as a ticket channel.','WSDesk sells an SMS add-on; Gorgias sells SMS by volume.'],
+   ['E5','pro','could','L','Facebook and Instagram messages','Only if customers ask for it after WhatsApp ships.','Gorgias has both; ThriveDesk lists social as "soon".']
+  ]}
+];
+var MATRIX = [
+ ['Email becomes tickets','P:local, no relay','P','P','P','P','P'],
+ ['Order details beside the ticket','Y','P','P','P','Y:basic','P:top tier'],
+ ['Refund, cancel, edit order from the ticket','Y:refund · P:rest','Q','Q','Q','Q','Q'],
+ ['Automation rules','P','P','P','P','Y:auto-assign only','P'],
+ ['SLA and response targets','P','Q','P','P','Q','Q'],
+ ['AI drafts and summaries for agents','P','P','Y','Y','Y','Q'],
+ ['AI that answers customers','N','Q','Y','P','P','Q'],
+ ['Knowledge base','N','P:suggestions','P:integration','P','H:docs writer','Q'],
+ ['Customer portal page','N:widget only','Y','Q','Y','Y','N'],
+ ['Custom fields','P:internal','P','Y','Y','Y:basic','Q'],
+ ['Satisfaction rating','P','P','P','P','Q','Q'],
+ ['Time tracking','P','P','P','P','Q','Q'],
+ ['Slack, Teams, Discord, Telegram','P','P','P:Slack','P','P:Slack','Q'],
+ ['WhatsApp','N','P','Q','Q','P','N'],
+ ['Live chat','N','Q','Q','P','Q','N'],
+ ['REST API and webhooks','P','Y:API · P:webhook','Y:API · P:webhooks','P','P:webhooks','H:webhooks'],
+ ['Scheduled replies','N','P','Q','Q','Q','Q'],
+ ['Agent groups / departments','N','H','P','Y','Q','Q'],
+ ['MCP server for AI tools','N','H','Q','Q','Q','Q'],
+ ['Lifetime license','N','Q','H','Q','H','Q']
+];
+var STATES = [['todo','Not started'],['doing','In progress'],['done','Done'],['drop','Dropped']];
+var PLUG = {free:'Free', pro:'Pro', both:'Free + Pro', biz:'Business'};
+var EFF = {S:'small', M:'medium', L:'large'};
+var KEY = 'deskovi-roadmap-2027';
+
+/* ------------------------------------------------------------------ helpers */
+function $(id){ return document.getElementById(id); }
+function el(tag, cls, text){ var e=document.createElement(tag); if(cls){e.className=cls;} if(text!==undefined){e.textContent=text;} return e; }
+var P = {};            // id -> {s, n, t}
+var rows = {};         // id -> {li, sel, note, item, rel}
+var filt = {plugin:'all', status:'all', prio:'all'};
+var readOnly = false, db = null, col = null, dl = null, queue = {}, noteTimers = {};
+
+function stateOf(id){ return (P[id] && P[id].s) || 'todo'; }
+function noteOf(id){ return (P[id] && P[id].n) || ''; }
+
+/* ------------------------------------------------------------------ storage */
+function loadLocal(){ try { var v = JSON.parse(localStorage.getItem(KEY) || '{}'); return v && typeof v === 'object' ? v : {}; } catch(e){ return {}; } }
+function saveLocal(){ try { localStorage.setItem(KEY, JSON.stringify(P)); return true; } catch(e){ return false; } }
+function setSave(kind, text){ $('save-dot').className = 'dot' + (kind ? ' ' + kind : ''); $('save-txt').textContent = text; }
+
+function persist(id){
+  var rec = P[id];
+  if (!col) { var ok = saveLocal(); setSave(ok ? 'ok' : 'err', ok ? 'Progress is saved in this browser.' : 'This browser blocked saving. Use Export to keep your progress.'); return; }
+  var ref = col.doc(id);
+  setSave('wait', 'Saving…');
+  queue[id] = (queue[id] || Promise.resolve()).then(function(){
+    return rec ? ref.set({s:rec.s, n:rec.n, t:rec.t}) : ref.delete();
+  }).then(function(){ setSave('ok', 'Saved to this artifact. It follows you to any device.'); })
+    .catch(function(e){
+      if (e && e.code === 'invalid_argument') { readOnly = true; lock(); setSave('', 'View only: you cannot change the status here.'); }
+      else { setSave('err', 'Could not save. Check the connection and change it again.'); }
+    });
+}
+function setItem(id, s, n){
+  if (s === 'todo' && !n) { delete P[id]; } else { P[id] = {s:s, n:n, t:new Date().toISOString()}; }
+  persist(id); paintRow(id); paintCounts(); applyFilters();
+}
+
+/* ------------------------------------------------------------------ build */
+function build(){
+  var host = $('releases');
+  RELEASES.forEach(function(r){
+    var sec = el('section','rel'); sec.id = 'rel-' + r.id;
+    var h = el('div','rel-h'), left = el('div'), vers = el('div','rel-v');
+    vers.appendChild(el('span','ver free', r.free)); vers.appendChild(el('span','ver pro', r.pro));
+    left.appendChild(vers); left.appendChild(el('h2', '', r.name)); left.appendChild(el('p','rel-goal', r.goal));
+    var meta = el('div','rel-meta');
+    meta.appendChild(el('div','when', 'Target: ' + r.when));
+    var cnt = el('div','cnt'); meta.appendChild(cnt);
+    var bar = el('div','bar'); bar.setAttribute('aria-hidden','true'); var b1 = el('i','b-done'), b2 = el('i','b-doing'); bar.appendChild(b1); bar.appendChild(b2); meta.appendChild(bar);
+    h.appendChild(left); h.appendChild(meta); sec.appendChild(h);
+    var ul = el('ul','items');
+    r.items.forEach(function(it){
+      var id = it[0], li = el('li','it'); li.id = 'it-' + id;
+      var row = el('div','it-row');
+      var sel = el('select','st'); sel.id = 'st-' + id; sel.setAttribute('aria-label', 'Status of ' + it[4]);
+      STATES.forEach(function(s){ var o = el('option','', s[1]); o.value = s[0]; sel.appendChild(o); });
+      var main = el('button','it-main'); main.type = 'button'; main.setAttribute('aria-expanded','false'); main.setAttribute('aria-controls','more-' + id);
+      var t = el('span','it-t'); t.appendChild(el('span','it-id', id)); t.appendChild(document.createTextNode(it[4])); main.appendChild(t);
+      var chips = el('div','chips');
+      chips.appendChild(el('span','chip ' + it[1], PLUG[it[1]]));
+      chips.appendChild(el('span','chip' + (it[2] === 'must' ? ' must' : ''), it[2]));
+      chips.appendChild(el('span','chip', EFF[it[3]]));
+      row.appendChild(sel); row.appendChild(main); row.appendChild(chips); li.appendChild(row);
+      var more = el('div','it-more'); more.id = 'more-' + id; more.hidden = true;
+      more.appendChild(el('p','', it[5]));
+      var why = el('p','why'); why.appendChild(el('b','', 'Why: ')); why.appendChild(document.createTextNode(it[6])); more.appendChild(why);
+      var note = el('textarea','note'); note.id = 'note-' + id; note.rows = 1; note.placeholder = 'Your note (decision, link, date)'; note.setAttribute('aria-label','Note for ' + it[4]);
+      more.appendChild(note); li.appendChild(more);
+      ul.appendChild(li);
+      rows[id] = {li:li, sel:sel, note:note, more:more, main:main, item:it, rel:r};
+      main.addEventListener('click', function(){ var open = more.hidden; more.hidden = !open; main.setAttribute('aria-expanded', String(open)); });
+      sel.addEventListener('change', function(){ setItem(id, sel.value, note.value.trim()); });
+      note.addEventListener('input', function(){
+        clearTimeout(noteTimers[id]);
+        noteTimers[id] = setTimeout(function(){ setItem(id, sel.value, note.value.trim()); }, 900);
+      });
+    });
+    var none = el('p','empty','No items match the filters.'); none.hidden = true;
+    sec.appendChild(ul); sec.appendChild(none); host.appendChild(sec);
+    r._ui = {cnt:cnt, b1:b1, b2:b2, none:none, sec:sec};
+  });
+  var mx = $('mx');
+  MATRIX.forEach(function(rw){
+    var tr = el('tr'); tr.appendChild(el('td','', rw[0]));
+    for (var i = 1; i < rw.length; i++) {
+      var td = el('td', i === 1 ? 'us' : '');
+      rw[i].split(' · ').forEach(function(part, k){
+        var bits = part.split(':'), code = bits[0], extra = bits[1];
+        if (k) { td.appendChild(document.createTextNode(' · ')); }
+        var label = {Y:'Free', P:'Paid', H:'Has', N:'No', Q:'n/f'}[code], cls = {Y:'y', P:'p', H:'h', N:'n', Q:'q'}[code];
+        td.appendChild(el('span', cls, label));
+        if (extra) { td.appendChild(document.createTextNode(' (' + extra + ')')); }
+      });
+      tr.appendChild(td);
+    }
+    mx.appendChild(tr);
+  });
+}
+
+/* ------------------------------------------------------------------ paint */
+function paintRow(id){
+  var r = rows[id]; if (!r) { return; }
+  var s = stateOf(id);
+  r.li.setAttribute('data-s', s); r.sel.setAttribute('data-s', s);
+  if (document.activeElement !== r.sel) { r.sel.value = s; }
+  if (document.activeElement !== r.note) { r.note.value = noteOf(id); }
+}
+function paintAll(){ Object.keys(rows).forEach(paintRow); paintCounts(); applyFilters(); }
+function paintCounts(){
+  var all = 0, done = 0, doing = 0;
+  RELEASES.forEach(function(r){
+    var a = 0, d = 0, g = 0;
+    r.items.forEach(function(it){ var s = stateOf(it[0]); if (s === 'drop') { return; } a++; if (s === 'done') { d++; } if (s === 'doing') { g++; } });
+    r._ui.cnt.textContent = d + ' / ' + a;
+    r._ui.b1.style.width = (a ? d / a * 100 : 0) + '%'; r._ui.b2.style.width = (a ? g / a * 100 : 0) + '%';
+    all += a; done += d; doing += g;
+  });
+  $('sc-done').textContent = done; $('sc-all').textContent = all; $('sc-doing').textContent = doing;
+  $('sc-b1').style.width = (all ? done / all * 100 : 0) + '%'; $('sc-b2').style.width = (all ? doing / all * 100 : 0) + '%';
+}
+function applyFilters(){
+  RELEASES.forEach(function(r){
+    var shown = 0;
+    r.items.forEach(function(it){
+      var s = stateOf(it[0]), ok = true;
+      if (filt.plugin !== 'all') { ok = it[1] === filt.plugin || (it[1] === 'both' && filt.plugin !== 'biz'); }
+      if (ok && filt.status === 'open') { ok = s === 'todo'; }
+      if (ok && filt.status === 'doing') { ok = s === 'doing'; }
+      if (ok && filt.status === 'done') { ok = s === 'done'; }
+      if (ok && filt.prio === 'must') { ok = it[2] === 'must'; }
+      rows[it[0]].li.hidden = !ok; if (ok) { shown++; }
+    });
+    r._ui.none.hidden = shown > 0;
+  });
+}
+function lock(){ Object.keys(rows).forEach(function(id){ rows[id].sel.disabled = readOnly; rows[id].note.readOnly = readOnly; }); $('btn-import').disabled = readOnly; }
+
+/* ------------------------------------------------------------------ filters and tabs */
+[['f-plugin','plugin'],['f-status','status'],['f-prio','prio']].forEach(function(pair){
+  $(pair[0]).addEventListener('click', function(e){
+    var b = e.target.closest('button'); if (!b) { return; }
+    filt[pair[1]] = b.getAttribute('data-f');
+    Array.prototype.forEach.call(this.querySelectorAll('button'), function(x){ x.setAttribute('aria-pressed', String(x === b)); });
+    applyFilters();
+  });
+});
+function showTab(){
+  var name = (location.hash || '').replace('#','');
+  if (['roadmap','market','matrix','sources'].indexOf(name) < 0) { name = 'roadmap'; }
+  Array.prototype.forEach.call(document.querySelectorAll('[data-view]'), function(v){ v.hidden = v.getAttribute('data-view') !== name; });
+  Array.prototype.forEach.call(document.querySelectorAll('[data-tab]'), function(a){ if (a.getAttribute('data-tab') === name) { a.setAttribute('aria-current','page'); } else { a.removeAttribute('aria-current'); } });
+}
+window.addEventListener('hashchange', showTab);
+
+/* ------------------------------------------------------------------ export / import */
+function exportText(){ return JSON.stringify({app:'deskovi-roadmap', version:1, exported:new Date().toISOString(), progress:P}, null, 2); }
+function sheet(msg, text, canApply){
+  $('sheet').hidden = false; $('sheet-msg').textContent = msg; $('sheet-text').value = text || ''; $('sheet-apply').hidden = !canApply;
+  if (text) { $('sheet-text').focus(); $('sheet-text').select(); }
+}
+$('sheet-close').addEventListener('click', function(){ $('sheet').hidden = true; });
+$('btn-export').addEventListener('click', function(){
+  var text = exportText(), name = 'deskovi-roadmap-progress.json';
+  if (dl) {
+    dl.save({filename:name, data:text}).then(function(){ setSave('ok', 'Exported.'); })
+      .catch(function(e){ if (!e || e.code !== 'declined') { sheet('Saving a file is not available here. Copy this text and keep it in a .json file.', text, false); } });
+    return;
+  }
+  if (!window.claude) {
+    try {
+      var a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([text], {type:'application/json'})); a.download = name;
+      document.body.appendChild(a); a.click(); a.remove(); return;
+    } catch(e) {}
+  }
+  sheet('Copy this text and keep it in a .json file.', text, false);
+});
+function importText(text){
+  var data; try { data = JSON.parse(text); } catch(e){ sheet('That is not valid progress data.', text, true); return; }
+  var prog = data && data.progress; if (!prog || typeof prog !== 'object') { sheet('That file has no progress in it.', '', true); return; }
+  var n = 0;
+  Object.keys(prog).forEach(function(id){
+    var rec = prog[id]; if (!rows[id] || !rec || typeof rec.s !== 'string') { return; }
+    var ok = STATES.some(function(s){ return s[0] === rec.s; }); if (!ok) { return; }
+    var mine = P[id];
+    if (mine && mine.t && rec.t && mine.t >= rec.t) { return; }
+    P[id] = {s:rec.s, n:String(rec.n || '').slice(0, 2000), t:rec.t || new Date().toISOString()};
+    persist(id); n++;
+  });
+  paintAll(); $('sheet').hidden = true;
+  setSave('ok', n + (n === 1 ? ' item' : ' items') + ' updated from the file. Newer changes here were kept.');
+}
+$('btn-import').addEventListener('click', function(){ $('file-import').click(); sheet('Choose a file, or paste exported progress here and press Apply.', '', true); });
+$('file-import').addEventListener('change', function(){
+  var f = this.files && this.files[0]; if (!f) { return; }
+  var r = new FileReader(); r.onload = function(){ importText(String(r.result)); }; r.readAsText(f); this.value = '';
+});
+$('sheet-apply').addEventListener('click', function(){ importText($('sheet-text').value); });
+
+/* ------------------------------------------------------------------ start */
+build(); showTab();
+P = loadLocal(); paintAll();
+
+if (window.claude && typeof window.claude.use === 'function') {
+  setSave('wait', 'Connecting to saved progress…');
+  var slow = setTimeout(function(){ setSave('wait', 'Saved progress cannot be reached yet. What you see may be out of date.'); }, 10000);
+  window.claude.use('downloads').then(function(d){ dl = d; });
+  Promise.all([window.claude.use('db'), window.claude.use('user')]).then(function(res){
+    db = res[0]; var user = res[1];
+    if (!db) { clearTimeout(slow); setSave('ok', 'Progress is saved in this browser only (sign in to sync).'); return; }
+    var local = P; col = db.collection('progress');
+    col.onSnapshot(function(snap){
+      var next = {};
+      snap.docs.forEach(function(d){ var v = d.data(); if (v && typeof v.s === 'string') { next[d.id] = {s:v.s, n:v.n || '', t:v.t || ''}; } });
+      P = next; paintAll();
+      if (!snap.metadata.fromCache) {
+        clearTimeout(slow);
+        if (!snap.metadata.hasPendingWrites) { setSave('ok', readOnly ? 'View only: you cannot change the status here.' : 'Saved to this artifact. It follows you to any device.'); }
+        // First visit on this device with progress made before connecting: offer it once.
+        if (local && Object.keys(local).length && !Object.keys(next).length && !readOnly) {
+          var keep = local; local = null;
+          Object.keys(keep).forEach(function(id){ if (rows[id]) { P[id] = keep[id]; persist(id); } });
+          paintAll();
+        }
+        local = null;
+      }
+    }, function(){ clearTimeout(slow); col = null; P = loadLocal(); paintAll(); setSave('err', 'Saved progress is unavailable. Changes stay in this browser.'); });
+    if (user && typeof user.can === 'function') {
+      Promise.resolve(user.can('data.write')).then(function(v){ if (v === false) { readOnly = true; lock(); setSave('', 'View only: you cannot change the status here.'); } });
+    }
+  });
+}
+})();
+</script>
+
+</body>
+</html>
